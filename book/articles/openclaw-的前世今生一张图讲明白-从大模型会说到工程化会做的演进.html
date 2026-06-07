@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw 的前世今生：一张图讲明白 从“大模型会说”到“工程化会做”的演进 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<aside class="sidebar">
+<div class="sidebar-header">
+<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+</div>
+<nav class="sidebar-nav">
+<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+<a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+<a href="../chapters/ch4-agent.html" class="nav-chapter active">Agent 架构与 Harness 工程</a>
+<a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+</nav>
+</aside>
+<main class="main-content">
+<article class="article">
+<header class="article-header">
+<div class="article-meta">第4章 · Agent 架构与 Harness 工程</div>
+<h1 class="article-title">OpenClaw 的前世今生：一张图讲明白 从“大模型会说”到“工程化会做”的演进</h1>
+<p class="article-summary">LLM→Function Call→Agent→OpenClaw 演进路线</p>
+</header>
+<div class="article-body">
+<div><div><span leaf="">今天给大家完整梳理了从大模型（LLM）初登场到 OpenClaw 最终成型的进化全史。这是一场从“文本生成”向“自主执行”的思维跃迁。</span></div><p><span leaf="">大家好，我是寒山。</span></p><p><span leaf="">一张图给大家讲明白大模型的进化过程，及小龙虾的由来。</span></p><div><img class="rich_pages wxw-img js_insertlocalimg js_img_placeholder wx_img_placeholder" data-aistatus="1" data-imgfileid="100000806" data-s="300,640" src="https://mmbiz.qpic.cn/mmbiz_png/f0QjIJohKGa4iayHRN3ancEpFCls2K1Aa9z3AUiaR4gR7ROibnqGpXia0Fqm2GbllKk2J8YsrV4EF16X0Gh73spR5pvicGgBiaegF30RakDQagQKc/640?wx_fmt=png&amp;from=appmsg&amp;watermark=1#imgIndex=0" data-type="png" type="block" data-original-style="null" data-index="3" data-ratio="0.3477272727272727" data-w="2640" src="data:image/svg+xml,%3C%3Fxml version=&#39;1.0&#39; encoding=&#39;UTF-8&#39;%3F%3E%3Csvg width=&#39;1px&#39; height=&#39;1px&#39; viewBox=&#39;0 0 1 1&#39; version=&#39;1.1&#39; xmlns=&#39;http://www.w3.org/2000/svg&#39; xmlns:xlink=&#39;http://www.w3.org/1999/xlink&#39;%3E%3Ctitle%3E%3C/title%3E%3Cg stroke=&#39;none&#39; stroke-width=&#39;1&#39; fill=&#39;none&#39; fill-rule=&#39;evenodd&#39; fill-opacity=&#39;0&#39;%3E%3Cg transform=&#39;translate(-249.000000, -126.000000)&#39; fill=&#39;%23FFFFFF&#39;%3E%3Crect x=&#39;249&#39; y=&#39;126&#39; width=&#39;1&#39; height=&#39;1&#39;%3E%3C/rect%3E%3C/g%3E%3C/g%3E%3C/svg%3E" _width="677px" alt="图片"></div><h2><span leaf="">第一阶段： LLM 萌芽：博学但无能的“隐士”</span></h2><p><span leaf="">大模型刚问世时，像是一个深居简出的隐士。</span></p><ul ><li><div><span leaf="">形态： 主要是 Web 端对话框。</span></div></li><li><div><span leaf="">用法： 纯文本交互。问天、问地、问代码，它能给你完美的答案，但它无法执行任何动作。</span></div></li><li><div><span leaf="">局限： 模型处于“信息孤岛”，不知道实时新闻，无法修改你的本地文件，也无法帮你发一封真实的邮件。</span></div><div><img class="rich_pages wxw-img js_img_placeholder wx_img_placeholder" data-aistatus="1" data-imgfileid="100000805" data-ratio="1.57703081232493" data-s="300,640" src="https://mmbiz.qpic.cn/sz_mmbiz_png/f0QjIJohKGYQQm69ib0wQE2guWbHc2y0RWdsHWHglPEk8BS87ZqmeIEiaaib8slotEeibSDPdfeyAuu5xAKlItPfyOL06ibOVXPuKWrJLzJ1Qllg/640?wx_fmt=png&amp;from=appmsg&amp;watermark=1#imgIndex=1" data-type="png" data-w="714" type="block" data-original-style="null" data-index="4" src="data:image/svg+xml,%3C%3Fxml version=&#39;1.0&#39; encoding=&#39;UTF-8&#39;%3F%3E%3Csvg width=&#39;1px&#39; height=&#39;1px&#39; viewBox=&#39;0 0 1 1&#39; version=&#39;1.1&#39; xmlns=&#39;http://www.w3.org/2000/svg&#39; xmlns:xlink=&#39;http://www.w3.org/1999/xlink&#39;%3E%3Ctitle%3E%3C/title%3E%3Cg stroke=&#39;none&#39; stroke-width=&#39;1&#39; fill=&#39;none&#39; fill-rule=&#39;evenodd&#39; fill-opacity=&#39;0&#39;%3E%3Cg transform=&#39;translate(-249.000000, -126.000000)&#39; fill=&#39;%23FFFFFF&#39;%3E%3Crect x=&#39;249&#39; y=&#39;126&#39; width=&#39;1&#39; height=&#39;1&#39;%3E%3C/rect%3E%3C/g%3E%3C/g%3E%3C/svg%3E" _width="677px" alt="图片"></div></li></ul><h2><span leaf="">第二阶段： Function Call：初生的“钥匙”</span></h2><p><span leaf="">为了打破孤岛，OpenAI 等厂商推出了 Function Calling（函数调用）。</span></p><ul ><li><div><span leaf="">演进： 开发者在代码里“硬编码”一堆 JSON 格式的工具描述。</span></div></li><li><div><span leaf="">做法： 告诉模型：“如果你要查库存，就输出 get_inventory</span><span></span><span leaf="">”。模型开始学会输出结构化指令，再由外部代码执行。</span></div></li><li><div><span leaf="">痛点： 每个模型的函数格式都不统一，开发者需要为每个模型写海量的“胶水代码”。这时的工具是死板的，且难以跨平台复用。 &nbsp;</span></div><div><img class="rich_pages wxw-img js_img_placeholder wx_img_placeholder" data-aistatus="1" data-imgfileid="100000801" data-ratio="1.5573333333333332" data-s="300,640" src="https://mmbiz.qpic.cn/sz_mmbiz_png/f0QjIJohKGZyQbmljxRdmAHj1bOrAKvS7xSqpb4MwyjAQh0D2IX4ZZibS8qdibmNcxlWavemvGlzGX2JeO90Q4g5fOQmlNcfRhAhkLf7lFIKs/640?wx_fmt=png&amp;from=appmsg&amp;watermark=1#imgIndex=2" data-type="png" data-w="750" type="block" data-original-style="null" data-index="5" src="data:image/svg+xml,%3C%3Fxml version=&#39;1.0&#39; encoding=&#39;UTF-8&#39;%3F%3E%3Csvg width=&#39;1px&#39; height=&#39;1px&#39; viewBox=&#39;0 0 1 1&#39; version=&#39;1.1&#39; xmlns=&#39;http://www.w3.org/2000/svg&#39; xmlns:xlink=&#39;http://www.w3.org/1999/xlink&#39;%3E%3Ctitle%3E%3C/title%3E%3Cg stroke=&#39;none&#39; stroke-width=&#39;1&#39; fill=&#39;none&#39; fill-rule=&#39;evenodd&#39; fill-opacity=&#39;0&#39;%3E%3Cg transform=&#39;translate(-249.000000, -126.000000)&#39; fill=&#39;%23FFFFFF&#39;%3E%3Crect x=&#39;249&#39; y=&#39;126&#39; width=&#39;1&#39; height=&#39;1&#39;%3E%3C/rect%3E%3C/g%3E%3C/g%3E%3C/svg%3E" _width="677px" alt="图片"></div></li></ul><h2><span leaf="">第三阶段： MCP：标准化的“万能插座”</span></h2><p><span leaf="">Anthropic 推出的 MCP&nbsp;</span><span></span><span leaf="">&nbsp;彻底改变了工具连接的逻辑。</span></p><ul ><li><div><span leaf="">革命： 它不再让模型适配工具，而是让工具适配协议。只要你写一个“MCP 服务端”，所有的模型（Claude, GPT, 甚至本地模型）都能直接连接。</span></div></li><li><div><span leaf="">解耦： 就像 USB 接口统一了外设，MCP 统一了模型的“外挂”标准。</span></div></li><li><div><span leaf="">状态： 这一阶段工具变得极其丰富，但依然存在门槛——普通用户如何快速把这些分散的 MCP 工具整合到一个好用的 Agent 里？ &nbsp;</span></div><div><img class="rich_pages wxw-img" data-aistatus="1" data-imgfileid="100000803" data-ratio="1.5635359116022098" data-s="300,640" data-type="png" data-w="724" type="block" data-original-style="null" data-index="6" src="../assets/images/d261c3d1_640.webp" _width="677px" alt="图片" data-report-img-idx="0" data-fail="0"></div></li></ul><h2><span leaf="">第四阶段： Skills：模块化的“专家级经验”</span></h2><p><span leaf="">在 MCP 的基础上，Skills（技能） 的概念开始盛行。</span></p><ul ><li><div><span leaf="">定义： Skill 不仅仅是一个 API 接口，它是一套封装好的、带指令的模块化能力包。</span></div></li><li><div><span leaf="">核心： 每个 Skill 通常包含一个 SKILL.md 文件，里面定义了什么时候用这个工具、具体的执行步骤以及处理异常的逻辑。</span></div></li><li><div><span leaf="">深度： 技能让模型拥有了“领域专家”的自觉。比如，“代码审查技能”不仅能查 Bug，还附带了企业的代码规范和最佳实践。 &nbsp;</span></div><div><img class="rich_pages wxw-img" data-aistatus="1" data-imgfileid="100000800" data-ratio="1.540983606557377" data-s="300,640" data-type="png" data-w="732" type="block" data-original-style="null" data-index="7" src="../assets/images/d261c3d1_640(1).png" _width="677px" alt="图片" data-report-img-idx="1" data-fail="0"></div></li></ul><h2><span leaf="">第五阶段： OpenClaw：集大成的“利爪”</span></h2><p><span leaf="">OpenClaw（其前身为 Clawdbot 和 Moltbot）在 2025 年底至 2026 年初横空出世。</span></p><ul ><li><div><span leaf="">由来： 它的名字代表“Open”（开源平权）和“Claw”（像利爪一样抓取现实世界的资源）。</span></div></li><li><div><span leaf="">终极整合： OpenClaw 的核心是它的 Skills 系统，它完美融合了前几个阶段的所有成果：</span></div></li></ul><ol ><li><div><span leaf="">原生支持 MCP： 它可以瞬间调用全球开发者分享的数千个 MCP 技能。</span></div></li><li><div><span leaf="">工程化闭环： 它不仅是给模型“钥匙”，还给模型一个自动执行、错误重试、长记忆管理的“身体”。</span></div></li><li><div><span leaf="">开源平权： 它让像 DeepSeek 这样的开源模型，通过 OpenClaw 框架，也能稳定地执行原本只有顶尖闭源模型才能胜任的复杂技能。 &nbsp;</span></div><div><img class="rich_pages wxw-img" data-aistatus="1" data-imgfileid="100000802" data-ratio="1.313953488372093" data-s="300,640" data-type="png" data-w="860" type="block" data-original-style="null" data-index="8" src="../assets/images/d261c3d1_640(2).webp" _width="677px" alt="图片" data-report-img-idx="2" data-fail="0"></div></li></ol><h2><span leaf="">总结：</span></h2><p><span leaf="">从“只会说（LLM）”到“会拿钥匙（Function Call）”，再到“有了万能接口（MCP）”，最后通过 OpenClaw 的 Skills 系统，AI 终于进化成了那个“有手有脚、能干实活”的智能代理。&nbsp;</span></p><p><span leaf="">想试试看吗？ 我们可以聊聊如何通过 OpenClaw 给你的本地模型挂载一个 网页搜索 或 本地文件管理 的 Skill。</span></p></div><p></p></div>
+          <script type="text/javascript" nonce="" reportloaderror="">
+            var first_sceen__time = (+new Date());
+            if ("" == 1 && document.getElementById('js_content')) {
+              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
+            }
+          </script>
+        </div>
+                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+                
+        <div 
+</div>
+<footer class="article-footer">
+<div class="article-nav">
+
+<a href="../chapters/ch4-agent.html" class="nav-toc">目录</a>
+<a href="openclaw-vs-hermes-架构深度拆解.html" class="nav-next">下一篇 &rarr;</a>
+</div>
+</footer>
+</article>
+</main>
+<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+<script src="../assets/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust 正在接管 AI Agent 的基础设施层 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<aside class="sidebar">
+<div class="sidebar-header">
+<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+</div>
+<nav class="sidebar-nav">
+<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+<a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+<a href="../chapters/ch4-agent.html" class="nav-chapter active">Agent 架构与 Harness 工程</a>
+<a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+</nav>
+</aside>
+<main class="main-content">
+<article class="article">
+<header class="article-header">
+<div class="article-meta">第4章 · Agent 架构与 Harness 工程</div>
+<h1 class="article-title">Rust 正在接管 AI Agent 的基础设施层</h1>
+<p class="article-summary">Rust 在 Agent 基础设施中的性能优势</p>
+</header>
+<div class="article-body">
+<div><p data-tool="mdnice编辑器"><span leaf="">2025 年底到 2026 年，如果你关注过 AI 编程工具和 Agent 平台的开源项目，会发现一个有趣的现象：越来越多这类项目的核心实现选择的是 Rust，而不是 Python 或 TypeScript。</span></p><p data-tool="mdnice编辑器"><span leaf="">从 jcode（6400+ stars）到 thClaws（1000+ stars），从 rig（7300+ stars）到 zerostack，从 rmcp 到 Symposium——一个以 Rust 为核心的 AI Agent 基础设施生态正在形成。这不仅仅是巧合，背后有扎实的工程原因。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/mmbiz_png/fXjeyV4JTVyUK1ZC8qFnyxvlG6AfFN3VH4NXDKIepKgNtCKngr8AICMo4cQXUw4oK5ibDgoumib3OYyPMxCrRyxg2S4kicxULpOSZVic2KIHQwk/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">一个正在发生的迁移</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">先看几个数字。</span></p><p data-tool="mdnice编辑器"><span leaf="">jcode 是一个 Coding Agent Harness，本质上是一个面向多会话工作流的 AI 编程助手底座。它的 README 里直接贴上了一份内存对比数据：同样是运行一个活动会话，jcode 的驻留内存（PSS）基线是 27.8 MB，而同类工具普遍在 140 MB 以上——差距超过 5 倍。这不是因为 jcode 功能更少，而是因为它的核心用 Rust 实现。</span></p><p data-tool="mdnice编辑器"><span leaf="">thClaws 把自己定位为"原生 Rust AI Agent 工作空间"——一个桌面端的 Agent 平台，集成代码编辑、终端、对话和知识库。它的发行物是一个二进制文件，不需要 Python 运行时，不需要 Node.js，用户下载就能跑。在 Tauri 框架的选择背后，理由是明确的：用 Rust 承载底层的工具执行、文件操作、进程管理和安全隔离。</span></p><p data-tool="mdnice编辑器"><span leaf="">rig 是 Rust 生态中发展最快的 LLM 应用框架之一，7300+ stars。它提供了 LLM 应用开发中需要的全套抽象：Agent、Chain、Retrieval、Tool——全部编译为原生二进制，没有 Python 解释器的开销。它的定位不是"在 Rust 里调用 Python 的 LLM 库"，而是"用 Rust 从头构建 LLM 应用"。</span></p><p data-tool="mdnice编辑器"><span leaf="">这些项目的出现时间集中在 2025 年到 2026 年。它们不是孤立的现象，而是 Rust 在 AI 基础设施层逐步深入的缩影。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/mmbiz_png/fXjeyV4JTVy5HA8aDrRKUrOlrJr6G2QINe9ftlql5n3nG8n4S3NmpcGbib5PWNLDicP65XwwKbCy7UlWRXxhFwMgYmgIibslXiateFn2e5iaqqQo/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">为什么是 Rust，而不是 Python</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">AI 应用的传统技术栈是 Python 主导的——PyTorch、transformers、LangChain、FastAPI。Python 的优势是生态成熟、开发效率高。但在 Agent 基础设施这个细分领域，Python 的一些短板开始暴露。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">内存和启动开销。</span></strong><span leaf="">&nbsp;Agent 工具的典型工作模式是常驻后台、持续响应。一个用 Python 写的 Agent 客户端，启动时需要加载解释器、初始化依赖图、导入大量模块。30 MB 起步的内存占用是常见的。而 jcode 的基线是 27.8 MB（含本地嵌入模型时 167 MB），这个数字在启动瞬间就已经确定了，不需要"预热"。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">运行时依赖的复杂度。</span></strong><span leaf="">&nbsp;Python 工具的痛点之一是"环境管理"。一个 Agent 工具如果依赖 Python 运行时，用户首先需要装 Python、配虚拟环境、安装依赖——这套流程在开发机上没问题，但要分发为一个"下载即用"的工具时，就成了障碍。Rust 编译为静态二进制，从根本上绕过了这个问题。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">执行 LLM 生成代码的安全边界。</span></strong><span leaf="">&nbsp;Agent 工具的核心能力之一是执行代码——用户让 Agent"帮我跑一下这个脚本"或"分析一下这个数据"，Agent 需要生成代码并在本地执行。在 Rust 生态中，WASM 沙箱、进程隔离、权限控制都有成熟的库支持。用 Rust 实现 Agent 引擎，可以把不受信任的代码执行放在沙箱里，同时在宿主环境中保持高性能。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">多会话并发的资源效率。</span></strong><span leaf="">&nbsp;Agent 工具的演进方向之一是"多会话"——同时处理多个任务，每个任务有自己的上下文和工具链。在 Python 中，多进程的开销是线性的：10 个会话就是 10 倍内存。在 Rust 中，异步任务的开销可以控制在 KB 级别，这是工程上的根本差异。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/mmbiz_png/fXjeyV4JTVxGbWfrA5ID6ibp0TSKCBSGplTsT2eeUVzibZZCW7nwKX2atZRMPrKFqJGp2eWrOVoibBq6tcel9dwzPv7MMnzpD9hVGYFrLk3ONM/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">从库到应用：三层结构的成形</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">梳理当前的 Rust Agent 生态，可以看到一个清晰的三层结构正在成形。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">底层是协议和基础设施。</span></strong><span leaf="">&nbsp;rmcp 提供了 MCP 协议的 Rust 实现，让 Rust 程序可以作为 MCP 客户端或服务器运行。Symposium 项目则在探索如何让 Cargo 理解 AI Agent 的上下文需求。这些是"管道"——没有它们，上层工具无法互通。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">中间层是框架。</span></strong><span leaf="">&nbsp;rig 是这一层的代表——它不直接面向终端用户，而是面向 Rust 开发者，提供 Agent、Chain、Tool 等抽象，让开发者可以用 Rust 构建自己的 LLM 应用。它已经积累了 7300+ stars，在 Rust LLM 框架中处于领先位置。</span></p><p data-tool="mdnice编辑器"><strong><span leaf="">应用层是终端工具。</span></strong><span leaf="">&nbsp;jcode 和 thClaws 在这一层。它们面向的是最终用户——开发者直接使用这些工具与 AI 协作编码。这一层对性能、用户体验和分发便利性的要求最高，也是 Rust 优势体现最明显的地方。</span></p><p data-tool="mdnice编辑器"><span leaf="">这三层不是孤立的。rig 的 Agent 可以被 jcode 集成，jcode 可以通过 MCP 协议与其他工具通信，thClaws 的底层工具执行引擎可以引用 rig 的抽象。Rust 的类型系统和 trait 机制让这种跨项目的集成比动态语言更安全、更可预测。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/sz_mmbiz_png/fXjeyV4JTVy2Eia0VmHclR3K5WPj0g3vIV46m0DbJeWkUHgopOyOcl0ibgBqN9VXOFBBDB37D1XJGDRNbxtmqtc1718G1rffc4CItCtJqucNA/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">不是替代，是补充</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">这里需要做一个区分。Rust 在 Agent 基础设施层的崛起，并不意味着 Python 在 AI 领域会被替代。Python 在模型训练、数据处理、科学计算方面的生态优势是 Rust 短期内无法追赶的。但 "Agent 基础设施" 和 "模型开发" 是两个不同的领域。</span></p><p data-tool="mdnice编辑器"><span leaf="">模型开发需要灵活的探索式编程、丰富的数值计算库、成熟的训练框架——Python 是天然选择。Agent 基础设施需要高吞吐、低延迟、安全隔离、零依赖分发——这是 Rust 的优势区间。</span></p><p data-tool="mdnice编辑器"><span leaf="">分界线在"模型执行"和"模型应用"之间。当 AI 能力从"训练一个模型"转向"把模型能力编排到生产系统中"，工程需求就从 Python 的灵活性转向了 Rust 的可靠性。这个分界线正在越来越清晰。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/sz_mmbiz_png/fXjeyV4JTVxkBCyqHvzKlYkNoWeN3j3hEh6M7bwhVibZkXApmy6tNPwFvQZp1sq798Tg3UUwza3vkwZREZmlibVUFNXvA9BUDGmn4WpHWQogA/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">对 Rust 开发者的启示</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">这个趋势带来了几个直接的信号。</span></p><p data-tool="mdnice编辑器"><span leaf="">第一，LLM 应用开发不再只是 Python 开发者的领域。rig、rmcp 等框架的成熟，意味着 Rust 开发者可以用自己熟悉的语言构建完整的 Agent 应用，而不需要绕道 Python。</span></p><p data-tool="mdnice编辑器"><span leaf="">第二，Agent 工具的分发现状正在改变。"下载一个二进制文件就能用"的用户体验，正在从系统工具领域扩展到 AI 工具领域。这对 Rust 开发者来说是一个熟悉的分发模式——cargo install 或 curl 下载，不需要配环境。</span></p><p data-tool="mdnice编辑器"><span leaf="">第三，安全执行和沙箱能力正在成为 Agent 平台的竞争力。Rust 的内存安全保证和 WASM 生态为此提供了天然基础。如果 Agent 平台需要在本地运行 AI 生成的代码，用 Rust 构建的执行引擎比用 Python 构建的有根本优势。</span></p><p data-tool="mdnice编辑器"><span leaf="">第四，这个领域的竞争还处于早期。rig 只有 7300+ stars，jcode 只有 6400+ stars——相比于 LangChain 的 10 万+ stars，还有巨大的成长空间。对 Rust 开发者来说，这是一个可以躬身入局的窗口期。</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/mmbiz_png/fXjeyV4JTVzaKs6awQUWQqx0Ox8nmiby9CfwUM436b3wtPmdFhh19VBicDsZLgvlGTR2q24NR9yrICWKnYlLVlCAclt9A1TUByP84ZrfmrkeU/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">趋势还是泡沫？</span></span></h2><p data-tool="mdnice编辑器"><span leaf="">每年都会有人宣布"X 是新的 Y"——"Rust is the new Python for AI"之类的说法已经出现过多次。但这次的区别在于，它不是由某个公司的 PR 推动的，而是由多个独立项目的实际工程选择共同构成的。</span></p><p data-tool="mdnice编辑器"><span leaf="">当一个工具选择 Rust，可能是因为创始人的偏好。当十个工具各自独立地选择 Rust，这就是一个信号。这些项目的作者分布在不同的组织、不同的时区，没有共同的资助方，他们的选择背后是共同的工程约束：做 Agent 基础设施，需要的是性能、安全、分发效率和并发能力——而这些恰好是 Rust 的设计目标。</span></p><p data-tool="mdnice编辑器"><span leaf="">2026 年的 Rust 已经不是 2020 年的 Rust了。异步运行时已经成熟，MCP 协议有了原生实现，WASM 沙箱工具链齐全，跨平台分发路径清晰。当这些基础设施到位之后，Agent 工具选择 Rust 就成了一件"顺理成章"的事，而不是"冒险"。</span></p><p data-tool="mdnice编辑器"><span leaf="">接下来的问题是：当 Agent 基础设施以 Rust 为基底之后，上面的应用层会怎么长？这个答案，可能就在接下来的一年里揭晓。</span></p><p data-tool="mdnice编辑器"><span leaf="">#Rust #AI #Agent #工程实践 #基础设施 #生态</span></p><h2 data-tool="mdnice编辑器"><span data-cacheurl="" data-remoteid="" data-lazy-bgimg="https://mmbiz.qpic.cn/mmbiz_png/fXjeyV4JTVwvnRJHKeSTxStiaGWfHA00eLONp80Oax1rcWCicDpicgIW5JeOLAqrzn6jg64PFoRvZsdMaX7vibCunnh3TK8mC5KJMdrbAnoiaOFg/640?wx_fmt=png&amp;from=appmsg" class="" data-fail="0"></span><span><span leaf="">关注扫码添加进交流群</span></span></h2><figure data-tool="mdnice编辑器"><figcaption><span leaf="">扫码添加进交流群</span></figcaption></figure></div><p></p></div>
+          <script type="text/javascript" nonce="" reportloaderror="">
+            var first_sceen__time = (+new Date());
+            if ("" == 1 && document.getElementById('js_content')) {
+              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
+            }
+          </script>
+        </div>
+                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+                
+        <div 
+</div>
+<footer class="article-footer">
+<div class="article-nav">
+<a href="9大harness的记忆能力对比.html" class="nav-prev">&larr; 上一篇</a>
+<a href="../chapters/ch4-agent.html" class="nav-toc">目录</a>
+
+</div>
+</footer>
+</article>
+</main>
+<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+<script src="../assets/theme.js"></script>
+</body>
+</html>
