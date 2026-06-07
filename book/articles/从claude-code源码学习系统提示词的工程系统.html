@@ -1,56 +1,991 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>从Claude-Code源码学习系统提示词的工程系统 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
-<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
-<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<article class="article">
-<header class="article-header">
-<div class="article-meta">第5章 · Claude Code 源码深度解读</div>
-<h1 class="article-title">从Claude-Code源码学习系统提示词的工程系统</h1>
-<p class="article-summary">提示词装配系统：多 Section 动态注入</p>
-</header>
-<div class="article-body">
-<p cid="n700" mdtype="paragraph" data-pm-slice="0 0 []"><span md-inline="plain"><span leaf="">很多人一提到“系统提示词”，第一反应是去找一大段神秘的 prompt，然后试着模仿它的措辞。</span></span></p><p cid="n702" mdtype="paragraph"><span md-inline="plain"><span leaf="">但当我认真翻了&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的源码后，发现真正值得学习的，不是某一句话怎么写，而是它把“系统提示词”做成了一套工程系统。</span></span></p><p cid="n703" mdtype="paragraph"><span md-inline="plain"><span leaf="">这篇文章我想讲清楚三件事：</span></span></p><ol ><li><p cid="n706" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词到底藏在哪些地方</span></span></p></li><li><p cid="n708" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是“一个 prompt”，而是一套怎样的拼装架构</span></span></p></li><li><p cid="n710" mdtype="paragraph"><span md-inline="plain"><span leaf="">我们能从中学到什么，如何把这种写法迁移到自己的 AI Agent / Coding Assistant 产品里</span></span></p></li></ol><p cid="n711" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你做的是 AI 编程助手、工作流 Agent、企业 Copilot、代码审查机器人，或者你只是想把 prompt 从“玄学”变成“工程”，这套设计非常值得研究。</span></span></p><div><img class="rich_pages wxw-img" data-ratio="0.8722222222222222" data-s="300,640" data-type="png" data-w="1080" type="block" data-imgfileid="305191999" data-aistatus="1" data-original-style="null" data-index="3" src="../assets/images/c279947f_640.webp" _width="677px" alt="图片" data-report-img-idx="0" data-fail="0"></div><hr><h2 cid="n713" mdtype="heading"><span md-inline="plain"><span leaf="">一、先说结论：Claude Code 的系统提示词，不在一个地方</span></span></h2><p cid="n714" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你以为它会在某个文件里放一个超长字符串，比如：</span></span></p><pre spellcheck="false" lang="ts" cid="n715" mdtype="fences"><span role="presentation"><span><span leaf="">const</span></span><span><span leaf="">SYSTEM_PROMPT</span></span><span><span leaf="">=</span></span><span><span leaf="">`...一大坨提示词...`</span></span></span></pre><p cid="n716" mdtype="paragraph"><span md-inline="plain"><span leaf="">那你会失望。</span></span></p><p cid="n717" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的实现方式不是“写死一个大 prompt”，而是：</span></span></p><ul ><li><p cid="n720" mdtype="paragraph"><span md-inline="plain"><span leaf="">基础身份前缀</span></span></p></li><li><p cid="n722" mdtype="paragraph"><span md-inline="plain"><span leaf="">多个职责清晰的 prompt section</span></span></p></li><li><p cid="n724" mdtype="paragraph"><span md-inline="plain"><span leaf="">不同模式下的覆盖或追加逻辑</span></span></p></li><li><p cid="n726" mdtype="paragraph"><span md-inline="plain"><span leaf="">最终在 API 层统一注入模型请求</span></span></p></li></ul><p cid="n727" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，它更像一个“提示词装配系统”，而不是一个“提示词文本文件”。</span></span></p><p cid="n728" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你要顺着源码看，最关键的几个文件是：</span></span></p><h3 cid="n729" mdtype="heading"><span md-inline="plain"><span leaf="">1. 主系统提示词内容定义</span></span></h3><p cid="n730" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts&nbsp;</span></span></span></p><p cid="n731" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是最核心的文件。大部分默认系统提示词内容，都是在这里定义的。</span></span></p><h3 cid="n732" mdtype="heading"><span md-inline="plain"><span leaf="">2. 决定最终采用哪套系统提示词</span></span></h3><p cid="n733" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/systemPrompt.ts&nbsp;</span></span></span></p><p cid="n734" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件负责决定：</span></span></p><ul ><li><p cid="n737" mdtype="paragraph"><span md-inline="plain"><span leaf="">用默认 prompt</span></span></p></li><li><p cid="n739" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 agent prompt</span></span></p></li><li><p cid="n741" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 coordinator prompt</span></span></p></li><li><p cid="n743" mdtype="paragraph"><span md-inline="plain"><span leaf="">用用户自定义 prompt</span></span></p></li><li><p cid="n745" mdtype="paragraph"><span md-inline="plain"><span leaf="">还是在默认 prompt 后面追加额外内容</span></span></p></li></ul><h3 cid="n746" mdtype="heading"><span md-inline="plain"><span leaf="">3. 最终把 prompt 塞进模型请求</span></span></h3><p cid="n747" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/services/api/claude.ts#L1358&nbsp;</span></span></span></p><p cid="n748" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里是最后的落点。前面拼好的&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">systemPrompt</span></code></span><span md-inline="plain"><span leaf="">，会在这里被加工成 Anthropic API 的&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">system</span></code></span><span md-inline="plain"><span leaf="">&nbsp;字段。</span></span></p><h3 cid="n749" mdtype="heading"><span md-inline="plain"><span leaf="">4. section 级别的缓存与动态拼装</span></span></h3><p cid="n750" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/systemPromptSections.ts&nbsp;</span></span></span></p><p cid="n751" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件说明，它不是简单拼字符串，而是把 system prompt 拆成一个个 section，并支持缓存和动态刷新。</span></span></p><hr><h2 cid="n753" mdtype="heading"><span md-inline="plain"><span leaf="">二、它最值得学的，不是文案，而是“分层设计”</span></span></h2><p cid="n754" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词结构抽象出来，大概是这样：</span></span></p><pre spellcheck="false" lang="text" cid="n755" mdtype="fences"><span role="presentation"><span leaf="">身份定义</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 系统级规则</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 做任务的行为准则</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 风险动作控制</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 工具使用策略</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 输出风格</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 环境信息</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 会话/角色专属附加说明</span></span></pre><p cid="n756" mdtype="paragraph"><span md-inline="plain"><span leaf="">这比“写一大坨高大上的 prompt”高明得多。</span></span></p><p cid="n757" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为真正稳定的 Agent，不靠华丽措辞，而靠结构清晰、职责明确、规则可执行。</span></span></p><hr><h2 cid="n759" mdtype="heading"><span md-inline="plain"><span leaf="">三、主 prompt 是怎么组起来的</span></span></h2><p cid="n760" mdtype="paragraph"><span md-inline="plain"><span leaf="">先看主入口：</span></span></p><p cid="n761" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L444&nbsp;</span></span></span></p><p cid="n762" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里有一个核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n763" mdtype="fences"><span role="presentation"><span><span leaf="">export</span></span><span><span leaf="">async</span></span><span><span leaf="">function</span></span><span><span leaf="">getSystemPrompt</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre><p cid="n764" mdtype="paragraph"><span md-inline="plain"><span leaf="">它返回的不是一个字符串，而是一个&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">string[]</span></code></span><span md-inline="plain"><span leaf="">。</span></span></p><p cid="n765" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是一个非常重要的设计细节。</span></span></p><p cid="n766" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么不是一个长字符串，而是一个数组？</span></span></p><p cid="n767" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为这样更适合：</span></span></p><ul ><li><p cid="n770" mdtype="paragraph"><span md-inline="plain"><span leaf="">模块化拼接</span></span></p></li><li><p cid="n772" mdtype="paragraph"><span md-inline="plain"><span leaf="">条件启用某些 section</span></span></p></li><li><p cid="n774" mdtype="paragraph"><span md-inline="plain"><span leaf="">做 prompt cache</span></span></p></li><li><p cid="n776" mdtype="paragraph"><span md-inline="plain"><span leaf="">明确区分静态内容和动态内容</span></span></p></li><li><p cid="n778" mdtype="paragraph"><span md-inline="plain"><span leaf="">在 API 层追加前缀或特殊指令</span></span></p></li></ul><p cid="n779" mdtype="paragraph"><span md-inline="plain"><span leaf="">在这个函数里，系统提示词会被拆成两大类：</span></span></p><h3 cid="n780" mdtype="heading"><span md-inline="plain"><span leaf="">1. 静态内容</span></span></h3><p cid="n781" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些内容通常不会随每轮会话变化，比如：</span></span></p><ul ><li><p cid="n784" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁</span></span></p></li><li><p cid="n786" mdtype="paragraph"><span md-inline="plain"><span leaf="">你要做什么</span></span></p></li><li><p cid="n788" mdtype="paragraph"><span md-inline="plain"><span leaf="">做任务时的原则</span></span></p></li><li><p cid="n790" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具使用的一般规范</span></span></p></li><li><p cid="n792" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格要求</span></span></p></li></ul><h3 cid="n793" mdtype="heading"><span md-inline="plain"><span leaf="">2. 动态内容</span></span></h3><p cid="n794" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些内容可能会变化，比如：</span></span></p><ul ><li><p cid="n797" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境信息</span></span></p></li><li><p cid="n799" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 注入</span></span></p></li><li><p cid="n801" mdtype="paragraph"><span md-inline="plain"><span leaf="">语言偏好</span></span></p></li><li><p cid="n803" mdtype="paragraph"><span md-inline="plain"><span leaf="">MCP server instructions</span></span></p></li><li><p cid="n805" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些 session-specific guidance</span></span></p></li></ul><p cid="n806" mdtype="paragraph"><span md-inline="plain"><span leaf="">源码里甚至专门定义了一个边界标记：</span></span></p><p cid="n807" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L114&nbsp;</span></span></span></p><pre spellcheck="false" lang="ts" cid="n808" mdtype="fences"><span role="presentation"><span><span leaf="">export</span></span><span><span leaf="">const</span></span><span><span leaf="">SYSTEM_PROMPT_DYNAMIC_BOUNDARY</span></span><span><span leaf="">=</span></span></span><span leaf=""><br></span><span role="presentation"><span><span leaf="">'__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'</span></span></span></pre><p cid="n809" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是典型的工程化思维。</span></span></p><p cid="n810" mdtype="paragraph"><span md-inline="plain"><span leaf="">它的意思不是“我有个 prompt”，而是“我的 prompt 有稳定部分，也有易变部分，这两部分应该区别对待”。</span></span></p><hr><h2 cid="n812" mdtype="heading"><span md-inline="plain"><span leaf="">四、Claude Code 的系统提示词，具体写了哪些层</span></span></h2><p cid="n813" mdtype="paragraph"><span md-inline="plain"><span leaf="">下面我们按职责拆一下它的主要 section。</span></span></p><hr><h3 cid="n815" mdtype="heading"><span md-inline="plain"><span leaf="">1. 身份定义：先告诉模型“你是谁”</span></span></h3><p cid="n816" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n817" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L173&nbsp;</span></span></span></p><p cid="n818" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数是：</span></span></p><pre spellcheck="false" lang="ts" cid="n819" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleIntroSection</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre><p cid="n820" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一段的写法很经典，它会先讲：</span></span></p><ul ><li><p cid="n823" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是一个交互式 agent</span></span></p></li><li><p cid="n825" mdtype="paragraph"><span md-inline="plain"><span leaf="">你要帮助用户完成软件工程任务</span></span></p></li><li><p cid="n827" mdtype="paragraph"><span md-inline="plain"><span leaf="">你需要利用工具来协助用户</span></span></p></li><li><p cid="n829" mdtype="paragraph"><span md-inline="plain"><span leaf="">你不应该胡乱生成不可靠 URL</span></span></p></li></ul><p cid="n830" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多人写系统提示词时，上来就开始堆规则，但&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;先做了一件更基础的事：定义角色和主任务。</span></span></p><p cid="n831" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是因为，如果身份模糊，后面的规则再多，模型也容易漂。</span></span></p><p cid="n832" mdtype="paragraph"><span md-inline="plain"><span leaf="">一个成熟的 system prompt，第一层永远不是“注意事项”，而是：</span></span></p><ul ><li><p cid="n835" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁</span></span></p></li><li><p cid="n837" mdtype="paragraph"><span md-inline="plain"><span leaf="">你服务于谁</span></span></p></li><li><p cid="n839" mdtype="paragraph"><span md-inline="plain"><span leaf="">你的主职责是什么</span></span></p></li></ul><hr><h3 cid="n841" mdtype="heading"><span md-inline="plain"><span leaf="">2. 系统级规则：说明这个运行环境的基本约束</span></span></h3><p cid="n842" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n843" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L182&nbsp;</span></span></span></p><p cid="n844" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n845" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleSystemSection</span></span><span leaf="">()</span></span></pre><p cid="n846" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一段会告诉模型：</span></span></p><ul ><li><p cid="n849" mdtype="paragraph"><span md-inline="plain"><span leaf="">你输出的文字会直接展示给用户</span></span></p></li><li><p cid="n851" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具调用受权限模式约束</span></span></p></li><li><p cid="n853" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果用户拒绝工具，不要机械重试同样的调用</span></span></p></li><li><p cid="n855" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具结果和用户消息里可能带系统标签</span></span></p></li><li><p cid="n857" mdtype="paragraph"><span md-inline="plain"><span leaf="">外部结果可能含 prompt injection</span></span></p></li><li><p cid="n859" mdtype="paragraph"><span md-inline="plain"><span leaf="">会话上下文会自动压缩，不是固定窗口</span></span></p></li></ul><p cid="n860" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层特别像“运行时协议”。</span></span></p><p cid="n861" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，它不是只在描述一个抽象助手，而是在描述一个具体的产品运行环境。</span></span></p><p cid="n862" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一点很多 prompt 写作者都会忽略。</span></span></p><p cid="n863" mdtype="paragraph"><span md-inline="plain"><span leaf="">他们会写很多“be helpful”“be concise”，但不会告诉模型：</span></span></p><ul ><li><p cid="n866" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个产品里工具权限是怎么工作的</span></span></p></li><li><p cid="n868" mdtype="paragraph"><span md-inline="plain"><span leaf="">外部内容是否可信</span></span></p></li><li><p cid="n870" mdtype="paragraph"><span md-inline="plain"><span leaf="">上下文是不是会被压缩</span></span></p></li><li><p cid="n872" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户能不能看到工具调用</span></span></p></li></ul><p cid="n873" mdtype="paragraph"><span md-inline="plain"><span leaf="">而这些，其实比很多抽象人格设定更重要。</span></span></p><hr><h3 cid="n875" mdtype="heading"><span md-inline="plain"><span leaf="">3. 做任务的行为准则：把常见失误直接写进 prompt</span></span></h3><p cid="n876" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n877" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L194&nbsp;</span></span></span></p><p cid="n878" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n879" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleDoingTasksSection</span></span><span leaf="">()</span></span></pre><p cid="n880" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是整份系统提示词里最值得学的部分之一。</span></span></p><p cid="n881" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是泛泛地说“请认真完成任务”，而是非常具体地约束模型在 coding task 中的行为，比如：</span></span></p><ul ><li><p cid="n884" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要额外加功能、重构、优化</span></span></p></li><li><p cid="n886" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要为了未来需求做过度抽象</span></span></p></li><li><p cid="n888" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要随手加注释</span></span></p></li><li><p cid="n890" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要在没读代码前就提修改方案</span></span></p></li><li><p cid="n892" mdtype="paragraph"><span md-inline="plain"><span leaf="">没必要就不要创建新文件</span></span></p></li><li><p cid="n894" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要乱估时</span></span></p></li><li><p cid="n896" mdtype="paragraph"><span md-inline="plain"><span leaf="">失败后先诊断原因，不要盲目切换方案</span></span></p></li><li><p cid="n898" mdtype="paragraph"><span md-inline="plain"><span leaf="">注意安全漏洞</span></span></p></li><li><p cid="n900" mdtype="paragraph"><span md-inline="plain"><span leaf="">结果要如实汇报，不能没跑测试却说通过了</span></span></p></li></ul><p cid="n901" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么这一段强？</span></span></p><p cid="n902" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为它不是“价值观型 prompt”，而是“失误防御型 prompt”。</span></span></p><p cid="n903" mdtype="paragraph"><span md-inline="plain"><span leaf="">它在对抗模型最常见的工程问题：</span></span></p><ul ><li><p cid="n906" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度设计</span></span></p></li><li><p cid="n908" mdtype="paragraph"><span md-inline="plain"><span leaf="">假装成功</span></span></p></li><li><p cid="n910" mdtype="paragraph"><span md-inline="plain"><span leaf="">乱加注释</span></span></p></li><li><p cid="n912" mdtype="paragraph"><span md-inline="plain"><span leaf="">没读代码就开改</span></span></p></li><li><p cid="n914" mdtype="paragraph"><span md-inline="plain"><span leaf="">为一次性需求做复杂抽象</span></span></p></li><li><p cid="n916" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具失败就胡乱换路线</span></span></p></li></ul><p cid="n917" mdtype="paragraph"><span md-inline="plain"><span leaf="">这背后的思路很重要：</span></span></p><p cid="n918" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">好的系统提示词，不只是告诉模型要做什么，更要明确告诉它最容易做错什么。</span></span></strong></span></p><hr><h3 cid="n920" mdtype="heading"><span md-inline="plain"><span leaf="">4. 风险动作控制：这是 Agent 产品和普通聊天产品的分水岭</span></span></h3><p cid="n921" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n922" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L281&nbsp;</span></span></span></p><p cid="n923" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n924" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getActionsSection</span></span><span leaf="">()</span></span></pre><p cid="n925" mdtype="paragraph"><span md-inline="plain"><span leaf="">这段 prompt 会明确要求模型：</span></span></p><ul ><li><p cid="n928" mdtype="paragraph"><span md-inline="plain"><span leaf="">对可逆、局部、低风险动作，可以自主做</span></span></p></li><li><p cid="n930" mdtype="paragraph"><span md-inline="plain"><span leaf="">对难以回滚、影响共享状态、可能破坏现场的动作，要先确认用户</span></span></p></li><li><p cid="n932" mdtype="paragraph"><span md-inline="plain"><span leaf="">删除文件、删分支、强推、改 CI、发消息、改权限等，都属于高风险动作</span></span></p></li><li><p cid="n934" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要把 destructive action 当捷径</span></span></p></li><li><p cid="n936" mdtype="paragraph"><span md-inline="plain"><span leaf="">发现异常状态时先调查，不要直接删</span></span></p></li></ul><p cid="n937" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层非常关键。</span></span></p><p cid="n938" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么？</span></span></p><p cid="n939" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为一旦模型具备工具调用能力，它就不再只是“会说话的 AI”，而是“可能操作真实系统的 AI”。</span></span></p><p cid="n940" mdtype="paragraph"><span md-inline="plain"><span leaf="">这时系统提示词必须从“内容生成约束”升级为“操作风险约束”。</span></span></p><p cid="n941" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 AI Agent 产品不稳定，不是因为模型不聪明，而是因为 prompt 没把风险边界写清楚。</span></span></p><p cid="n942" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;在这方面做得很成熟：</span></span></p><p cid="n943" mdtype="paragraph"><span md-inline="plain"><span leaf="">它没有一刀切地说“什么都不要做”，也没有完全放飞，而是用“可逆性、影响面、共享状态”来划分动作风险等级。</span></span></p><p cid="n944" mdtype="paragraph"><span md-inline="plain"><span leaf="">这就是很典型的工程系统思维。</span></span></p><hr><h3 cid="n946" mdtype="heading"><span md-inline="plain"><span leaf="">5. 工具使用策略：不是给工具就完了，还要规定“怎么用”</span></span></h3><p cid="n947" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n948" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L295&nbsp;</span></span></span></p><p cid="n949" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n950" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getUsingYourToolsSection</span></span><span leaf="">(</span><span><span leaf="">enabledTools</span></span><span leaf="">:&nbsp;</span><span><span leaf="">Set</span></span><span><span leaf="">&lt;</span></span><span><span leaf="">string</span></span><span><span leaf="">&gt;</span></span><span leaf="">)</span></span></pre><p cid="n951" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里会明确规定：</span></span></p><ul ><li><p cid="n954" mdtype="paragraph"><span md-inline="plain"><span leaf="">读文件优先用文件读取工具</span></span></p></li><li><p cid="n956" mdtype="paragraph"><span md-inline="plain"><span leaf="">编辑文件优先用编辑工具</span></span></p></li><li><p cid="n958" mdtype="paragraph"><span md-inline="plain"><span leaf="">创建文件优先用写文件工具</span></span></p></li><li><p cid="n960" mdtype="paragraph"><span md-inline="plain"><span leaf="">搜索文件和搜索内容优先用专门搜索工具</span></span></p></li><li><p cid="n962" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">Bash</span></code></span><span md-inline="plain"><span leaf="">&nbsp;工具只在确实需要 shell 操作时使用</span></span></p></li><li><p cid="n964" mdtype="paragraph"><span md-inline="plain"><span leaf="">没依赖关系的多个工具调用要并行</span></span></p></li></ul><p cid="n965" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层特别值得产品设计者抄。</span></span></p><p cid="n966" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为很多人做工具调用时，以为“给模型一个 schema，它自然会选最优工具”。</span></span></p><p cid="n967" mdtype="paragraph"><span md-inline="plain"><span leaf="">现实往往不是这样。</span></span></p><p cid="n968" mdtype="paragraph"><span md-inline="plain"><span leaf="">模型如果没有明确策略约束，就容易：</span></span></p><ul ><li><p cid="n971" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度使用 bash</span></span></p></li><li><p cid="n973" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 shell 代替结构化工具</span></span></p></li><li><p cid="n975" mdtype="paragraph"><span md-inline="plain"><span leaf="">本该并行的操作串行执行</span></span></p></li><li><p cid="n977" mdtype="paragraph"><span md-inline="plain"><span leaf="">本该读文件的地方，用 grep/sed 硬凑</span></span></p></li></ul><p cid="n978" mdtype="paragraph"><span md-inline="plain"><span leaf="">而&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的做法是：</span></span><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">把工具选择策略也写进系统提示词。</span></span></strong></span></p><p cid="n979" mdtype="paragraph"><span md-inline="plain"><span leaf="">这会极大提高 Agent 的稳定性和可解释性。</span></span></p><hr><h3 cid="n981" mdtype="heading"><span md-inline="plain"><span leaf="">6. 输出风格：把“如何和用户说话”也做成一层 prompt</span></span></h3><p cid="n982" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n983" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L389&nbsp;</span></span></span></p><p cid="n984" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层包括两个方向：</span></span></p><ul ><li><p cid="n987" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格和格式</span></span></p></li><li><p cid="n989" mdtype="paragraph"><span md-inline="plain"><span leaf="">信息密度和更新节奏</span></span></p></li></ul><p cid="n990" mdtype="paragraph"><span md-inline="plain"><span leaf="">例如：</span></span></p><ul ><li><p cid="n993" mdtype="paragraph"><span md-inline="plain"><span leaf="">要简洁直接</span></span></p></li><li><p cid="n995" mdtype="paragraph"><span md-inline="plain"><span leaf="">引用代码时带路径和行号</span></span></p></li><li><p cid="n997" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要在工具调用前用奇怪的冒号铺垫</span></span></p></li><li><p cid="n999" mdtype="paragraph"><span md-inline="plain"><span leaf="">要在关键节点给用户进度更新</span></span></p></li><li><p cid="n1001" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户通常看不到思维链和大部分工具调用，所以用户可见文本要完整、可理解</span></span></p></li></ul><p cid="n1002" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层体现的是一个非常成熟的产品意识：</span></span></p><p cid="n1003" mdtype="paragraph"><span md-inline="plain"><span leaf="">模型不是在“自言自语”，它是在和真实用户协作。</span></span></p><p cid="n1004" mdtype="paragraph"><span md-inline="plain"><span leaf="">因此系统提示词不能只约束“任务做法”，还要约束“用户体验”。</span></span></p><hr><h2 cid="n1006" mdtype="heading"><span md-inline="plain"><span leaf="">五、为什么它要把 system prompt 做成 section</span></span></h2><p cid="n1007" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n1008" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/systemPromptSections.ts&nbsp;</span></span></span></p><p cid="n1009" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里定义了两个很关键的概念：</span></span></p><ul ><li><p cid="n1012" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">systemPromptSection(...)</span></code></span></p></li><li><p cid="n1014" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">DANGEROUS_uncachedSystemPromptSection(...)</span></code></span></p></li></ul><p cid="n1015" mdtype="paragraph"><span md-inline="plain"><span leaf="">以及：</span></span></p><pre spellcheck="false" lang="ts" cid="n1016" mdtype="fences"><span role="presentation"><span><span leaf="">resolveSystemPromptSections</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre><p cid="n1017" mdtype="paragraph"><span md-inline="plain"><span leaf="">这说明&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计者已经把 system prompt 当成“可计算内容”，而不是“固定文本”。</span></span></p><p cid="n1018" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么这么做？</span></span></p><p cid="n1019" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为真实产品里，系统提示词里有很多内容是动态的：</span></span></p><ul ><li><p cid="n1022" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境信息</span></span></p></li><li><p cid="n1024" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前语言偏好</span></span></p></li><li><p cid="n1026" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 召回结果</span></span></p></li><li><p cid="n1028" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前接入的 MCP 工具说明</span></span></p></li><li><p cid="n1030" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些实验开关带来的局部指令</span></span></p></li></ul><p cid="n1031" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把这些东西全塞进一个大字符串，每轮都完全重建，会带来两个问题：</span></span></p><ol ><li><p cid="n1034" mdtype="paragraph"><span md-inline="plain"><span leaf="">不好维护</span></span></p></li><li><p cid="n1036" mdtype="paragraph"><span md-inline="plain"><span leaf="">prompt cache 命中率差</span></span></p></li></ol><p cid="n1037" mdtype="paragraph"><span md-inline="plain"><span leaf="">而 section 化的好处是：</span></span></p><ul ><li><p cid="n1040" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪一段需要变，就只变哪一段</span></span></p></li><li><p cid="n1042" mdtype="paragraph"><span md-inline="plain"><span leaf="">能缓存的 section 就缓存</span></span></p></li><li><p cid="n1044" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做 feature flag</span></span></p></li><li><p cid="n1046" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做实验对比</span></span></p></li><li><p cid="n1048" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做不同 agent 的复用</span></span></p></li></ul><p cid="n1049" mdtype="paragraph"><span md-inline="plain"><span leaf="">这已经不只是“prompt engineering”，而是“prompt architecture”。</span></span></p><hr><h2 cid="n1051" mdtype="heading"><span md-inline="plain"><span leaf="">六、真正的总开关：最终到底用哪套 prompt</span></span></h2><p cid="n1052" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n1053" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/systemPrompt.ts&nbsp;</span></span></span></p><p cid="n1054" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件最核心的函数是：</span></span></p><pre spellcheck="false" lang="ts" cid="n1055" mdtype="fences"><span role="presentation"><span><span leaf="">buildEffectiveSystemPrompt</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre><p cid="n1056" mdtype="paragraph"><span md-inline="plain"><span leaf="">源码里把优先级写得非常清楚：</span></span></p><ol ><li><p cid="n1059" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">overrideSystemPrompt</span></code></span></p></li><li><p cid="n1061" mdtype="paragraph"><span md-inline="plain"><span leaf="">coordinator 模式 prompt</span></span></p></li><li><p cid="n1063" mdtype="paragraph"><span md-inline="plain"><span leaf="">agent prompt</span></span></p></li><li><p cid="n1065" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户自定义&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt</span></code></span></p></li><li><p cid="n1067" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认系统 prompt</span></span></p></li><li><p cid="n1069" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">appendSystemPrompt</span></code></span><span md-inline="plain"><span leaf="">&nbsp;总是在最后追加</span></span></p></li></ol><p cid="n1070" mdtype="paragraph"><span md-inline="plain"><span leaf="">这套优先级设计很干净，也很产品化。</span></span></p><p cid="n1071" mdtype="paragraph"><span md-inline="plain"><span leaf="">它说明&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;并不把 system prompt 当成“不可触碰的圣经”，而是当成一个支持组合的配置层。</span></span></p><p cid="n1072" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说：</span></span></p><ul ><li><p cid="n1075" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认产品 prompt 可以存在</span></span></p></li><li><p cid="n1077" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色型 agent 可以覆盖它</span></span></p></li><li><p cid="n1079" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户也可以自己替换它</span></span></p></li><li><p cid="n1081" mdtype="paragraph"><span md-inline="plain"><span leaf="">或者只在默认 prompt 后面补一小段要求</span></span></p></li></ul><p cid="n1082" mdtype="paragraph"><span md-inline="plain"><span leaf="">这就是一个成熟产品该有的 prompt 可扩展性。</span></span></p><hr><h2 cid="n1084" mdtype="heading"><span md-inline="plain"><span leaf="">七、API 层还会再加一层前缀</span></span></h2><p cid="n1085" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n1086" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/services/api/claude.ts#L1358&nbsp;</span></span></span></p><p cid="n1087" mdtype="paragraph"><span md-inline="plain"><span leaf="">在真正发给模型前，源码里还会在&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">systemPrompt</span></code></span><span md-inline="plain"><span leaf="">&nbsp;前面补上几类内容：</span></span></p><ul ><li><p cid="n1090" mdtype="paragraph"><span md-inline="plain"><span leaf="">attribution header</span></span></p></li><li><p cid="n1092" mdtype="paragraph"><span md-inline="plain"><span leaf="">CLI 身份前缀</span></span></p></li><li><p cid="n1094" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些 advisor/chrome 等特殊场景说明</span></span></p></li></ul><p cid="n1095" mdtype="paragraph"><span md-inline="plain"><span leaf="">而身份前缀定义在：</span></span></p><p cid="n1096" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/system.ts#L10&nbsp;</span></span></span></p><p cid="n1097" mdtype="paragraph"><span md-inline="plain"><span leaf="">比如：</span></span></p><ul ><li><p cid="n1100" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are Claude Code, Anthropic's official CLI for Claude.</span></code></span></p></li><li><p cid="n1102" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are Claude Code ... running within the Claude Agent SDK.</span></code></span></p></li><li><p cid="n1104" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are a Claude agent, built on Anthropic's Claude Agent SDK.</span></code></span></p></li></ul><p cid="n1105" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个设计说明了一件很重要的事：</span></span></p><p cid="n1106" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">身份前缀是系统提示词中最稳定、最顶层的一部分，所以它被单独抽离。</span></span></strong></span></p><p cid="n1107" mdtype="paragraph"><span md-inline="plain"><span leaf="">这也很值得学习。</span></span></p><p cid="n1108" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为很多人把身份、规则、动态环境全部混在一起写，最后 prompt 很难维护。</span></span></p><p cid="n1109" mdtype="paragraph"><span md-inline="plain"><span leaf="">而这里的做法是：</span></span></p><ul ><li><p cid="n1112" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份前缀独立</span></span></p></li><li><p cid="n1114" mdtype="paragraph"><span md-inline="plain"><span leaf="">主规则独立</span></span></p></li><li><p cid="n1116" mdtype="paragraph"><span md-inline="plain"><span leaf="">动态内容独立</span></span></p></li><li><p cid="n1118" mdtype="paragraph"><span md-inline="plain"><span leaf="">API 附加内容独立</span></span></p></li></ul><p cid="n1119" mdtype="paragraph"><span md-inline="plain"><span leaf="">结构非常清晰。</span></span></p><hr><h2 cid="n1121" mdtype="heading"><span md-inline="plain"><span leaf="">八、用户甚至可以从 CLI 覆盖或追加 system prompt</span></span></h2><p cid="n1122" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p><p cid="n1123" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/main.tsx#L1342&nbsp;</span></span></span></p><p cid="n1124" mdtype="paragraph"><span md-inline="plain"><span leaf="">支持的参数包括：</span></span></p><ul ><li><p cid="n1127" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt</span></code></span></p></li><li><p cid="n1129" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt-file</span></code></span></p></li><li><p cid="n1131" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--append-system-prompt</span></code></span></p></li><li><p cid="n1133" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--append-system-prompt-file</span></code></span></p></li></ul><p cid="n1134" mdtype="paragraph"><span md-inline="plain"><span leaf="">这背后体现的产品理念是：</span></span></p><ul ><li><p cid="n1137" mdtype="paragraph"><span md-inline="plain"><span leaf="">系统默认 prompt 是产品能力的一部分</span></span></p></li><li><p cid="n1139" mdtype="paragraph"><span md-inline="plain"><span leaf="">但 prompt 也应该允许用户进行定制</span></span></p></li><li><p cid="n1141" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户既可以“完全替换”</span></span></p></li><li><p cid="n1143" mdtype="paragraph"><span md-inline="plain"><span leaf="">也可以“在默认规则上追加一层自己的偏好”</span></span></p></li></ul><p cid="n1144" mdtype="paragraph"><span md-inline="plain"><span leaf="">这其实是很多 AI 产品都会逐步走到的一步。</span></span></p><p cid="n1145" mdtype="paragraph"><span md-inline="plain"><span leaf="">最初大家都把 prompt 写死在代码里，但随着场景复杂化，最终一定会出现：</span></span></p><ul ><li><p cid="n1148" mdtype="paragraph"><span md-inline="plain"><span leaf="">团队级 prompt</span></span></p></li><li><p cid="n1150" mdtype="paragraph"><span md-inline="plain"><span leaf="">项目级 prompt</span></span></p></li><li><p cid="n1152" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色级 prompt</span></span></p></li><li><p cid="n1154" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户个人追加 prompt</span></span></p></li></ul><p cid="n1155" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;已经把这条路铺好了。</span></span></p><hr><h2 cid="n1157" mdtype="heading"><span md-inline="plain"><span leaf="">九、自定义 Agent 的 prompt 怎么设计</span></span></h2><p cid="n1158" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你不只关心主助手，还关心“多角色 agent”，那么它的 agent prompt 设计也很有参考价值。</span></span></p><p cid="n1159" mdtype="paragraph"><span md-inline="plain"><span leaf="">相关代码：</span></span></p><p cid="n1160" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/components/agents/agentFileUtils.ts&nbsp;</span></span></span></p><p cid="n1161" mdtype="paragraph"><span md-inline="plain"><span leaf="">Agent 文件会被保存为 markdown，格式类似这样：</span></span></p><pre spellcheck="false" lang="md" cid="n1162" mdtype="fences"><span role="presentation"><span leaf="">---</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">name: xxx</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">description: "什么时候使用这个 agent"</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">tools: ...</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">model: ...</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">---</span></span><span leaf=""><br></span><span leaf=""><br></span><span role="presentation"><span leaf="">这里是这个 agent 的 system prompt</span></span></pre><p cid="n1163" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，自定义 agent 的 prompt 并不是单独存在于数据库里，而是作为一种可编辑的配置文件存在。</span></span></p><p cid="n1164" mdtype="paragraph"><span md-inline="plain"><span leaf="">这很实用，因为：</span></span></p><ul ><li><p cid="n1167" mdtype="paragraph"><span md-inline="plain"><span leaf="">可读</span></span></p></li><li><p cid="n1169" mdtype="paragraph"><span md-inline="plain"><span leaf="">可版本管理</span></span></p></li><li><p cid="n1171" mdtype="paragraph"><span md-inline="plain"><span leaf="">可迁移</span></span></p></li><li><p cid="n1173" mdtype="paragraph"><span md-inline="plain"><span leaf="">可审查</span></span></p></li><li><p cid="n1175" mdtype="paragraph"><span md-inline="plain"><span leaf="">可直接给用户暴露编辑能力</span></span></p></li></ul><p cid="n1176" mdtype="paragraph"><span md-inline="plain"><span leaf="">更有意思的是，在 team / swarm 模式下，teammate agent 还会额外追加一层 prompt：</span></span></p><p cid="n1177" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/swarm/teammatePromptAddendum.ts&nbsp;</span></span></span></p><p cid="n1178" mdtype="paragraph"><span md-inline="plain"><span leaf="">这段附加说明会明确告诉子 agent：</span></span></p><ul ><li><p cid="n1181" mdtype="paragraph"><span md-inline="plain"><span leaf="">你现在是在团队里工作的 agent</span></span></p></li><li><p cid="n1183" mdtype="paragraph"><span md-inline="plain"><span leaf="">普通文本对队友不可见</span></span></p></li><li><p cid="n1185" mdtype="paragraph"><span md-inline="plain"><span leaf="">你必须用&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">SendMessage</span></code></span><span md-inline="plain"><span leaf="">&nbsp;和队友沟通</span></span></p></li><li><p cid="n1187" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户主要和 team lead 交互</span></span></p></li></ul><p cid="n1188" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是非常典型的“角色约束 prompt”。</span></span></p><p cid="n1189" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是在重新定义整个助手，而是在已有 prompt 上再叠加一个“协作身份”。</span></span></p><p cid="n1190" mdtype="paragraph"><span md-inline="plain"><span leaf="">这种写法特别适合多 Agent 系统。</span></span></p><hr><h2 cid="n1192" mdtype="heading"><span md-inline="plain"><span leaf="">十、真正值得抄的，不是文案，而是它背后的六条方法论</span></span></h2><p cid="n1193" mdtype="paragraph"><span md-inline="plain"><span leaf="">看完整个源码之后，我认为&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;最值得学习的不是哪一段英文，而是下面六个方法论。</span></span></p><hr><h3 cid="n1195" mdtype="heading"><span md-inline="plain"><span leaf="">方法一：不要写“一大坨 prompt”，要分层写</span></span></h3><p cid="n1196" mdtype="paragraph"><span md-inline="plain"><span leaf="">系统提示词应该至少分成这些层：</span></span></p><ul ><li><p cid="n1199" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份层</span></span></p></li><li><p cid="n1201" mdtype="paragraph"><span md-inline="plain"><span leaf="">运行规则层</span></span></p></li><li><p cid="n1203" mdtype="paragraph"><span md-inline="plain"><span leaf="">任务执行层</span></span></p></li><li><p cid="n1205" mdtype="paragraph"><span md-inline="plain"><span leaf="">风险控制层</span></span></p></li><li><p cid="n1207" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具策略层</span></span></p></li><li><p cid="n1209" mdtype="paragraph"><span md-inline="plain"><span leaf="">输出风格层</span></span></p></li><li><p cid="n1211" mdtype="paragraph"><span md-inline="plain"><span leaf="">环境上下文层</span></span></p></li><li><p cid="n1213" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色附加层</span></span></p></li></ul><p cid="n1214" mdtype="paragraph"><span md-inline="plain"><span leaf="">这样做的好处是：</span></span></p><ul ><li><p cid="n1217" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易维护</span></span></p></li><li><p cid="n1219" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易复用</span></span></p></li><li><p cid="n1221" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做实验</span></span></p></li><li><p cid="n1223" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易按场景开关</span></span></p></li><li><p cid="n1225" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易定位是哪一层规则出了问题</span></span></p></li></ul><hr><h3 cid="n1227" mdtype="heading"><span md-inline="plain"><span leaf="">方法二：规则必须是“可执行的”，不是“好听的”</span></span></h3><p cid="n1228" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 prompt 的问题是写得很正确，但没法执行。</span></span></p><p cid="n1229" mdtype="paragraph"><span md-inline="plain"><span leaf="">比如：</span></span></p><ul ><li><p cid="n1232" mdtype="paragraph"><span md-inline="plain"><span leaf="">be helpful</span></span></p></li><li><p cid="n1234" mdtype="paragraph"><span md-inline="plain"><span leaf="">be concise</span></span></p></li><li><p cid="n1236" mdtype="paragraph"><span md-inline="plain"><span leaf="">think carefully</span></span></p></li><li><p cid="n1238" mdtype="paragraph"><span md-inline="plain"><span leaf="">do your best</span></span></p></li></ul><p cid="n1239" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些都太虚。</span></span></p><p cid="n1240" mdtype="paragraph"><span md-inline="plain"><span leaf="">而&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;写的是：</span></span></p><ul ><li><p cid="n1243" mdtype="paragraph"><span md-inline="plain"><span leaf="">没读代码前不要提修改建议</span></span></p></li><li><p cid="n1245" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要为了未来需求做抽象</span></span></p></li><li><p cid="n1247" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户拒绝同一个工具调用后不要原样重试</span></span></p></li><li><p cid="n1249" mdtype="paragraph"><span md-inline="plain"><span leaf="">没有验证就不要声称成功</span></span></p></li><li><p cid="n1251" mdtype="paragraph"><span md-inline="plain"><span leaf="">没依赖关系的工具调用尽量并行</span></span></p></li></ul><p cid="n1252" mdtype="paragraph"><span md-inline="plain"><span leaf="">这类规则强在：</span></span><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">模型能在具体操作中执行它。</span></span></strong></span></p><hr><h3 cid="n1254" mdtype="heading"><span md-inline="plain"><span leaf="">方法三：系统提示词要正面描述“常见错误”</span></span></h3><p cid="n1255" mdtype="paragraph"><span md-inline="plain"><span leaf="">好的系统提示词，不只告诉模型该做什么，还要提前防守它最常见的错误。</span></span></p><p cid="n1256" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;明显在防守这些问题：</span></span></p><ul ><li><p cid="n1259" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度设计</span></span></p></li><li><p cid="n1261" mdtype="paragraph"><span md-inline="plain"><span leaf="">伪造完成状态</span></span></p></li><li><p cid="n1263" mdtype="paragraph"><span md-inline="plain"><span leaf="">不必要的注释</span></span></p></li><li><p cid="n1265" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度使用 bash</span></span></p></li><li><p cid="n1267" mdtype="paragraph"><span md-inline="plain"><span leaf="">忽略风险动作确认</span></span></p></li><li><p cid="n1269" mdtype="paragraph"><span md-inline="plain"><span leaf="">被外部内容诱导</span></span></p></li><li><p cid="n1271" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具被拒后死循环重试</span></span></p></li></ul><p cid="n1272" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是一种非常成熟的 prompt 设计思路：</span></span></p><p cid="n1273" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">不要只写理想行为，也要写高频错误行为的边界。</span></span></strong></span></p><hr><h3 cid="n1275" mdtype="heading"><span md-inline="plain"><span leaf="">方法四：工具调用策略一定要写进系统提示词</span></span></h3><p cid="n1276" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你的产品有多个工具，千万不要只给 schema，不给策略。</span></span></p><p cid="n1277" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为模型需要知道：</span></span></p><ul ><li><p cid="n1280" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪类任务优先用哪个工具</span></span></p></li><li><p cid="n1282" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么时候不该用 bash</span></span></p></li><li><p cid="n1284" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么情况下应该并行</span></span></p></li><li><p cid="n1286" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么情况下必须串行</span></span></p></li><li><p cid="n1288" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么操作属于专用工具，不该走通用工具</span></span></p></li></ul><p cid="n1289" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 Agent 的不稳定，不是因为模型不够强，而是因为系统提示词没把工具使用策略明确下来。</span></span></p><hr><h3 cid="n1291" mdtype="heading"><span md-inline="plain"><span leaf="">方法五：静态内容和动态内容必须分开</span></span></h3><p cid="n1292" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是非常关键的一点。</span></span></p><p cid="n1293" mdtype="paragraph"><span md-inline="plain"><span leaf="">静态部分适合放：</span></span></p><ul ><li><p cid="n1296" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份</span></span></p></li><li><p cid="n1298" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心原则</span></span></p></li><li><p cid="n1300" mdtype="paragraph"><span md-inline="plain"><span leaf="">通用行为规范</span></span></p></li><li><p cid="n1302" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格要求</span></span></p></li></ul><p cid="n1303" mdtype="paragraph"><span md-inline="plain"><span leaf="">动态部分适合放：</span></span></p><ul ><li><p cid="n1306" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境</span></span></p></li><li><p cid="n1308" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前项目上下文</span></span></p></li><li><p cid="n1310" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 检索结果</span></span></p></li><li><p cid="n1312" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前模式</span></span></p></li><li><p cid="n1314" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前挂载工具说明</span></span></p></li></ul><p cid="n1315" mdtype="paragraph"><span md-inline="plain"><span leaf="">分开后，你会得到几个巨大好处：</span></span></p><ul ><li><p cid="n1318" mdtype="paragraph"><span md-inline="plain"><span leaf="">更好的 prompt cache</span></span></p></li><li><p cid="n1320" mdtype="paragraph"><span md-inline="plain"><span leaf="">更清晰的修改边界</span></span></p></li><li><p cid="n1322" mdtype="paragraph"><span md-inline="plain"><span leaf="">更容易观察每一段的作用</span></span></p></li><li><p cid="n1324" mdtype="paragraph"><span md-inline="plain"><span leaf="">更容易做版本演进</span></span></p></li></ul><hr><h3 cid="n1326" mdtype="heading"><span md-inline="plain"><span leaf="">方法六：为覆盖、追加、角色扩展预留接口</span></span></h3><p cid="n1327" mdtype="paragraph"><span md-inline="plain"><span leaf="">成熟产品的 prompt 系统，一定不是只能写死在源码里。</span></span></p><p cid="n1328" mdtype="paragraph"><span md-inline="plain"><span leaf="">它应该支持：</span></span></p><ul ><li><p cid="n1331" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认 prompt</span></span></p></li><li><p cid="n1333" mdtype="paragraph"><span md-inline="plain"><span leaf="">完全覆盖</span></span></p></li><li><p cid="n1335" mdtype="paragraph"><span md-inline="plain"><span leaf="">部分追加</span></span></p></li><li><p cid="n1337" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色型扩展</span></span></p></li><li><p cid="n1339" mdtype="paragraph"><span md-inline="plain"><span leaf="">团队型扩展</span></span></p></li><li><p cid="n1341" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户个性化扩展</span></span></p></li></ul><p cid="n1342" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的这套设计，已经明显不是“写 prompt”，而是在做“prompt 配置系统”。</span></span></p><hr><h2 cid="n1344" mdtype="heading"><span md-inline="plain"><span leaf="">十一、如果你也想做一套类似的系统提示词，应该怎么写</span></span></h2><p cid="n1345" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计抽象成一个通用模板，我会建议你按下面这个骨架来写。</span></span></p><hr><h3 cid="n1347" mdtype="heading"><span md-inline="plain"><span leaf="">一套适合 Agent 产品的系统提示词骨架</span></span></h3><h4 cid="n1348" mdtype="heading"><span md-inline="plain"><span leaf="">1. Identity</span></span></h4><p cid="n1349" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁，属于哪个产品，你服务的核心目标是什么。</span></span></p><h4 cid="n1350" mdtype="heading"><span md-inline="plain"><span leaf="">2. Runtime Protocol</span></span></h4><p cid="n1351" mdtype="paragraph"><span md-inline="plain"><span leaf="">你和用户、工具、系统消息、外部内容之间的关系是什么，权限和可见性如何工作。</span></span></p><h4 cid="n1352" mdtype="heading"><span md-inline="plain"><span leaf="">3. Task Execution Policy</span></span></h4><p cid="n1353" mdtype="paragraph"><span md-inline="plain"><span leaf="">处理任务时的总体原则，比如先读后改、不过度设计、失败先诊断、结果要验证。</span></span></p><h4 cid="n1354" mdtype="heading"><span md-inline="plain"><span leaf="">4. Risk Control</span></span></h4><p cid="n1355" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪些动作可以自主做，哪些动作需要确认，哪些动作不能擅自做。</span></span></p><h4 cid="n1356" mdtype="heading"><span md-inline="plain"><span leaf="">5. Tool Use Strategy</span></span></h4><p cid="n1357" mdtype="paragraph"><span md-inline="plain"><span leaf="">不同工具的适用场景、优先级、并行策略、回退策略。</span></span></p><h4 cid="n1358" mdtype="heading"><span md-inline="plain"><span leaf="">6. Output Style</span></span></h4><p cid="n1359" mdtype="paragraph"><span md-inline="plain"><span leaf="">如何向用户汇报，什么时候更新进度，回答应该多长，怎么引用文件位置。</span></span></p><h4 cid="n1360" mdtype="heading"><span md-inline="plain"><span leaf="">7. Environment Context</span></span></h4><p cid="n1361" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前工作目录、平台、项目状态、模型限制、外部服务信息。</span></span></p><h4 cid="n1362" mdtype="heading"><span md-inline="plain"><span leaf="">8. Role-specific Addendum</span></span></h4><p cid="n1363" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果当前是 reviewer、planner、researcher、teammate、ops agent，就在最后叠加角色专属约束。</span></span></p><hr><h2 cid="n1365" mdtype="heading"><span md-inline="plain"><span leaf="">十二、一个更重要的判断：Claude Code 在写的不是 prompt，而是“操作系统”</span></span></h2><p cid="n1366" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是我看完源码后最强烈的感觉。</span></span></p><p cid="n1367" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多团队还停留在“提示词调优”阶段，讨论的是：</span></span></p><ul ><li><p cid="n1370" mdtype="paragraph"><span md-inline="plain"><span leaf="">这句话要不要更礼貌</span></span></p></li><li><p cid="n1372" mdtype="paragraph"><span md-inline="plain"><span leaf="">要不要加一句 think step by step</span></span></p></li><li><p cid="n1374" mdtype="paragraph"><span md-inline="plain"><span leaf="">要不要把 be concise 改成 be brief</span></span></p></li></ul><p cid="n1375" mdtype="paragraph"><span md-inline="plain"><span leaf="">但&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计已经是另一层了。</span></span></p><p cid="n1376" mdtype="paragraph"><span md-inline="plain"><span leaf="">它关注的是：</span></span></p><ul ><li><p cid="n1379" mdtype="paragraph"><span md-inline="plain"><span leaf="">提示词怎样模块化</span></span></p></li><li><p cid="n1381" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟工具系统对齐</span></span></p></li><li><p cid="n1383" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟权限系统对齐</span></span></p></li><li><p cid="n1385" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟缓存系统对齐</span></span></p></li><li><p cid="n1387" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟多 agent 协作对齐</span></span></p></li><li><p cid="n1389" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样让 prompt 可以被覆盖、追加、复用、实验化</span></span></p></li></ul><p cid="n1390" mdtype="paragraph"><span md-inline="plain"><span leaf="">所以它真正做的，不是一段漂亮 prompt，而是一套“面向 Agent 运行时的提示词架构”。</span></span></p><p cid="n1391" mdtype="paragraph"><span md-inline="plain"><span leaf="">这也是为什么它值得研究。</span></span></p><p cid="n1392" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为当你的产品从“聊天”走向“执行”时，prompt 的写法一定会从“文案工作”变成“系统设计”。</span></span></p><hr><h2 cid="n1394" mdtype="heading"><span md-inline="plain"><span leaf="">十三、最后总结一句</span></span></h2><p cid="n1395" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果只从表面看，</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词像是一堆英文规则。</span></span></p><p cid="n1396" mdtype="paragraph"><span md-inline="plain"><span leaf="">但如果顺着源码看进去，你会发现它真正厉害的地方是：</span></span></p><p cid="n1397" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">它把系统提示词拆成了身份、规则、工具、风格、环境、角色这几个层次，并且把它们做成了可组合、可缓存、可覆盖、可扩展的工程系统。</span></span></strong></span></p><p cid="n1398" mdtype="paragraph"><span md-inline="plain"><span leaf="">这比“抄一段神 prompt”有用得多。</span></span></p><p cid="n1399" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为前者能让你做出稳定的产品，后者通常只能让你短暂地感觉“我也写了 prompt”。</span></span></p><p></p></div>
-          <script type="text/javascript" nonce="" reportloaderror="">
-            var first_sceen__time = (+new Date());
-            if ("" == 1 && document.getElementById('js_content')) {
-              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
-            }
-          </script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从Claude-Code源码学习系统提示词的工程系统 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+        <a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="../chapters/ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
+        <a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <article class="article">
+        <header class="article-header">
+          <div class="article-meta">第5章 · Claude Code 源码深度解读</div>
+          <h1 class="article-title">从Claude-Code源码学习系统提示词的工程系统</h1>
+          <p class="article-summary">提示词装配系统：多 Section 动态注入</p>
+        </header>
+        <div class="article-body">
+          <p cid="n700" mdtype="paragraph" data-pm-slice="0 0 []"><span md-inline="plain"><span leaf="">很多人一提到“系统提示词”，第一反应是去找一大段神秘的 prompt，然后试着模仿它的措辞。</span></span></p>
+          <p cid="n702" mdtype="paragraph"><span md-inline="plain"><span leaf="">但当我认真翻了&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的源码后，发现真正值得学习的，不是某一句话怎么写，而是它把“系统提示词”做成了一套工程系统。</span></span></p>
+          <p cid="n703" mdtype="paragraph"><span md-inline="plain"><span leaf="">这篇文章我想讲清楚三件事：</span></span></p>
+          <ol>
+            <li>
+              <p cid="n706" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词到底藏在哪些地方</span></span></p>
+            </li>
+            <li>
+              <p cid="n708" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是“一个 prompt”，而是一套怎样的拼装架构</span></span></p>
+            </li>
+            <li>
+              <p cid="n710" mdtype="paragraph"><span md-inline="plain"><span leaf="">我们能从中学到什么，如何把这种写法迁移到自己的 AI Agent / Coding Assistant 产品里</span></span></p>
+            </li>
+          </ol>
+          <p cid="n711" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你做的是 AI 编程助手、工作流 Agent、企业 Copilot、代码审查机器人，或者你只是想把 prompt 从“玄学”变成“工程”，这套设计非常值得研究。</span></span></p>
+          <div><img class="rich_pages wxw-img" data-ratio="0.8722222222222222" data-s="300,640" data-type="png" data-w="1080" type="block" data-imgfileid="305191999" data-aistatus="1" data-original-style="null" data-index="3" src="../assets/images/c279947f_640.webp" _width="677px" alt="图片" data-report-img-idx="0" data-fail="0"></div>
+          <hr>
+          <h2 cid="n713" mdtype="heading"><span md-inline="plain"><span leaf="">一、先说结论：Claude Code 的系统提示词，不在一个地方</span></span></h2>
+          <p cid="n714" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你以为它会在某个文件里放一个超长字符串，比如：</span></span></p><pre spellcheck="false" lang="ts" cid="n715" mdtype="fences"><span role="presentation"><span><span leaf="">const</span></span><span><span leaf="">SYSTEM_PROMPT</span></span><span><span leaf="">=</span></span><span><span leaf="">`...一大坨提示词...`</span></span></span></pre>
+          <p cid="n716" mdtype="paragraph"><span md-inline="plain"><span leaf="">那你会失望。</span></span></p>
+          <p cid="n717" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的实现方式不是“写死一个大 prompt”，而是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n720" mdtype="paragraph"><span md-inline="plain"><span leaf="">基础身份前缀</span></span></p>
+            </li>
+            <li>
+              <p cid="n722" mdtype="paragraph"><span md-inline="plain"><span leaf="">多个职责清晰的 prompt section</span></span></p>
+            </li>
+            <li>
+              <p cid="n724" mdtype="paragraph"><span md-inline="plain"><span leaf="">不同模式下的覆盖或追加逻辑</span></span></p>
+            </li>
+            <li>
+              <p cid="n726" mdtype="paragraph"><span md-inline="plain"><span leaf="">最终在 API 层统一注入模型请求</span></span></p>
+            </li>
+          </ul>
+          <p cid="n727" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，它更像一个“提示词装配系统”，而不是一个“提示词文本文件”。</span></span></p>
+          <p cid="n728" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你要顺着源码看，最关键的几个文件是：</span></span></p>
+          <h3 cid="n729" mdtype="heading"><span md-inline="plain"><span leaf="">1. 主系统提示词内容定义</span></span></h3>
+          <p cid="n730" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts&nbsp;</span></span></span></p>
+          <p cid="n731" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是最核心的文件。大部分默认系统提示词内容，都是在这里定义的。</span></span></p>
+          <h3 cid="n732" mdtype="heading"><span md-inline="plain"><span leaf="">2. 决定最终采用哪套系统提示词</span></span></h3>
+          <p cid="n733" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/systemPrompt.ts&nbsp;</span></span></span></p>
+          <p cid="n734" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件负责决定：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n737" mdtype="paragraph"><span md-inline="plain"><span leaf="">用默认 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n739" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 agent prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n741" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 coordinator prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n743" mdtype="paragraph"><span md-inline="plain"><span leaf="">用用户自定义 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n745" mdtype="paragraph"><span md-inline="plain"><span leaf="">还是在默认 prompt 后面追加额外内容</span></span></p>
+            </li>
+          </ul>
+          <h3 cid="n746" mdtype="heading"><span md-inline="plain"><span leaf="">3. 最终把 prompt 塞进模型请求</span></span></h3>
+          <p cid="n747" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/services/api/claude.ts#L1358&nbsp;</span></span></span></p>
+          <p cid="n748" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里是最后的落点。前面拼好的&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">systemPrompt</span></code></span><span md-inline="plain"><span leaf="">，会在这里被加工成 Anthropic API 的&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">system</span></code></span><span md-inline="plain"><span leaf="">&nbsp;字段。</span></span></p>
+          <h3 cid="n749" mdtype="heading"><span md-inline="plain"><span leaf="">4. section 级别的缓存与动态拼装</span></span></h3>
+          <p cid="n750" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/systemPromptSections.ts&nbsp;</span></span></span></p>
+          <p cid="n751" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件说明，它不是简单拼字符串，而是把 system prompt 拆成一个个 section，并支持缓存和动态刷新。</span></span></p>
+          <hr>
+          <h2 cid="n753" mdtype="heading"><span md-inline="plain"><span leaf="">二、它最值得学的，不是文案，而是“分层设计”</span></span></h2>
+          <p cid="n754" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词结构抽象出来，大概是这样：</span></span></p><pre spellcheck="false" lang="text" cid="n755" mdtype="fences"><span role="presentation"><span leaf="">身份定义</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 系统级规则</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 做任务的行为准则</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 风险动作控制</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 工具使用策略</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 输出风格</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 环境信息</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">+ 会话/角色专属附加说明</span></span></pre>
+          <p cid="n756" mdtype="paragraph"><span md-inline="plain"><span leaf="">这比“写一大坨高大上的 prompt”高明得多。</span></span></p>
+          <p cid="n757" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为真正稳定的 Agent，不靠华丽措辞，而靠结构清晰、职责明确、规则可执行。</span></span></p>
+          <hr>
+          <h2 cid="n759" mdtype="heading"><span md-inline="plain"><span leaf="">三、主 prompt 是怎么组起来的</span></span></h2>
+          <p cid="n760" mdtype="paragraph"><span md-inline="plain"><span leaf="">先看主入口：</span></span></p>
+          <p cid="n761" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L444&nbsp;</span></span></span></p>
+          <p cid="n762" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里有一个核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n763" mdtype="fences"><span role="presentation"><span><span leaf="">export</span></span><span><span leaf="">async</span></span><span><span leaf="">function</span></span><span><span leaf="">getSystemPrompt</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre>
+          <p cid="n764" mdtype="paragraph"><span md-inline="plain"><span leaf="">它返回的不是一个字符串，而是一个&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">string[]</span></code></span><span md-inline="plain"><span leaf="">。</span></span></p>
+          <p cid="n765" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是一个非常重要的设计细节。</span></span></p>
+          <p cid="n766" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么不是一个长字符串，而是一个数组？</span></span></p>
+          <p cid="n767" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为这样更适合：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n770" mdtype="paragraph"><span md-inline="plain"><span leaf="">模块化拼接</span></span></p>
+            </li>
+            <li>
+              <p cid="n772" mdtype="paragraph"><span md-inline="plain"><span leaf="">条件启用某些 section</span></span></p>
+            </li>
+            <li>
+              <p cid="n774" mdtype="paragraph"><span md-inline="plain"><span leaf="">做 prompt cache</span></span></p>
+            </li>
+            <li>
+              <p cid="n776" mdtype="paragraph"><span md-inline="plain"><span leaf="">明确区分静态内容和动态内容</span></span></p>
+            </li>
+            <li>
+              <p cid="n778" mdtype="paragraph"><span md-inline="plain"><span leaf="">在 API 层追加前缀或特殊指令</span></span></p>
+            </li>
+          </ul>
+          <p cid="n779" mdtype="paragraph"><span md-inline="plain"><span leaf="">在这个函数里，系统提示词会被拆成两大类：</span></span></p>
+          <h3 cid="n780" mdtype="heading"><span md-inline="plain"><span leaf="">1. 静态内容</span></span></h3>
+          <p cid="n781" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些内容通常不会随每轮会话变化，比如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n784" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁</span></span></p>
+            </li>
+            <li>
+              <p cid="n786" mdtype="paragraph"><span md-inline="plain"><span leaf="">你要做什么</span></span></p>
+            </li>
+            <li>
+              <p cid="n788" mdtype="paragraph"><span md-inline="plain"><span leaf="">做任务时的原则</span></span></p>
+            </li>
+            <li>
+              <p cid="n790" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具使用的一般规范</span></span></p>
+            </li>
+            <li>
+              <p cid="n792" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格要求</span></span></p>
+            </li>
+          </ul>
+          <h3 cid="n793" mdtype="heading"><span md-inline="plain"><span leaf="">2. 动态内容</span></span></h3>
+          <p cid="n794" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些内容可能会变化，比如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n797" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境信息</span></span></p>
+            </li>
+            <li>
+              <p cid="n799" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 注入</span></span></p>
+            </li>
+            <li>
+              <p cid="n801" mdtype="paragraph"><span md-inline="plain"><span leaf="">语言偏好</span></span></p>
+            </li>
+            <li>
+              <p cid="n803" mdtype="paragraph"><span md-inline="plain"><span leaf="">MCP server instructions</span></span></p>
+            </li>
+            <li>
+              <p cid="n805" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些 session-specific guidance</span></span></p>
+            </li>
+          </ul>
+          <p cid="n806" mdtype="paragraph"><span md-inline="plain"><span leaf="">源码里甚至专门定义了一个边界标记：</span></span></p>
+          <p cid="n807" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L114&nbsp;</span></span></span></p><pre spellcheck="false" lang="ts" cid="n808" mdtype="fences"><span role="presentation"><span><span leaf="">export</span></span><span><span leaf="">const</span></span><span><span leaf="">SYSTEM_PROMPT_DYNAMIC_BOUNDARY</span></span><span><span leaf="">=</span></span></span><span leaf=""><br></span><span role="presentation"><span><span leaf="">'__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'</span></span></span></pre>
+          <p cid="n809" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是典型的工程化思维。</span></span></p>
+          <p cid="n810" mdtype="paragraph"><span md-inline="plain"><span leaf="">它的意思不是“我有个 prompt”，而是“我的 prompt 有稳定部分，也有易变部分，这两部分应该区别对待”。</span></span></p>
+          <hr>
+          <h2 cid="n812" mdtype="heading"><span md-inline="plain"><span leaf="">四、Claude Code 的系统提示词，具体写了哪些层</span></span></h2>
+          <p cid="n813" mdtype="paragraph"><span md-inline="plain"><span leaf="">下面我们按职责拆一下它的主要 section。</span></span></p>
+          <hr>
+          <h3 cid="n815" mdtype="heading"><span md-inline="plain"><span leaf="">1. 身份定义：先告诉模型“你是谁”</span></span></h3>
+          <p cid="n816" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n817" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L173&nbsp;</span></span></span></p>
+          <p cid="n818" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数是：</span></span></p><pre spellcheck="false" lang="ts" cid="n819" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleIntroSection</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre>
+          <p cid="n820" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一段的写法很经典，它会先讲：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n823" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是一个交互式 agent</span></span></p>
+            </li>
+            <li>
+              <p cid="n825" mdtype="paragraph"><span md-inline="plain"><span leaf="">你要帮助用户完成软件工程任务</span></span></p>
+            </li>
+            <li>
+              <p cid="n827" mdtype="paragraph"><span md-inline="plain"><span leaf="">你需要利用工具来协助用户</span></span></p>
+            </li>
+            <li>
+              <p cid="n829" mdtype="paragraph"><span md-inline="plain"><span leaf="">你不应该胡乱生成不可靠 URL</span></span></p>
+            </li>
+          </ul>
+          <p cid="n830" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多人写系统提示词时，上来就开始堆规则，但&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;先做了一件更基础的事：定义角色和主任务。</span></span></p>
+          <p cid="n831" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是因为，如果身份模糊，后面的规则再多，模型也容易漂。</span></span></p>
+          <p cid="n832" mdtype="paragraph"><span md-inline="plain"><span leaf="">一个成熟的 system prompt，第一层永远不是“注意事项”，而是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n835" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁</span></span></p>
+            </li>
+            <li>
+              <p cid="n837" mdtype="paragraph"><span md-inline="plain"><span leaf="">你服务于谁</span></span></p>
+            </li>
+            <li>
+              <p cid="n839" mdtype="paragraph"><span md-inline="plain"><span leaf="">你的主职责是什么</span></span></p>
+            </li>
+          </ul>
+          <hr>
+          <h3 cid="n841" mdtype="heading"><span md-inline="plain"><span leaf="">2. 系统级规则：说明这个运行环境的基本约束</span></span></h3>
+          <p cid="n842" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n843" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L182&nbsp;</span></span></span></p>
+          <p cid="n844" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n845" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleSystemSection</span></span><span leaf="">()</span></span></pre>
+          <p cid="n846" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一段会告诉模型：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n849" mdtype="paragraph"><span md-inline="plain"><span leaf="">你输出的文字会直接展示给用户</span></span></p>
+            </li>
+            <li>
+              <p cid="n851" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具调用受权限模式约束</span></span></p>
+            </li>
+            <li>
+              <p cid="n853" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果用户拒绝工具，不要机械重试同样的调用</span></span></p>
+            </li>
+            <li>
+              <p cid="n855" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具结果和用户消息里可能带系统标签</span></span></p>
+            </li>
+            <li>
+              <p cid="n857" mdtype="paragraph"><span md-inline="plain"><span leaf="">外部结果可能含 prompt injection</span></span></p>
+            </li>
+            <li>
+              <p cid="n859" mdtype="paragraph"><span md-inline="plain"><span leaf="">会话上下文会自动压缩，不是固定窗口</span></span></p>
+            </li>
+          </ul>
+          <p cid="n860" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层特别像“运行时协议”。</span></span></p>
+          <p cid="n861" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，它不是只在描述一个抽象助手，而是在描述一个具体的产品运行环境。</span></span></p>
+          <p cid="n862" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一点很多 prompt 写作者都会忽略。</span></span></p>
+          <p cid="n863" mdtype="paragraph"><span md-inline="plain"><span leaf="">他们会写很多“be helpful”“be concise”，但不会告诉模型：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n866" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个产品里工具权限是怎么工作的</span></span></p>
+            </li>
+            <li>
+              <p cid="n868" mdtype="paragraph"><span md-inline="plain"><span leaf="">外部内容是否可信</span></span></p>
+            </li>
+            <li>
+              <p cid="n870" mdtype="paragraph"><span md-inline="plain"><span leaf="">上下文是不是会被压缩</span></span></p>
+            </li>
+            <li>
+              <p cid="n872" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户能不能看到工具调用</span></span></p>
+            </li>
+          </ul>
+          <p cid="n873" mdtype="paragraph"><span md-inline="plain"><span leaf="">而这些，其实比很多抽象人格设定更重要。</span></span></p>
+          <hr>
+          <h3 cid="n875" mdtype="heading"><span md-inline="plain"><span leaf="">3. 做任务的行为准则：把常见失误直接写进 prompt</span></span></h3>
+          <p cid="n876" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n877" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L194&nbsp;</span></span></span></p>
+          <p cid="n878" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n879" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getSimpleDoingTasksSection</span></span><span leaf="">()</span></span></pre>
+          <p cid="n880" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是整份系统提示词里最值得学的部分之一。</span></span></p>
+          <p cid="n881" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是泛泛地说“请认真完成任务”，而是非常具体地约束模型在 coding task 中的行为，比如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n884" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要额外加功能、重构、优化</span></span></p>
+            </li>
+            <li>
+              <p cid="n886" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要为了未来需求做过度抽象</span></span></p>
+            </li>
+            <li>
+              <p cid="n888" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要随手加注释</span></span></p>
+            </li>
+            <li>
+              <p cid="n890" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要在没读代码前就提修改方案</span></span></p>
+            </li>
+            <li>
+              <p cid="n892" mdtype="paragraph"><span md-inline="plain"><span leaf="">没必要就不要创建新文件</span></span></p>
+            </li>
+            <li>
+              <p cid="n894" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要乱估时</span></span></p>
+            </li>
+            <li>
+              <p cid="n896" mdtype="paragraph"><span md-inline="plain"><span leaf="">失败后先诊断原因，不要盲目切换方案</span></span></p>
+            </li>
+            <li>
+              <p cid="n898" mdtype="paragraph"><span md-inline="plain"><span leaf="">注意安全漏洞</span></span></p>
+            </li>
+            <li>
+              <p cid="n900" mdtype="paragraph"><span md-inline="plain"><span leaf="">结果要如实汇报，不能没跑测试却说通过了</span></span></p>
+            </li>
+          </ul>
+          <p cid="n901" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么这一段强？</span></span></p>
+          <p cid="n902" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为它不是“价值观型 prompt”，而是“失误防御型 prompt”。</span></span></p>
+          <p cid="n903" mdtype="paragraph"><span md-inline="plain"><span leaf="">它在对抗模型最常见的工程问题：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n906" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度设计</span></span></p>
+            </li>
+            <li>
+              <p cid="n908" mdtype="paragraph"><span md-inline="plain"><span leaf="">假装成功</span></span></p>
+            </li>
+            <li>
+              <p cid="n910" mdtype="paragraph"><span md-inline="plain"><span leaf="">乱加注释</span></span></p>
+            </li>
+            <li>
+              <p cid="n912" mdtype="paragraph"><span md-inline="plain"><span leaf="">没读代码就开改</span></span></p>
+            </li>
+            <li>
+              <p cid="n914" mdtype="paragraph"><span md-inline="plain"><span leaf="">为一次性需求做复杂抽象</span></span></p>
+            </li>
+            <li>
+              <p cid="n916" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具失败就胡乱换路线</span></span></p>
+            </li>
+          </ul>
+          <p cid="n917" mdtype="paragraph"><span md-inline="plain"><span leaf="">这背后的思路很重要：</span></span></p>
+          <p cid="n918" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">好的系统提示词，不只是告诉模型要做什么，更要明确告诉它最容易做错什么。</span></span></strong></span></p>
+          <hr>
+          <h3 cid="n920" mdtype="heading"><span md-inline="plain"><span leaf="">4. 风险动作控制：这是 Agent 产品和普通聊天产品的分水岭</span></span></h3>
+          <p cid="n921" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n922" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L281&nbsp;</span></span></span></p>
+          <p cid="n923" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n924" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getActionsSection</span></span><span leaf="">()</span></span></pre>
+          <p cid="n925" mdtype="paragraph"><span md-inline="plain"><span leaf="">这段 prompt 会明确要求模型：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n928" mdtype="paragraph"><span md-inline="plain"><span leaf="">对可逆、局部、低风险动作，可以自主做</span></span></p>
+            </li>
+            <li>
+              <p cid="n930" mdtype="paragraph"><span md-inline="plain"><span leaf="">对难以回滚、影响共享状态、可能破坏现场的动作，要先确认用户</span></span></p>
+            </li>
+            <li>
+              <p cid="n932" mdtype="paragraph"><span md-inline="plain"><span leaf="">删除文件、删分支、强推、改 CI、发消息、改权限等，都属于高风险动作</span></span></p>
+            </li>
+            <li>
+              <p cid="n934" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要把 destructive action 当捷径</span></span></p>
+            </li>
+            <li>
+              <p cid="n936" mdtype="paragraph"><span md-inline="plain"><span leaf="">发现异常状态时先调查，不要直接删</span></span></p>
+            </li>
+          </ul>
+          <p cid="n937" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层非常关键。</span></span></p>
+          <p cid="n938" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么？</span></span></p>
+          <p cid="n939" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为一旦模型具备工具调用能力，它就不再只是“会说话的 AI”，而是“可能操作真实系统的 AI”。</span></span></p>
+          <p cid="n940" mdtype="paragraph"><span md-inline="plain"><span leaf="">这时系统提示词必须从“内容生成约束”升级为“操作风险约束”。</span></span></p>
+          <p cid="n941" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 AI Agent 产品不稳定，不是因为模型不聪明，而是因为 prompt 没把风险边界写清楚。</span></span></p>
+          <p cid="n942" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;在这方面做得很成熟：</span></span></p>
+          <p cid="n943" mdtype="paragraph"><span md-inline="plain"><span leaf="">它没有一刀切地说“什么都不要做”，也没有完全放飞，而是用“可逆性、影响面、共享状态”来划分动作风险等级。</span></span></p>
+          <p cid="n944" mdtype="paragraph"><span md-inline="plain"><span leaf="">这就是很典型的工程系统思维。</span></span></p>
+          <hr>
+          <h3 cid="n946" mdtype="heading"><span md-inline="plain"><span leaf="">5. 工具使用策略：不是给工具就完了，还要规定“怎么用”</span></span></h3>
+          <p cid="n947" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n948" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L295&nbsp;</span></span></span></p>
+          <p cid="n949" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心函数：</span></span></p><pre spellcheck="false" lang="ts" cid="n950" mdtype="fences"><span role="presentation"><span><span leaf="">function</span></span><span><span leaf="">getUsingYourToolsSection</span></span><span leaf="">(</span><span><span leaf="">enabledTools</span></span><span leaf="">:&nbsp;</span><span><span leaf="">Set</span></span><span><span leaf="">&lt;</span></span><span><span leaf="">string</span></span><span><span leaf="">&gt;</span></span><span leaf="">)</span></span></pre>
+          <p cid="n951" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里会明确规定：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n954" mdtype="paragraph"><span md-inline="plain"><span leaf="">读文件优先用文件读取工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n956" mdtype="paragraph"><span md-inline="plain"><span leaf="">编辑文件优先用编辑工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n958" mdtype="paragraph"><span md-inline="plain"><span leaf="">创建文件优先用写文件工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n960" mdtype="paragraph"><span md-inline="plain"><span leaf="">搜索文件和搜索内容优先用专门搜索工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n962" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">Bash</span></code></span><span md-inline="plain"><span leaf="">&nbsp;工具只在确实需要 shell 操作时使用</span></span></p>
+            </li>
+            <li>
+              <p cid="n964" mdtype="paragraph"><span md-inline="plain"><span leaf="">没依赖关系的多个工具调用要并行</span></span></p>
+            </li>
+          </ul>
+          <p cid="n965" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层特别值得产品设计者抄。</span></span></p>
+          <p cid="n966" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为很多人做工具调用时，以为“给模型一个 schema，它自然会选最优工具”。</span></span></p>
+          <p cid="n967" mdtype="paragraph"><span md-inline="plain"><span leaf="">现实往往不是这样。</span></span></p>
+          <p cid="n968" mdtype="paragraph"><span md-inline="plain"><span leaf="">模型如果没有明确策略约束，就容易：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n971" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度使用 bash</span></span></p>
+            </li>
+            <li>
+              <p cid="n973" mdtype="paragraph"><span md-inline="plain"><span leaf="">用 shell 代替结构化工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n975" mdtype="paragraph"><span md-inline="plain"><span leaf="">本该并行的操作串行执行</span></span></p>
+            </li>
+            <li>
+              <p cid="n977" mdtype="paragraph"><span md-inline="plain"><span leaf="">本该读文件的地方，用 grep/sed 硬凑</span></span></p>
+            </li>
+          </ul>
+          <p cid="n978" mdtype="paragraph"><span md-inline="plain"><span leaf="">而&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的做法是：</span></span><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">把工具选择策略也写进系统提示词。</span></span></strong></span></p>
+          <p cid="n979" mdtype="paragraph"><span md-inline="plain"><span leaf="">这会极大提高 Agent 的稳定性和可解释性。</span></span></p>
+          <hr>
+          <h3 cid="n981" mdtype="heading"><span md-inline="plain"><span leaf="">6. 输出风格：把“如何和用户说话”也做成一层 prompt</span></span></h3>
+          <p cid="n982" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n983" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/prompts.ts#L389&nbsp;</span></span></span></p>
+          <p cid="n984" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层包括两个方向：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n987" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格和格式</span></span></p>
+            </li>
+            <li>
+              <p cid="n989" mdtype="paragraph"><span md-inline="plain"><span leaf="">信息密度和更新节奏</span></span></p>
+            </li>
+          </ul>
+          <p cid="n990" mdtype="paragraph"><span md-inline="plain"><span leaf="">例如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n993" mdtype="paragraph"><span md-inline="plain"><span leaf="">要简洁直接</span></span></p>
+            </li>
+            <li>
+              <p cid="n995" mdtype="paragraph"><span md-inline="plain"><span leaf="">引用代码时带路径和行号</span></span></p>
+            </li>
+            <li>
+              <p cid="n997" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要在工具调用前用奇怪的冒号铺垫</span></span></p>
+            </li>
+            <li>
+              <p cid="n999" mdtype="paragraph"><span md-inline="plain"><span leaf="">要在关键节点给用户进度更新</span></span></p>
+            </li>
+            <li>
+              <p cid="n1001" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户通常看不到思维链和大部分工具调用，所以用户可见文本要完整、可理解</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1002" mdtype="paragraph"><span md-inline="plain"><span leaf="">这一层体现的是一个非常成熟的产品意识：</span></span></p>
+          <p cid="n1003" mdtype="paragraph"><span md-inline="plain"><span leaf="">模型不是在“自言自语”，它是在和真实用户协作。</span></span></p>
+          <p cid="n1004" mdtype="paragraph"><span md-inline="plain"><span leaf="">因此系统提示词不能只约束“任务做法”，还要约束“用户体验”。</span></span></p>
+          <hr>
+          <h2 cid="n1006" mdtype="heading"><span md-inline="plain"><span leaf="">五、为什么它要把 system prompt 做成 section</span></span></h2>
+          <p cid="n1007" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n1008" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/systemPromptSections.ts&nbsp;</span></span></span></p>
+          <p cid="n1009" mdtype="paragraph"><span md-inline="plain"><span leaf="">这里定义了两个很关键的概念：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1012" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">systemPromptSection(...)</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1014" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">DANGEROUS_uncachedSystemPromptSection(...)</span></code></span></p>
+            </li>
+          </ul>
+          <p cid="n1015" mdtype="paragraph"><span md-inline="plain"><span leaf="">以及：</span></span></p><pre spellcheck="false" lang="ts" cid="n1016" mdtype="fences"><span role="presentation"><span><span leaf="">resolveSystemPromptSections</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre>
+          <p cid="n1017" mdtype="paragraph"><span md-inline="plain"><span leaf="">这说明&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计者已经把 system prompt 当成“可计算内容”，而不是“固定文本”。</span></span></p>
+          <p cid="n1018" mdtype="paragraph"><span md-inline="plain"><span leaf="">为什么这么做？</span></span></p>
+          <p cid="n1019" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为真实产品里，系统提示词里有很多内容是动态的：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1022" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境信息</span></span></p>
+            </li>
+            <li>
+              <p cid="n1024" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前语言偏好</span></span></p>
+            </li>
+            <li>
+              <p cid="n1026" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 召回结果</span></span></p>
+            </li>
+            <li>
+              <p cid="n1028" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前接入的 MCP 工具说明</span></span></p>
+            </li>
+            <li>
+              <p cid="n1030" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些实验开关带来的局部指令</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1031" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把这些东西全塞进一个大字符串，每轮都完全重建，会带来两个问题：</span></span></p>
+          <ol>
+            <li>
+              <p cid="n1034" mdtype="paragraph"><span md-inline="plain"><span leaf="">不好维护</span></span></p>
+            </li>
+            <li>
+              <p cid="n1036" mdtype="paragraph"><span md-inline="plain"><span leaf="">prompt cache 命中率差</span></span></p>
+            </li>
+          </ol>
+          <p cid="n1037" mdtype="paragraph"><span md-inline="plain"><span leaf="">而 section 化的好处是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1040" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪一段需要变，就只变哪一段</span></span></p>
+            </li>
+            <li>
+              <p cid="n1042" mdtype="paragraph"><span md-inline="plain"><span leaf="">能缓存的 section 就缓存</span></span></p>
+            </li>
+            <li>
+              <p cid="n1044" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做 feature flag</span></span></p>
+            </li>
+            <li>
+              <p cid="n1046" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做实验对比</span></span></p>
+            </li>
+            <li>
+              <p cid="n1048" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做不同 agent 的复用</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1049" mdtype="paragraph"><span md-inline="plain"><span leaf="">这已经不只是“prompt engineering”，而是“prompt architecture”。</span></span></p>
+          <hr>
+          <h2 cid="n1051" mdtype="heading"><span md-inline="plain"><span leaf="">六、真正的总开关：最终到底用哪套 prompt</span></span></h2>
+          <p cid="n1052" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n1053" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/systemPrompt.ts&nbsp;</span></span></span></p>
+          <p cid="n1054" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个文件最核心的函数是：</span></span></p><pre spellcheck="false" lang="ts" cid="n1055" mdtype="fences"><span role="presentation"><span><span leaf="">buildEffectiveSystemPrompt</span></span><span leaf="">(</span><span><span leaf="">...</span></span><span leaf="">)</span></span></pre>
+          <p cid="n1056" mdtype="paragraph"><span md-inline="plain"><span leaf="">源码里把优先级写得非常清楚：</span></span></p>
+          <ol>
+            <li>
+              <p cid="n1059" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">overrideSystemPrompt</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1061" mdtype="paragraph"><span md-inline="plain"><span leaf="">coordinator 模式 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1063" mdtype="paragraph"><span md-inline="plain"><span leaf="">agent prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1065" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户自定义&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1067" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认系统 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1069" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">appendSystemPrompt</span></code></span><span md-inline="plain"><span leaf="">&nbsp;总是在最后追加</span></span></p>
+            </li>
+          </ol>
+          <p cid="n1070" mdtype="paragraph"><span md-inline="plain"><span leaf="">这套优先级设计很干净，也很产品化。</span></span></p>
+          <p cid="n1071" mdtype="paragraph"><span md-inline="plain"><span leaf="">它说明&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;并不把 system prompt 当成“不可触碰的圣经”，而是当成一个支持组合的配置层。</span></span></p>
+          <p cid="n1072" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1075" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认产品 prompt 可以存在</span></span></p>
+            </li>
+            <li>
+              <p cid="n1077" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色型 agent 可以覆盖它</span></span></p>
+            </li>
+            <li>
+              <p cid="n1079" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户也可以自己替换它</span></span></p>
+            </li>
+            <li>
+              <p cid="n1081" mdtype="paragraph"><span md-inline="plain"><span leaf="">或者只在默认 prompt 后面补一小段要求</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1082" mdtype="paragraph"><span md-inline="plain"><span leaf="">这就是一个成熟产品该有的 prompt 可扩展性。</span></span></p>
+          <hr>
+          <h2 cid="n1084" mdtype="heading"><span md-inline="plain"><span leaf="">七、API 层还会再加一层前缀</span></span></h2>
+          <p cid="n1085" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n1086" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/services/api/claude.ts#L1358&nbsp;</span></span></span></p>
+          <p cid="n1087" mdtype="paragraph"><span md-inline="plain"><span leaf="">在真正发给模型前，源码里还会在&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">systemPrompt</span></code></span><span md-inline="plain"><span leaf="">&nbsp;前面补上几类内容：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1090" mdtype="paragraph"><span md-inline="plain"><span leaf="">attribution header</span></span></p>
+            </li>
+            <li>
+              <p cid="n1092" mdtype="paragraph"><span md-inline="plain"><span leaf="">CLI 身份前缀</span></span></p>
+            </li>
+            <li>
+              <p cid="n1094" mdtype="paragraph"><span md-inline="plain"><span leaf="">某些 advisor/chrome 等特殊场景说明</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1095" mdtype="paragraph"><span md-inline="plain"><span leaf="">而身份前缀定义在：</span></span></p>
+          <p cid="n1096" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/constants/system.ts#L10&nbsp;</span></span></span></p>
+          <p cid="n1097" mdtype="paragraph"><span md-inline="plain"><span leaf="">比如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1100" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are Claude Code, Anthropic's official CLI for Claude.</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1102" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are Claude Code ... running within the Claude Agent SDK.</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1104" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">You are a Claude agent, built on Anthropic's Claude Agent SDK.</span></code></span></p>
+            </li>
+          </ul>
+          <p cid="n1105" mdtype="paragraph"><span md-inline="plain"><span leaf="">这个设计说明了一件很重要的事：</span></span></p>
+          <p cid="n1106" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">身份前缀是系统提示词中最稳定、最顶层的一部分，所以它被单独抽离。</span></span></strong></span></p>
+          <p cid="n1107" mdtype="paragraph"><span md-inline="plain"><span leaf="">这也很值得学习。</span></span></p>
+          <p cid="n1108" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为很多人把身份、规则、动态环境全部混在一起写，最后 prompt 很难维护。</span></span></p>
+          <p cid="n1109" mdtype="paragraph"><span md-inline="plain"><span leaf="">而这里的做法是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1112" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份前缀独立</span></span></p>
+            </li>
+            <li>
+              <p cid="n1114" mdtype="paragraph"><span md-inline="plain"><span leaf="">主规则独立</span></span></p>
+            </li>
+            <li>
+              <p cid="n1116" mdtype="paragraph"><span md-inline="plain"><span leaf="">动态内容独立</span></span></p>
+            </li>
+            <li>
+              <p cid="n1118" mdtype="paragraph"><span md-inline="plain"><span leaf="">API 附加内容独立</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1119" mdtype="paragraph"><span md-inline="plain"><span leaf="">结构非常清晰。</span></span></p>
+          <hr>
+          <h2 cid="n1121" mdtype="heading"><span md-inline="plain"><span leaf="">八、用户甚至可以从 CLI 覆盖或追加 system prompt</span></span></h2>
+          <p cid="n1122" mdtype="paragraph"><span md-inline="plain"><span leaf="">对应代码：</span></span></p>
+          <p cid="n1123" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/main.tsx#L1342&nbsp;</span></span></span></p>
+          <p cid="n1124" mdtype="paragraph"><span md-inline="plain"><span leaf="">支持的参数包括：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1127" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1129" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--system-prompt-file</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1131" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--append-system-prompt</span></code></span></p>
+            </li>
+            <li>
+              <p cid="n1133" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">--append-system-prompt-file</span></code></span></p>
+            </li>
+          </ul>
+          <p cid="n1134" mdtype="paragraph"><span md-inline="plain"><span leaf="">这背后体现的产品理念是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1137" mdtype="paragraph"><span md-inline="plain"><span leaf="">系统默认 prompt 是产品能力的一部分</span></span></p>
+            </li>
+            <li>
+              <p cid="n1139" mdtype="paragraph"><span md-inline="plain"><span leaf="">但 prompt 也应该允许用户进行定制</span></span></p>
+            </li>
+            <li>
+              <p cid="n1141" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户既可以“完全替换”</span></span></p>
+            </li>
+            <li>
+              <p cid="n1143" mdtype="paragraph"><span md-inline="plain"><span leaf="">也可以“在默认规则上追加一层自己的偏好”</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1144" mdtype="paragraph"><span md-inline="plain"><span leaf="">这其实是很多 AI 产品都会逐步走到的一步。</span></span></p>
+          <p cid="n1145" mdtype="paragraph"><span md-inline="plain"><span leaf="">最初大家都把 prompt 写死在代码里，但随着场景复杂化，最终一定会出现：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1148" mdtype="paragraph"><span md-inline="plain"><span leaf="">团队级 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1150" mdtype="paragraph"><span md-inline="plain"><span leaf="">项目级 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1152" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色级 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1154" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户个人追加 prompt</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1155" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;已经把这条路铺好了。</span></span></p>
+          <hr>
+          <h2 cid="n1157" mdtype="heading"><span md-inline="plain"><span leaf="">九、自定义 Agent 的 prompt 怎么设计</span></span></h2>
+          <p cid="n1158" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你不只关心主助手，还关心“多角色 agent”，那么它的 agent prompt 设计也很有参考价值。</span></span></p>
+          <p cid="n1159" mdtype="paragraph"><span md-inline="plain"><span leaf="">相关代码：</span></span></p>
+          <p cid="n1160" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/components/agents/agentFileUtils.ts&nbsp;</span></span></span></p>
+          <p cid="n1161" mdtype="paragraph"><span md-inline="plain"><span leaf="">Agent 文件会被保存为 markdown，格式类似这样：</span></span></p><pre spellcheck="false" lang="md" cid="n1162" mdtype="fences"><span role="presentation"><span leaf="">---</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">name: xxx</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">description: "什么时候使用这个 agent"</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">tools: ...</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">model: ...</span></span><span leaf=""><br></span><span role="presentation"><span leaf="">---</span></span><span leaf=""><br></span><span leaf=""><br></span><span role="presentation"><span leaf="">这里是这个 agent 的 system prompt</span></span></pre>
+          <p cid="n1163" mdtype="paragraph"><span md-inline="plain"><span leaf="">也就是说，自定义 agent 的 prompt 并不是单独存在于数据库里，而是作为一种可编辑的配置文件存在。</span></span></p>
+          <p cid="n1164" mdtype="paragraph"><span md-inline="plain"><span leaf="">这很实用，因为：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1167" mdtype="paragraph"><span md-inline="plain"><span leaf="">可读</span></span></p>
+            </li>
+            <li>
+              <p cid="n1169" mdtype="paragraph"><span md-inline="plain"><span leaf="">可版本管理</span></span></p>
+            </li>
+            <li>
+              <p cid="n1171" mdtype="paragraph"><span md-inline="plain"><span leaf="">可迁移</span></span></p>
+            </li>
+            <li>
+              <p cid="n1173" mdtype="paragraph"><span md-inline="plain"><span leaf="">可审查</span></span></p>
+            </li>
+            <li>
+              <p cid="n1175" mdtype="paragraph"><span md-inline="plain"><span leaf="">可直接给用户暴露编辑能力</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1176" mdtype="paragraph"><span md-inline="plain"><span leaf="">更有意思的是，在 team / swarm 模式下，teammate agent 还会额外追加一层 prompt：</span></span></p>
+          <p cid="n1177" mdtype="paragraph"><span md-inline="link"><span md-inline="plain"><span leaf="">/src/utils/swarm/teammatePromptAddendum.ts&nbsp;</span></span></span></p>
+          <p cid="n1178" mdtype="paragraph"><span md-inline="plain"><span leaf="">这段附加说明会明确告诉子 agent：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1181" mdtype="paragraph"><span md-inline="plain"><span leaf="">你现在是在团队里工作的 agent</span></span></p>
+            </li>
+            <li>
+              <p cid="n1183" mdtype="paragraph"><span md-inline="plain"><span leaf="">普通文本对队友不可见</span></span></p>
+            </li>
+            <li>
+              <p cid="n1185" mdtype="paragraph"><span md-inline="plain"><span leaf="">你必须用&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">SendMessage</span></code></span><span md-inline="plain"><span leaf="">&nbsp;和队友沟通</span></span></p>
+            </li>
+            <li>
+              <p cid="n1187" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户主要和 team lead 交互</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1188" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是非常典型的“角色约束 prompt”。</span></span></p>
+          <p cid="n1189" mdtype="paragraph"><span md-inline="plain"><span leaf="">它不是在重新定义整个助手，而是在已有 prompt 上再叠加一个“协作身份”。</span></span></p>
+          <p cid="n1190" mdtype="paragraph"><span md-inline="plain"><span leaf="">这种写法特别适合多 Agent 系统。</span></span></p>
+          <hr>
+          <h2 cid="n1192" mdtype="heading"><span md-inline="plain"><span leaf="">十、真正值得抄的，不是文案，而是它背后的六条方法论</span></span></h2>
+          <p cid="n1193" mdtype="paragraph"><span md-inline="plain"><span leaf="">看完整个源码之后，我认为&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;最值得学习的不是哪一段英文，而是下面六个方法论。</span></span></p>
+          <hr>
+          <h3 cid="n1195" mdtype="heading"><span md-inline="plain"><span leaf="">方法一：不要写“一大坨 prompt”，要分层写</span></span></h3>
+          <p cid="n1196" mdtype="paragraph"><span md-inline="plain"><span leaf="">系统提示词应该至少分成这些层：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1199" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1201" mdtype="paragraph"><span md-inline="plain"><span leaf="">运行规则层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1203" mdtype="paragraph"><span md-inline="plain"><span leaf="">任务执行层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1205" mdtype="paragraph"><span md-inline="plain"><span leaf="">风险控制层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1207" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具策略层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1209" mdtype="paragraph"><span md-inline="plain"><span leaf="">输出风格层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1211" mdtype="paragraph"><span md-inline="plain"><span leaf="">环境上下文层</span></span></p>
+            </li>
+            <li>
+              <p cid="n1213" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色附加层</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1214" mdtype="paragraph"><span md-inline="plain"><span leaf="">这样做的好处是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1217" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易维护</span></span></p>
+            </li>
+            <li>
+              <p cid="n1219" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易复用</span></span></p>
+            </li>
+            <li>
+              <p cid="n1221" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易做实验</span></span></p>
+            </li>
+            <li>
+              <p cid="n1223" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易按场景开关</span></span></p>
+            </li>
+            <li>
+              <p cid="n1225" mdtype="paragraph"><span md-inline="plain"><span leaf="">容易定位是哪一层规则出了问题</span></span></p>
+            </li>
+          </ul>
+          <hr>
+          <h3 cid="n1227" mdtype="heading"><span md-inline="plain"><span leaf="">方法二：规则必须是“可执行的”，不是“好听的”</span></span></h3>
+          <p cid="n1228" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 prompt 的问题是写得很正确，但没法执行。</span></span></p>
+          <p cid="n1229" mdtype="paragraph"><span md-inline="plain"><span leaf="">比如：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1232" mdtype="paragraph"><span md-inline="plain"><span leaf="">be helpful</span></span></p>
+            </li>
+            <li>
+              <p cid="n1234" mdtype="paragraph"><span md-inline="plain"><span leaf="">be concise</span></span></p>
+            </li>
+            <li>
+              <p cid="n1236" mdtype="paragraph"><span md-inline="plain"><span leaf="">think carefully</span></span></p>
+            </li>
+            <li>
+              <p cid="n1238" mdtype="paragraph"><span md-inline="plain"><span leaf="">do your best</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1239" mdtype="paragraph"><span md-inline="plain"><span leaf="">这些都太虚。</span></span></p>
+          <p cid="n1240" mdtype="paragraph"><span md-inline="plain"><span leaf="">而&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;写的是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1243" mdtype="paragraph"><span md-inline="plain"><span leaf="">没读代码前不要提修改建议</span></span></p>
+            </li>
+            <li>
+              <p cid="n1245" mdtype="paragraph"><span md-inline="plain"><span leaf="">不要为了未来需求做抽象</span></span></p>
+            </li>
+            <li>
+              <p cid="n1247" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户拒绝同一个工具调用后不要原样重试</span></span></p>
+            </li>
+            <li>
+              <p cid="n1249" mdtype="paragraph"><span md-inline="plain"><span leaf="">没有验证就不要声称成功</span></span></p>
+            </li>
+            <li>
+              <p cid="n1251" mdtype="paragraph"><span md-inline="plain"><span leaf="">没依赖关系的工具调用尽量并行</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1252" mdtype="paragraph"><span md-inline="plain"><span leaf="">这类规则强在：</span></span><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">模型能在具体操作中执行它。</span></span></strong></span></p>
+          <hr>
+          <h3 cid="n1254" mdtype="heading"><span md-inline="plain"><span leaf="">方法三：系统提示词要正面描述“常见错误”</span></span></h3>
+          <p cid="n1255" mdtype="paragraph"><span md-inline="plain"><span leaf="">好的系统提示词，不只告诉模型该做什么，还要提前防守它最常见的错误。</span></span></p>
+          <p cid="n1256" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;明显在防守这些问题：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1259" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度设计</span></span></p>
+            </li>
+            <li>
+              <p cid="n1261" mdtype="paragraph"><span md-inline="plain"><span leaf="">伪造完成状态</span></span></p>
+            </li>
+            <li>
+              <p cid="n1263" mdtype="paragraph"><span md-inline="plain"><span leaf="">不必要的注释</span></span></p>
+            </li>
+            <li>
+              <p cid="n1265" mdtype="paragraph"><span md-inline="plain"><span leaf="">过度使用 bash</span></span></p>
+            </li>
+            <li>
+              <p cid="n1267" mdtype="paragraph"><span md-inline="plain"><span leaf="">忽略风险动作确认</span></span></p>
+            </li>
+            <li>
+              <p cid="n1269" mdtype="paragraph"><span md-inline="plain"><span leaf="">被外部内容诱导</span></span></p>
+            </li>
+            <li>
+              <p cid="n1271" mdtype="paragraph"><span md-inline="plain"><span leaf="">工具被拒后死循环重试</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1272" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是一种非常成熟的 prompt 设计思路：</span></span></p>
+          <p cid="n1273" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">不要只写理想行为，也要写高频错误行为的边界。</span></span></strong></span></p>
+          <hr>
+          <h3 cid="n1275" mdtype="heading"><span md-inline="plain"><span leaf="">方法四：工具调用策略一定要写进系统提示词</span></span></h3>
+          <p cid="n1276" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果你的产品有多个工具，千万不要只给 schema，不给策略。</span></span></p>
+          <p cid="n1277" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为模型需要知道：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1280" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪类任务优先用哪个工具</span></span></p>
+            </li>
+            <li>
+              <p cid="n1282" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么时候不该用 bash</span></span></p>
+            </li>
+            <li>
+              <p cid="n1284" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么情况下应该并行</span></span></p>
+            </li>
+            <li>
+              <p cid="n1286" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么情况下必须串行</span></span></p>
+            </li>
+            <li>
+              <p cid="n1288" mdtype="paragraph"><span md-inline="plain"><span leaf="">什么操作属于专用工具，不该走通用工具</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1289" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多 Agent 的不稳定，不是因为模型不够强，而是因为系统提示词没把工具使用策略明确下来。</span></span></p>
+          <hr>
+          <h3 cid="n1291" mdtype="heading"><span md-inline="plain"><span leaf="">方法五：静态内容和动态内容必须分开</span></span></h3>
+          <p cid="n1292" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是非常关键的一点。</span></span></p>
+          <p cid="n1293" mdtype="paragraph"><span md-inline="plain"><span leaf="">静态部分适合放：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1296" mdtype="paragraph"><span md-inline="plain"><span leaf="">身份</span></span></p>
+            </li>
+            <li>
+              <p cid="n1298" mdtype="paragraph"><span md-inline="plain"><span leaf="">核心原则</span></span></p>
+            </li>
+            <li>
+              <p cid="n1300" mdtype="paragraph"><span md-inline="plain"><span leaf="">通用行为规范</span></span></p>
+            </li>
+            <li>
+              <p cid="n1302" mdtype="paragraph"><span md-inline="plain"><span leaf="">风格要求</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1303" mdtype="paragraph"><span md-inline="plain"><span leaf="">动态部分适合放：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1306" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前环境</span></span></p>
+            </li>
+            <li>
+              <p cid="n1308" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前项目上下文</span></span></p>
+            </li>
+            <li>
+              <p cid="n1310" mdtype="paragraph"><span md-inline="plain"><span leaf="">memory 检索结果</span></span></p>
+            </li>
+            <li>
+              <p cid="n1312" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前模式</span></span></p>
+            </li>
+            <li>
+              <p cid="n1314" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前挂载工具说明</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1315" mdtype="paragraph"><span md-inline="plain"><span leaf="">分开后，你会得到几个巨大好处：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1318" mdtype="paragraph"><span md-inline="plain"><span leaf="">更好的 prompt cache</span></span></p>
+            </li>
+            <li>
+              <p cid="n1320" mdtype="paragraph"><span md-inline="plain"><span leaf="">更清晰的修改边界</span></span></p>
+            </li>
+            <li>
+              <p cid="n1322" mdtype="paragraph"><span md-inline="plain"><span leaf="">更容易观察每一段的作用</span></span></p>
+            </li>
+            <li>
+              <p cid="n1324" mdtype="paragraph"><span md-inline="plain"><span leaf="">更容易做版本演进</span></span></p>
+            </li>
+          </ul>
+          <hr>
+          <h3 cid="n1326" mdtype="heading"><span md-inline="plain"><span leaf="">方法六：为覆盖、追加、角色扩展预留接口</span></span></h3>
+          <p cid="n1327" mdtype="paragraph"><span md-inline="plain"><span leaf="">成熟产品的 prompt 系统，一定不是只能写死在源码里。</span></span></p>
+          <p cid="n1328" mdtype="paragraph"><span md-inline="plain"><span leaf="">它应该支持：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1331" mdtype="paragraph"><span md-inline="plain"><span leaf="">默认 prompt</span></span></p>
+            </li>
+            <li>
+              <p cid="n1333" mdtype="paragraph"><span md-inline="plain"><span leaf="">完全覆盖</span></span></p>
+            </li>
+            <li>
+              <p cid="n1335" mdtype="paragraph"><span md-inline="plain"><span leaf="">部分追加</span></span></p>
+            </li>
+            <li>
+              <p cid="n1337" mdtype="paragraph"><span md-inline="plain"><span leaf="">角色型扩展</span></span></p>
+            </li>
+            <li>
+              <p cid="n1339" mdtype="paragraph"><span md-inline="plain"><span leaf="">团队型扩展</span></span></p>
+            </li>
+            <li>
+              <p cid="n1341" mdtype="paragraph"><span md-inline="plain"><span leaf="">用户个性化扩展</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1342" mdtype="paragraph"><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的这套设计，已经明显不是“写 prompt”，而是在做“prompt 配置系统”。</span></span></p>
+          <hr>
+          <h2 cid="n1344" mdtype="heading"><span md-inline="plain"><span leaf="">十一、如果你也想做一套类似的系统提示词，应该怎么写</span></span></h2>
+          <p cid="n1345" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果把&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计抽象成一个通用模板，我会建议你按下面这个骨架来写。</span></span></p>
+          <hr>
+          <h3 cid="n1347" mdtype="heading"><span md-inline="plain"><span leaf="">一套适合 Agent 产品的系统提示词骨架</span></span></h3>
+          <h4 cid="n1348" mdtype="heading"><span md-inline="plain"><span leaf="">1. Identity</span></span></h4>
+          <p cid="n1349" mdtype="paragraph"><span md-inline="plain"><span leaf="">你是谁，属于哪个产品，你服务的核心目标是什么。</span></span></p>
+          <h4 cid="n1350" mdtype="heading"><span md-inline="plain"><span leaf="">2. Runtime Protocol</span></span></h4>
+          <p cid="n1351" mdtype="paragraph"><span md-inline="plain"><span leaf="">你和用户、工具、系统消息、外部内容之间的关系是什么，权限和可见性如何工作。</span></span></p>
+          <h4 cid="n1352" mdtype="heading"><span md-inline="plain"><span leaf="">3. Task Execution Policy</span></span></h4>
+          <p cid="n1353" mdtype="paragraph"><span md-inline="plain"><span leaf="">处理任务时的总体原则，比如先读后改、不过度设计、失败先诊断、结果要验证。</span></span></p>
+          <h4 cid="n1354" mdtype="heading"><span md-inline="plain"><span leaf="">4. Risk Control</span></span></h4>
+          <p cid="n1355" mdtype="paragraph"><span md-inline="plain"><span leaf="">哪些动作可以自主做，哪些动作需要确认，哪些动作不能擅自做。</span></span></p>
+          <h4 cid="n1356" mdtype="heading"><span md-inline="plain"><span leaf="">5. Tool Use Strategy</span></span></h4>
+          <p cid="n1357" mdtype="paragraph"><span md-inline="plain"><span leaf="">不同工具的适用场景、优先级、并行策略、回退策略。</span></span></p>
+          <h4 cid="n1358" mdtype="heading"><span md-inline="plain"><span leaf="">6. Output Style</span></span></h4>
+          <p cid="n1359" mdtype="paragraph"><span md-inline="plain"><span leaf="">如何向用户汇报，什么时候更新进度，回答应该多长，怎么引用文件位置。</span></span></p>
+          <h4 cid="n1360" mdtype="heading"><span md-inline="plain"><span leaf="">7. Environment Context</span></span></h4>
+          <p cid="n1361" mdtype="paragraph"><span md-inline="plain"><span leaf="">当前工作目录、平台、项目状态、模型限制、外部服务信息。</span></span></p>
+          <h4 cid="n1362" mdtype="heading"><span md-inline="plain"><span leaf="">8. Role-specific Addendum</span></span></h4>
+          <p cid="n1363" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果当前是 reviewer、planner、researcher、teammate、ops agent，就在最后叠加角色专属约束。</span></span></p>
+          <hr>
+          <h2 cid="n1365" mdtype="heading"><span md-inline="plain"><span leaf="">十二、一个更重要的判断：Claude Code 在写的不是 prompt，而是“操作系统”</span></span></h2>
+          <p cid="n1366" mdtype="paragraph"><span md-inline="plain"><span leaf="">这是我看完源码后最强烈的感觉。</span></span></p>
+          <p cid="n1367" mdtype="paragraph"><span md-inline="plain"><span leaf="">很多团队还停留在“提示词调优”阶段，讨论的是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1370" mdtype="paragraph"><span md-inline="plain"><span leaf="">这句话要不要更礼貌</span></span></p>
+            </li>
+            <li>
+              <p cid="n1372" mdtype="paragraph"><span md-inline="plain"><span leaf="">要不要加一句 think step by step</span></span></p>
+            </li>
+            <li>
+              <p cid="n1374" mdtype="paragraph"><span md-inline="plain"><span leaf="">要不要把 be concise 改成 be brief</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1375" mdtype="paragraph"><span md-inline="plain"><span leaf="">但&nbsp;</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的设计已经是另一层了。</span></span></p>
+          <p cid="n1376" mdtype="paragraph"><span md-inline="plain"><span leaf="">它关注的是：</span></span></p>
+          <ul>
+            <li>
+              <p cid="n1379" mdtype="paragraph"><span md-inline="plain"><span leaf="">提示词怎样模块化</span></span></p>
+            </li>
+            <li>
+              <p cid="n1381" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟工具系统对齐</span></span></p>
+            </li>
+            <li>
+              <p cid="n1383" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟权限系统对齐</span></span></p>
+            </li>
+            <li>
+              <p cid="n1385" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟缓存系统对齐</span></span></p>
+            </li>
+            <li>
+              <p cid="n1387" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样跟多 agent 协作对齐</span></span></p>
+            </li>
+            <li>
+              <p cid="n1389" mdtype="paragraph"><span md-inline="plain"><span leaf="">怎样让 prompt 可以被覆盖、追加、复用、实验化</span></span></p>
+            </li>
+          </ul>
+          <p cid="n1390" mdtype="paragraph"><span md-inline="plain"><span leaf="">所以它真正做的，不是一段漂亮 prompt，而是一套“面向 Agent 运行时的提示词架构”。</span></span></p>
+          <p cid="n1391" mdtype="paragraph"><span md-inline="plain"><span leaf="">这也是为什么它值得研究。</span></span></p>
+          <p cid="n1392" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为当你的产品从“聊天”走向“执行”时，prompt 的写法一定会从“文案工作”变成“系统设计”。</span></span></p>
+          <hr>
+          <h2 cid="n1394" mdtype="heading"><span md-inline="plain"><span leaf="">十三、最后总结一句</span></span></h2>
+          <p cid="n1395" mdtype="paragraph"><span md-inline="plain"><span leaf="">如果只从表面看，</span></span><span md-inline="code" spellcheck="false"><code><span leaf="">claude-code</span></code></span><span md-inline="plain"><span leaf="">&nbsp;的系统提示词像是一堆英文规则。</span></span></p>
+          <p cid="n1396" mdtype="paragraph"><span md-inline="plain"><span leaf="">但如果顺着源码看进去，你会发现它真正厉害的地方是：</span></span></p>
+          <p cid="n1397" mdtype="paragraph"><span md-inline="strong"><strong><span md-inline="plain"><span leaf="">它把系统提示词拆成了身份、规则、工具、风格、环境、角色这几个层次，并且把它们做成了可组合、可缓存、可覆盖、可扩展的工程系统。</span></span></strong></span></p>
+          <p cid="n1398" mdtype="paragraph"><span md-inline="plain"><span leaf="">这比“抄一段神 prompt”有用得多。</span></span></p>
+          <p cid="n1399" mdtype="paragraph"><span md-inline="plain"><span leaf="">因为前者能让你做出稳定的产品，后者通常只能让你短暂地感觉“我也写了 prompt”。</span></span></p>
+          <p></p>
         </div>
-                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
-                
-        <div 
-</div>
-<footer class="article-footer">
-<div class="article-nav">
-<a href="claude-code-泄漏源码分析.html" class="nav-prev">&larr; 上一篇</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-toc">目录</a>
-<a href="从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="nav-next">下一篇 &rarr;</a>
-</div>
-</footer>
-</article>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+        <script type="text/javascript" nonce="" reportloaderror="">
+          var first_sceen__time = (+new Date());
+          if ("" == 1 && document.getElementById('js_content')) {
+            document.getElementById('js_content').addEventListener("selectstart", function(e) {
+              e.preventDefault();
+            });
+          }
+
+        </script>
+        </div>
+        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+
+        <div </div>
+          <footer class="article-footer">
+            <div class="article-nav">
+              <a href="claude-code-泄漏源码分析.html" class="nav-prev">&larr; 上一篇</a>
+              <a href="../chapters/ch5-claude-code.html" class="nav-toc">目录</a>
+              <a href="从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="nav-next">下一篇 &rarr;</a>
+            </div>
+          </footer>
+      </article>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

@@ -1,104 +1,107 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第5章 Claude Code 源码深度解读 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
-<a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
-<a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<div class="chapter-page">
-<header class="chapter-header">
-<span class="chapter-number">第 5 章</span>
-<h1>Claude Code 源码深度解读</h1>
-<p class="chapter-desc">架构拆解、提示词工程、设计模式 —— 从源码理解顶级 Agent</p>
-</header>
-<div class="article-list">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第5章 Claude Code 源码深度解读 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
 
-<a href="../articles/claude-code-源码解读包含agent-loopcontext-管理tool-调用memorymuti-agent等模块.html" class="article-card">
-<span class="article-order">01</span>
-<div class="article-card-body">
-<h3>Claude Code 源码解读：包含Agent Loop、Context 管理、Tool 调用、Memory、Muti Agent等模块</h3>
-<p>Agent Loop/Context/Tool/Memory/Muti Agent 模块拆解</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/claude-code-架构详解.html" class="article-card">
-<span class="article-order">02</span>
-<div class="article-card-body">
-<h3>Claude Code 架构详解</h3>
-<p>多层架构协同：从用户输入到自主执行</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/claude-code-泄漏源码分析.html" class="article-card">
-<span class="article-order">03</span>
-<div class="article-card-body">
-<h3>Claude Code 泄漏源码分析</h3>
-<p>从启动到 Agent Loop 的完整源码分析</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/从claude-code源码学习系统提示词的工程系统.html" class="article-card">
-<span class="article-order">04</span>
-<div class="article-card-body">
-<h3>从Claude-Code源码学习系统提示词的工程系统</h3>
-<p>提示词装配系统：多 Section 动态注入</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="article-card">
-<span class="article-order">05</span>
-<div class="article-card-body">
-<h3>从启动到 Agent 循环：Claude Code 51 万行源码架构拆解</h3>
-<p>完整架构拆解：入口→Agent 循环</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="article-card">
-<span class="article-order">06</span>
-<div class="article-card-body">
-<h3>Claude Code 的 12 个可复用的 Agentic Harness 设计模式</h3>
-<p>12 个 Agent 设计模式：记忆、工具、编排</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/又一个神级-claude-code-插件开源了.html" class="article-card">
-<span class="article-order">07</span>
-<div class="article-card-body">
-<h3>又一个神级 Claude Code 插件，开源了！</h3>
-<p>Claude Code 插件生态与开源工具</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案.html" class="article-card">
-<span class="article-order">08</span>
-<div class="article-card-body">
-<h3>基于顶级 Agent（Claude Code）的 Harness 工程搭建式业务 Agent 评测方案</h3>
-<p>Agent 搭建评测 Harness 的完整方案</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-</div>
-<nav class="chapter-nav"><a href="ch4-agent.html" class="nav-prev">&larr; Agent 架构与 Harness 工程</a><a href="../index.html" class="nav-toc">首页</a><a href="ch6-career.html" class="nav-next">行业全景与职业发展 &rarr;</a></nav>
-</div>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+        <a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
+        <a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="chapter-page">
+        <header class="chapter-header">
+          <span class="chapter-number">第 5 章</span>
+          <h1>Claude Code 源码深度解读</h1>
+          <p class="chapter-desc">架构拆解、提示词工程、设计模式 —— 从源码理解顶级 Agent</p>
+        </header>
+        <div class="article-list">
+
+          <a href="../articles/claude-code-源码解读包含agent-loopcontext-管理tool-调用memorymuti-agent等模块.html" class="article-card">
+            <span class="article-order">01</span>
+            <div class="article-card-body">
+              <h3>Claude Code 源码解读：包含Agent Loop、Context 管理、Tool 调用、Memory、Muti Agent等模块</h3>
+              <p>Agent Loop/Context/Tool/Memory/Muti Agent 模块拆解</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/claude-code-架构详解.html" class="article-card">
+            <span class="article-order">02</span>
+            <div class="article-card-body">
+              <h3>Claude Code 架构详解</h3>
+              <p>多层架构协同：从用户输入到自主执行</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/claude-code-泄漏源码分析.html" class="article-card">
+            <span class="article-order">03</span>
+            <div class="article-card-body">
+              <h3>Claude Code 泄漏源码分析</h3>
+              <p>从启动到 Agent Loop 的完整源码分析</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/从claude-code源码学习系统提示词的工程系统.html" class="article-card">
+            <span class="article-order">04</span>
+            <div class="article-card-body">
+              <h3>从Claude-Code源码学习系统提示词的工程系统</h3>
+              <p>提示词装配系统：多 Section 动态注入</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="article-card">
+            <span class="article-order">05</span>
+            <div class="article-card-body">
+              <h3>从启动到 Agent 循环：Claude Code 51 万行源码架构拆解</h3>
+              <p>完整架构拆解：入口→Agent 循环</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="article-card">
+            <span class="article-order">06</span>
+            <div class="article-card-body">
+              <h3>Claude Code 的 12 个可复用的 Agentic Harness 设计模式</h3>
+              <p>12 个 Agent 设计模式：记忆、工具、编排</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/又一个神级-claude-code-插件开源了.html" class="article-card">
+            <span class="article-order">07</span>
+            <div class="article-card-body">
+              <h3>又一个神级 Claude Code 插件，开源了！</h3>
+              <p>Claude Code 插件生态与开源工具</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案.html" class="article-card">
+            <span class="article-order">08</span>
+            <div class="article-card-body">
+              <h3>基于顶级 Agent（Claude Code）的 Harness 工程搭建式业务 Agent 评测方案</h3>
+              <p>Agent 搭建评测 Harness 的完整方案</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+        </div>
+        <nav class="chapter-nav"><a href="ch4-agent.html" class="nav-prev">&larr; Agent 架构与 Harness 工程</a><a href="../index.html" class="nav-toc">首页</a><a href="ch6-career.html" class="nav-next">行业全景与职业发展 &rarr;</a></nav>
+      </div>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

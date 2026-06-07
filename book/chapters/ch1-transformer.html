@@ -1,88 +1,91 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第1章 Transformer 与模型架构基础 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="ch1-transformer.html" class="nav-chapter active">Transformer 与模型架构基础</a>
-<a href="ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
-<a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
-<a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<div class="chapter-page">
-<header class="chapter-header">
-<span class="chapter-number">第 1 章</span>
-<h1>Transformer 与模型架构基础</h1>
-<p class="chapter-desc">从 Transformer 原理到 MoE 架构，理解大模型的基石</p>
-</header>
-<div class="article-list">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第1章 Transformer 与模型架构基础 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
 
-<a href="../articles/终于把-transformer-算法搞懂了.html" class="article-card">
-<span class="article-order">01</span>
-<div class="article-card-body">
-<h3>终于把 Transformer 算法搞懂了！！</h3>
-<p>Transformer 算法入门：自注意力、编码器-解码器架构</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/transformer-推理全流程简单拆解.html" class="article-card">
-<span class="article-order">02</span>
-<div class="article-card-body">
-<h3>Transformer 推理全流程简单拆解</h3>
-<p>Transformer 推理原理：从文本到生成的全流程解析</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/transformer-全貌一个-token-从输入到输出的完整旅程.html" class="article-card">
-<span class="article-order">03</span>
-<div class="article-card-body">
-<h3>Transformer 全貌——</h3>
-<p>Encoder-Decoder-GPT 三族谱，完整数据流旅程</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/ai算法moe混合专家架构.html" class="article-card">
-<span class="article-order">04</span>
-<div class="article-card-body">
-<h3>AI算法：MoE混合专家架构</h3>
-<p>MoE 稀疏激活架构：路由机制、负载均衡与实际应用</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/attention-机制与-llm-的数学能力.html" class="article-card">
-<span class="article-order">05</span>
-<div class="article-card-body">
-<h3>Attention 机制与 LLM 的数学能力</h3>
-<p>Attention 数学原理与 LLM 数学推理的局限性</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/大模型上下文窗口为什么有限这3个问题必须搞清楚.html" class="article-card">
-<span class="article-order">06</span>
-<div class="article-card-body">
-<h3>大模型上下文窗口为什么有限？这3个问题必须搞清楚</h3>
-<p>注意力平方复杂度、KV Cache 内存、位置编码限制</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-</div>
-<nav class="chapter-nav"><a href="../index.html" class="nav-toc">首页</a><a href="ch2-inference.html" class="nav-next">LLM 推理机制与优化 &rarr;</a></nav>
-</div>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="ch1-transformer.html" class="nav-chapter active">Transformer 与模型架构基础</a>
+        <a href="ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+        <a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+        <a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="chapter-page">
+        <header class="chapter-header">
+          <span class="chapter-number">第 1 章</span>
+          <h1>Transformer 与模型架构基础</h1>
+          <p class="chapter-desc">从 Transformer 原理到 MoE 架构，理解大模型的基石</p>
+        </header>
+        <div class="article-list">
+
+          <a href="../articles/终于把-transformer-算法搞懂了.html" class="article-card">
+            <span class="article-order">01</span>
+            <div class="article-card-body">
+              <h3>终于把 Transformer 算法搞懂了！！</h3>
+              <p>Transformer 算法入门：自注意力、编码器-解码器架构</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/transformer-推理全流程简单拆解.html" class="article-card">
+            <span class="article-order">02</span>
+            <div class="article-card-body">
+              <h3>Transformer 推理全流程简单拆解</h3>
+              <p>Transformer 推理原理：从文本到生成的全流程解析</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/transformer-全貌一个-token-从输入到输出的完整旅程.html" class="article-card">
+            <span class="article-order">03</span>
+            <div class="article-card-body">
+              <h3>Transformer 全貌——</h3>
+              <p>Encoder-Decoder-GPT 三族谱，完整数据流旅程</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/ai算法moe混合专家架构.html" class="article-card">
+            <span class="article-order">04</span>
+            <div class="article-card-body">
+              <h3>AI算法：MoE混合专家架构</h3>
+              <p>MoE 稀疏激活架构：路由机制、负载均衡与实际应用</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/attention-机制与-llm-的数学能力.html" class="article-card">
+            <span class="article-order">05</span>
+            <div class="article-card-body">
+              <h3>Attention 机制与 LLM 的数学能力</h3>
+              <p>Attention 数学原理与 LLM 数学推理的局限性</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/大模型上下文窗口为什么有限这3个问题必须搞清楚.html" class="article-card">
+            <span class="article-order">06</span>
+            <div class="article-card-body">
+              <h3>大模型上下文窗口为什么有限？这3个问题必须搞清楚</h3>
+              <p>注意力平方复杂度、KV Cache 内存、位置编码限制</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+        </div>
+        <nav class="chapter-nav"><a href="../index.html" class="nav-toc">首页</a><a href="ch2-inference.html" class="nav-next">LLM 推理机制与优化 &rarr;</a></nav>
+      </div>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

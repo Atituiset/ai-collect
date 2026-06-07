@@ -1,56 +1,579 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LLM推理优化核心技术 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="../chapters/ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
-<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
-<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<article class="article">
-<header class="article-header">
-<div class="article-meta">第2章 · LLM 推理机制与优化</div>
-<h1 class="article-title">LLM推理优化核心技术</h1>
-<p class="article-summary">量化、蒸馏、投机解码等推理优化技术全景</p>
-</header>
-<div class="article-body">
-<table><tbody><tr><td align="center"><span><span leaf="">KV Cache：基础中的基础</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">KV Cache 是 Transformer 注意力机制最自然的一类优化。随着自回归推理进入大规模生产，它几乎成为必需品。没有 KV Cache 的话，每生成一个新 token，都要从头对整个历史序列重算注意力，导致时延和成本都随序列长度呈平方级增长。</span></p><table></table></td></tr><tr><td><p><span leaf="">没有 KV Cache：每个新 token 都重算整段序列的注意力，成本约为&nbsp;</span><strong><span leaf="">O(n²)</span></strong><span leaf="">，规模化时速度和成本都难以接受。</span></p></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">有 KV Cache：把每个 token 已算出的 K/V 张量缓存起来，每个新 token 的注意力计算降为&nbsp;</span><strong><span leaf="">O(n)</span></strong><span leaf="">，这是生产推理的关键能力。</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">Prefix Caching：跨请求复用 KV</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">KV Cache 不只是“让单次请求可用”。Prefix Caching 把复用能力扩展到了多个请求：只要它们共享同样的前缀，就能共享已计算过的 KV。 Vllm使用PrefixCaching, Sglang使用RadixTree</span><span leaf=""><br></span><span leaf="">核心思想：举个例子，如果某次请求里出现过 “I want to travel to” 这段前缀，那么该前缀对应 KV 已经算好。下一次请求只要开头 token 一样，就可以直接跳过这段 prefill，复用已有 KV，从第一个新 token 开始算。这样能降低 TTFT，并节省算力。</span></p></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">Prefix Caching 最有价值的场景</span></span></td></tr></tbody></table><table><tbody><tr><td><p><strong><span leaf="">复杂系统提示词</span></strong><span leaf="">：应用里每次请求都带很长、稳定的 system prompt。</span><strong><span leaf="">代码补全</span></strong><span leaf="">：同一会话下，文件上下文往往高度一致。</span><strong><span leaf="">文档问答与检索</span></strong><span leaf="">：多轮对话里会反复出现相同检索片段。</span></p><table></table></td></tr><tr><td><p><span leaf="">这就是为什么按 token 计费的 API 往往对&nbsp;</span><strong><span leaf="">cache hit input tokens</span></strong><span leaf="">&nbsp;收费更低：这部分计算已经做过。</span></p></td></tr></tbody></table><p><strong><span leaf="">上下文工程建议：</span></strong><span leaf="">Prefix Caching 只对“从序列起点到第一个新 token”这一段生效。想提高命中率，应把变化内容尽量往后放：稳定的 system prompt 和文档放前面，用户个性化问题放后面。</span></p><table><tbody><tr><td><span><span leaf="">非前缀缓存（研究热点）</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">Prefix Caching 的硬限制是：只能复用到第一个不重复 token 为止。当前研究在尝试缓存 prompt 中间任意位置的 token，但要解决位置编码修正问题以保证正确性。</span><strong><span leaf="">CacheBlend</span></strong><span leaf="">&nbsp;和&nbsp;</span><strong><span leaf="">LMCache</span></strong><span leaf="">&nbsp;是当前支持非前缀缓存的代表性工具。</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">KV Cache 存储：内存分层问题</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">KV Cache 理想上应尽量靠近算力侧，但 GPU VRAM 有限且很快会被占满。给 KV Cache 分多少显存，是推理系统中的核心配置项。</span><span leaf=""><br></span><span leaf="">以 TensorRT-LLM 配置&nbsp;</span><span><span leaf="">kv_cache_config.free_gpu_memory_fraction = 0.8</span></span><span leaf="">&nbsp;为例：在一张 B200（180GB VRAM）上，若模型权重与 buffer 占用 100GB，剩余 80GB 中的 80%（即 64GB）可给 KV Cache。KV Cache 填满后必须淘汰旧条目，这会提高后续请求的 cache miss 风险。</span></p><table></table></td></tr><tr><td><p><span leaf="">这也是为什么生产环境通常会把 KV Cache 下沉到更慢的存储层：</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.22" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="3" src="../assets/images/bb46175e_640.webp" _width="100%" alt="图片" data-report-img-idx="0" data-fail="0"></div></td></tr></tbody></table><p><span leaf="">像&nbsp;</span><strong><span leaf="">GB200</span></strong><span leaf="">&nbsp;这类 SKU 会搭配专用 CPU 与高带宽互联，因此 G2 层速度会明显更快。</span><span leaf=""><br></span><strong><span leaf="">Nvidia Dynamo</span></strong><span leaf="">&nbsp;通过 KV Block Manager（</span><strong><span leaf="">KVBM</span></strong><span leaf="">）支持 KV offloading，提供 API 在不同存储层之间移动 KV block，并把高频访问 block 保持在最高带宽层。</span></p><table><tbody><tr><td align="center"><span><span leaf="">Cache-Aware Routing（缓存感知路由）</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">生产里通常是多副本推理服务，通过负载均衡分发请求。但要吃满 Prefix Caching 红利，路由策略必须感知缓存状态。</span><span leaf=""><br></span><strong><span leaf="">按用户粘性路由（Per-user sticky routing）</span></strong><span leaf="">：同一用户请求始终打到同一副本。该用户会话历史的 KV Cache 会持续“热”在该副本上，响应更快、单轮成本更低。</span><span leaf=""><br></span><strong><span leaf="">全局 KV Cache（G4）</span></strong><span leaf="">：通过网络存储维护所有副本可访问的共享缓存。它比 VRAM 慢，但能保证任意副本都能复用任意预计算 KV，适合超大共享前缀（如系统提示词）。</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">处理长上下文</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">即使 KV Cache 已将注意力复杂度降到 O(n)，长上下文仍会在推理时大量吞噬 VRAM，而 decode 阶段又偏偏受显存带宽约束。</span><span leaf=""><br></span><span leaf="">对应有三类关键算法优化：</span><span leaf=""><br></span><strong><span leaf="">FlashAttention</span></strong><span leaf=""><br></span><span leaf="">在片上 SRAM 中按小 tile 计算注意力，避免在 HBM 中显式构建完整 QKᵀ 矩阵，并融合 softmax 与缩放计算。它是</span><strong><span leaf="">精确注意力</span></strong><span leaf="">，不是近似，只是内存访问模式更优。</span></p><table></table></td></tr><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.6914285714285714" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="4" src="../assets/images/bb46175e_640(1).webp" _width="100%" alt="图片" data-report-img-idx="1" data-fail="0"></div></td></tr></tbody></table><p><strong><span leaf="">PagedAttention</span></strong><span leaf=""><br></span><span leaf="">把 KV 张量切成固定大小“页”，非连续存储并配查找表。可消除碎片、支持动态增长、支持跨请求共享，提升显存利用率与批处理灵活性。</span></p><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.55" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="5" src="../assets/images/bb46175e_640(2).webp" _width="100%" alt="图片" data-report-img-idx="2" data-fail="0"></div></td></tr></tbody></table><p><strong><span leaf="">Chunked Prefill</span></strong><span leaf=""><br></span><span leaf="">把长提示词拆成块，增量构建 KV Cache。调度器可把某些请求的 chunked prefill 与其他请求的 decode 交错执行，平衡“算力密集”和“带宽密集”负载，是稳定高吞吐服务的重要基建能力。</span></p><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.4471428571428571" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="6" src="../assets/images/bb46175e_640(3).webp" _width="100%" alt="图片" data-report-img-idx="3" data-fail="0"></div></td></tr></tbody></table><p><span leaf="">说明：RAG 或摘要本质上是</span><strong><span leaf="">减少模型需要读取的数据量</span></strong><span leaf="">；上面这些方法是当你决定把大量内容放进上下文窗口后，如何</span><strong><span leaf="">更高效地存储并处理</span></strong><span leaf="">这些数据。前者是架构策略，后者是算法/系统优化。</span></p><table><tbody><tr><td align="center"><span><span leaf="">并行化（Parallelism）</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">前沿大模型无法装进单卡。FP8 下可粗略按“每十亿参数约 1GB”估算：DeepSeek V3 的 671B 参数约需 671GB，仅权重就远超 B200 的 180GB VRAM。即便 4 卡总量接近可容纳，也还要给 KV Cache 预留大量空间。很多场景下，整节点并行是必选项。</span></p><table></table></td></tr><tr><td><p><strong><span leaf="">关键约束：</span></strong><span leaf="">多 GPU 推理最大的瓶颈是 GPU 间通信开销。</span></p></td></tr></tbody></table><p><span leaf="">NVLink 与 InfiniBand 带宽都远低于显存带宽。decode 又是显存带宽受限型任务，因此并行策略必须结合硬件拓扑设计，这就是&nbsp;</span><strong><span leaf="">topology-aware parallelism</span></strong><span leaf="">。</span></p><table><tbody><tr><td align="center"><span><span leaf="">三种并行方式</span></span></td></tr></tbody></table><table><tbody><tr><td><p><strong><span leaf="">Tensor Parallelism（TP）</span></strong><span leaf="">：层内切分</span></p><table></table></td></tr><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.5814285714285714" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="7" src="../assets/images/bb46175e_640(4).webp" _width="100%" alt="图片" data-report-img-idx="4" data-fail="0"></div></td></tr></tbody></table><p><strong><span leaf="">Pipeline Parallelism（PP）</span></strong><span leaf="">：按层段切分</span></p><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.42142857142857143" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="8" src="../assets/images/bb46175e_640(5).webp" _width="100%" alt="图片" data-report-img-idx="5" data-fail="0"></div></td></tr></tbody></table><p><strong><span leaf="">Expert Parallelism（EP）</span></strong><span leaf="">：MoE token 路由切分</span></p><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.7128571428571429" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="9" src="../assets/images/bb46175e_640(6).webp" _width="100%" alt="图片" data-report-img-idx="6" data-fail="0"></div></td></tr></tbody></table><p><strong><span leaf="">三者对比：</span></strong></p><table><tbody><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.41714285714285715" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="10" src="../assets/images/bb46175e_640(7).webp" _width="100%" alt="图片" data-report-img-idx="7" data-fail="0"></div></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">TP + EP 混合部署</span></span></td></tr></tbody></table><table><tbody><tr><td><p><strong><span leaf="">稠密层 / 注意力层 -&gt; Tensor Parallelism</span></strong><span leaf=""><br></span><span leaf="">每个注意力层跨 GPU 切分，权重与矩阵乘分摊执行，并在下一层前通过 all-reduce 同步结果。它主要降低单用户时延，但依赖 NVLink 级别带宽。</span><span leaf=""><br></span><strong><span leaf="">稀疏 MoE 层 -&gt; Expert Parallelism</span></strong><span leaf=""><br></span><span leaf="">每张 GPU 承载部分专家，token 被路由到对应专家所在 GPU。这里不需要 all-reduce，token 直接“去找专家”。它主要提升系统总吞吐，且避免 all-reduce 成为瓶颈。</span></p><table></table></td></tr><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.44285714285714284" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="11" src="../assets/images/bb46175e_640(8).png" _width="100%" alt="图片" data-report-img-idx="8" data-fail="0"></div></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">在稠密层使用 TP、在 MoE 层使用 EP 是互补关系：TP 针对计算重的注意力块降低时延，EP 则把专家路由负载高效分散到多卡，二者共同作用于同一次前向中的不同瓶颈。</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">多节点推理（Multi-node Inference）</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">当模型权重 + KV Cache 需求超过单节点（8 卡）容量时，就要扩展到多节点。多节点推理通常比多节点训练更复杂。</span></p></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">多节点挑战</span></span></td></tr></tbody></table><table><tbody><tr><td><ul ><li><div><span leaf="">节点间 InfiniBand 远慢于节点内 NVLink，因此 TP 的 all-reduce 跨节点会成为瓶颈。</span></div></li><li><div><span leaf="">多 GPU 云环境下的基础设施抽象与编排复杂度高。</span></div></li><li><strong><span leaf="">Dense 模型</span></strong><div><span leaf="">：通常节点内 TP，节点间 PP。</span></div></li><li><strong><span leaf="">MoE 模型</span></strong><div><span leaf="">：节点内 TP + 节点间 PP + EP 负责专家路由。TP8PP2 可降低单用户时延，叠加 EP 可提升整体输出吞吐。</span></div></li><li><div><span leaf="">若不是模型和 KV Cache 规模强制要求，多节点推理通常不是最优资源使用方式；横向副本扩展或解耦式服务往往更高效。</span></div></li></ul></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">解耦（PD分离，Prefill Decode Disaggregation）</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">在这五类技术中，解耦是架构上最激进的一种。它基于三个关键观察：</span></p><ul ><li><strong><span leaf="">Prefill 算力密集，Decode 显存带宽密集</span></strong><div><span leaf="">。batch 变大后，两者会争夺同一批硬件资源。</span></div></li><li><strong><span leaf="">专用化能提升性能</span></strong><div><span leaf="">：从 kernel 选择到推理引擎调参，prefill 优化引擎与 decode 优化引擎各自都优于“一套引擎包办全部”。</span></div></li><li><div><span leaf="">高效并行化需要</span><strong><span leaf="">尽量规避通信瓶颈</span></strong><span leaf="">。拆开 prefill 与 decode 后，每个阶段可采用更匹配自身工作负载的并行策略。</span></div></li></ul></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">工作机制</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">解耦架构把 prefill 与 decode 分到不同引擎，在不同 GPU 或节点上运行。</span></p></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">标准解耦流程</span></span></td></tr></tbody></table><table><tbody><tr><td><table></table></td></tr><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.15428571428571428" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="12" src="../assets/images/bb46175e_640(9).webp" _width="100%" alt="图片" data-report-img-idx="9" data-fail="0"></div></td></tr></tbody></table><ul ><li><strong><span leaf="">Prefill 引擎</span></strong><div><span leaf="">接收输入序列，执行完整 prefill，计算 KV Cache，并生成首 token。</span></div></li><li><div><span leaf="">计算出的 KV Cache 通过硬件互联传给 decode 引擎（节点内 NVLink，节点间 InfiniBand）。</span></div></li><li><strong><span leaf="">Decode 引擎</span></strong><div><span leaf="">接收 KV Cache 后继续自回归生成后续 token。</span></div></li><li><div><span leaf="">两个引擎可分别扩缩容、分别调优、分别并行化。</span></div></li></ul><table><tbody><tr><td><span><span leaf="">条件聚合（Conditional Aggregation）：更实用的变体</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">全量解耦会让每个请求都承担额外开销。条件聚合更贴近真实流量。</span><span leaf=""><br></span><strong><span leaf="">工作方式</span></strong></p><table></table></td></tr><tr><td align="center"><div><img class="rich_pages wxw-img" data-ratio="0.33" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="13" src="../assets/images/bb46175e_640(10).webp" _width="100%" alt="图片" data-report-img-idx="10" data-fail="0"></div></td></tr></tbody></table><p><span leaf="">请求先到&nbsp;</span><strong><span leaf="">decode 引擎</span></strong><span leaf="">，先判断：该序列是否已命中缓存？是否足够短可本地处理？如果是，就在 decode 引擎本地完成 prefill，跳过解耦路径；如果否，再转发到 prefill 引擎走解耦流程。</span><span leaf=""><br></span><strong><span leaf="">为什么这样会更好呢？</span></strong><span leaf=""><br></span><span leaf="">真实流量是混合分布，并非每个请求都值得走解耦。短请求或缓存命中请求可以完全绕过 KV 传输开销；只有长输入、未命中、prefill 计算重的请求才走解耦路径，此时额外开销才划算。</span></p><table><tbody><tr><td><span><span leaf="">何时值得使用PD分离</span></span></td></tr></tbody></table><table><tbody><tr><td><p><span leaf="">解耦需要较高工程投入，一般仅在以下条件同时满足时才值得：</span><span leaf=""><br></span><strong><span leaf="">条件1（规模）</span></strong><span leaf="">：日服务量达到 1 亿到数十亿 token。低于这个量级，工程复杂度通常不划算。</span><strong><span leaf="">条件2（模型）</span></strong><span leaf="">：模型规模至少 100B 参数。更小模型单请求开销不够大，难以摊薄解耦成本。</span><strong><span leaf="">条件3（流量画像）</span></strong><span leaf="">：prefill 占比高，且输入序列长。若输入普遍较短，横向副本扩展通常更优。</span></p><table></table></td></tr><tr><td><p><span leaf="">如果条件 1 或 2 不成立，往往是“用更贵硬件换来很小收益”；如果条件 3 不成立，优先做横向扩展。</span></p></td></tr></tbody></table><table><tbody><tr><td><span><span leaf="">Nvidia Dynamo 与动态解耦</span></span></td></tr></tbody></table><table><tbody><tr><td><p><strong><span leaf="">Nvidia Dynamo</span></strong><span leaf="">&nbsp;是一个整合多种推理优化技术的服务框架。针对解耦场景，Dynamo 支持动态聚合/解耦：根据实时条件（序列长度、缓存状态、引擎负载）在聚合路径与解耦路径之间自适应路由。它不是静态配置，而是按请求做决策，在需要时享受解耦收益，在不需要时避免无谓开销。</span></p></td></tr></tbody></table><table><tbody><tr><td align="center"><span><span leaf="">上述总结：Caching、Parallelism 与 Disaggregation</span></span></td></tr></tbody></table><table><tbody><tr><td><ul ><li><div><span leaf="">KV Cache 把注意力计算从 O(n²) 降到 O(n)，没有它就没有大规模生产推理。</span></div></li><li><div><span leaf="">Prefix Caching 把 KV 复用扩展到跨请求；稳定 token 放前、变化 token 放后可提升命中率。</span></div></li><li><div><span leaf="">KV Cache 存储可看作四层层级：GPU VRAM -&gt; CPU RAM -&gt; 本地 SSD -&gt; 网络 SSD；Nvidia Dynamo 的 KVBM 负责层间迁移。</span></div></li><li><div><span leaf="">缓存感知路由（按用户粘性或全局共享缓存）是多副本场景吃满 Prefix Caching 的关键。</span></div></li><li><div><span leaf="">FlashAttention、PagedAttention、Chunked Prefill 是长上下文高效处理的基础算法。</span></div></li><li><div><span leaf="">Tensor Parallelism 是默认多 GPU 低时延策略，强依赖 NVLink；多节点通常采用“节点内 TP + 节点间 PP”。</span></div></li><li><div><span leaf="">Expert Parallelism 面向 MoE 模型，通过分布式专家路由提升系统总吞吐。</span></div></li><li><div><span leaf="">在稠密/注意力层用 TP，在 MoE 层用 EP，可同时命中不同瓶颈。</span></div></li><li><div><span leaf="">Disaggregation 将 prefill 与 decode 分离，仅在超大规模（1e8+ token/day）、超大模型（100B+）与 prefill-heavy 流量下值得投入。</span></div></li><li><div><span leaf="">Conditional Aggregation 是更实用形态：只让长且未命中的请求走解耦路径。</span></div></li></ul></td></tr></tbody></table><p></p></div>
-          <script type="text/javascript" nonce="" reportloaderror="">
-            var first_sceen__time = (+new Date());
-            if ("" == 1 && document.getElementById('js_content')) {
-              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
-            }
-          </script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM推理优化核心技术 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="../chapters/ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
+        <a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+        <a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <article class="article">
+        <header class="article-header">
+          <div class="article-meta">第2章 · LLM 推理机制与优化</div>
+          <h1 class="article-title">LLM推理优化核心技术</h1>
+          <p class="article-summary">量化、蒸馏、投机解码等推理优化技术全景</p>
+        </header>
+        <div class="article-body">
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">KV Cache：基础中的基础</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">KV Cache 是 Transformer 注意力机制最自然的一类优化。随着自回归推理进入大规模生产，它几乎成为必需品。没有 KV Cache 的话，每生成一个新 token，都要从头对整个历史序列重算注意力，导致时延和成本都随序列长度呈平方级增长。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><span leaf="">没有 KV Cache：每个新 token 都重算整段序列的注意力，成本约为&nbsp;</span><strong><span leaf="">O(n²)</span></strong><span leaf="">，规模化时速度和成本都难以接受。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">有 KV Cache：把每个 token 已算出的 K/V 张量缓存起来，每个新 token 的注意力计算降为&nbsp;</span><strong><span leaf="">O(n)</span></strong><span leaf="">，这是生产推理的关键能力。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">Prefix Caching：跨请求复用 KV</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">KV Cache 不只是“让单次请求可用”。Prefix Caching 把复用能力扩展到了多个请求：只要它们共享同样的前缀，就能共享已计算过的 KV。 Vllm使用PrefixCaching, Sglang使用RadixTree</span><span leaf=""><br></span><span leaf="">核心思想：举个例子，如果某次请求里出现过 “I want to travel to” 这段前缀，那么该前缀对应 KV 已经算好。下一次请求只要开头 token 一样，就可以直接跳过这段 prefill，复用已有 KV，从第一个新 token 开始算。这样能降低 TTFT，并节省算力。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">Prefix Caching 最有价值的场景</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><strong><span leaf="">复杂系统提示词</span></strong><span leaf="">：应用里每次请求都带很长、稳定的 system prompt。</span><strong><span leaf="">代码补全</span></strong><span leaf="">：同一会话下，文件上下文往往高度一致。</span><strong><span leaf="">文档问答与检索</span></strong><span leaf="">：多轮对话里会反复出现相同检索片段。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><span leaf="">这就是为什么按 token 计费的 API 往往对&nbsp;</span><strong><span leaf="">cache hit input tokens</span></strong><span leaf="">&nbsp;收费更低：这部分计算已经做过。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">上下文工程建议：</span></strong><span leaf="">Prefix Caching 只对“从序列起点到第一个新 token”这一段生效。想提高命中率，应把变化内容尽量往后放：稳定的 system prompt 和文档放前面，用户个性化问题放后面。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">非前缀缓存（研究热点）</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">Prefix Caching 的硬限制是：只能复用到第一个不重复 token 为止。当前研究在尝试缓存 prompt 中间任意位置的 token，但要解决位置编码修正问题以保证正确性。</span><strong><span leaf="">CacheBlend</span></strong><span leaf="">&nbsp;和&nbsp;</span><strong><span leaf="">LMCache</span></strong><span leaf="">&nbsp;是当前支持非前缀缓存的代表性工具。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">KV Cache 存储：内存分层问题</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">KV Cache 理想上应尽量靠近算力侧，但 GPU VRAM 有限且很快会被占满。给 KV Cache 分多少显存，是推理系统中的核心配置项。</span><span leaf=""><br></span><span leaf="">以 TensorRT-LLM 配置&nbsp;</span><span><span leaf="">kv_cache_config.free_gpu_memory_fraction = 0.8</span></span><span leaf="">&nbsp;为例：在一张 B200（180GB VRAM）上，若模型权重与 buffer 占用 100GB，剩余 80GB 中的 80%（即 64GB）可给 KV Cache。KV Cache 填满后必须淘汰旧条目，这会提高后续请求的 cache miss 风险。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><span leaf="">这也是为什么生产环境通常会把 KV Cache 下沉到更慢的存储层：</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.22" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="3" src="../assets/images/bb46175e_640.webp" _width="100%" alt="图片" data-report-img-idx="0" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><span leaf="">像&nbsp;</span><strong><span leaf="">GB200</span></strong><span leaf="">&nbsp;这类 SKU 会搭配专用 CPU 与高带宽互联，因此 G2 层速度会明显更快。</span><span leaf=""><br></span><strong><span leaf="">Nvidia Dynamo</span></strong><span leaf="">&nbsp;通过 KV Block Manager（</span><strong><span leaf="">KVBM</span></strong><span leaf="">）支持 KV offloading，提供 API 在不同存储层之间移动 KV block，并把高频访问 block 保持在最高带宽层。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">Cache-Aware Routing（缓存感知路由）</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">生产里通常是多副本推理服务，通过负载均衡分发请求。但要吃满 Prefix Caching 红利，路由策略必须感知缓存状态。</span><span leaf=""><br></span><strong><span leaf="">按用户粘性路由（Per-user sticky routing）</span></strong><span leaf="">：同一用户请求始终打到同一副本。该用户会话历史的 KV Cache 会持续“热”在该副本上，响应更快、单轮成本更低。</span><span leaf=""><br></span><strong><span leaf="">全局 KV Cache（G4）</span></strong><span leaf="">：通过网络存储维护所有副本可访问的共享缓存。它比 VRAM 慢，但能保证任意副本都能复用任意预计算 KV，适合超大共享前缀（如系统提示词）。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">处理长上下文</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">即使 KV Cache 已将注意力复杂度降到 O(n)，长上下文仍会在推理时大量吞噬 VRAM，而 decode 阶段又偏偏受显存带宽约束。</span><span leaf=""><br></span><span leaf="">对应有三类关键算法优化：</span><span leaf=""><br></span><strong><span leaf="">FlashAttention</span></strong><span leaf=""><br></span><span leaf="">在片上 SRAM 中按小 tile 计算注意力，避免在 HBM 中显式构建完整 QKᵀ 矩阵，并融合 softmax 与缩放计算。它是</span><strong><span leaf="">精确注意力</span></strong><span leaf="">，不是近似，只是内存访问模式更优。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.6914285714285714" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="4" src="../assets/images/bb46175e_640(1).webp" _width="100%" alt="图片" data-report-img-idx="1" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">PagedAttention</span></strong><span leaf=""><br></span><span leaf="">把 KV 张量切成固定大小“页”，非连续存储并配查找表。可消除碎片、支持动态增长、支持跨请求共享，提升显存利用率与批处理灵活性。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.55" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="5" src="../assets/images/bb46175e_640(2).webp" _width="100%" alt="图片" data-report-img-idx="2" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">Chunked Prefill</span></strong><span leaf=""><br></span><span leaf="">把长提示词拆成块，增量构建 KV Cache。调度器可把某些请求的 chunked prefill 与其他请求的 decode 交错执行，平衡“算力密集”和“带宽密集”负载，是稳定高吞吐服务的重要基建能力。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.4471428571428571" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="6" src="../assets/images/bb46175e_640(3).webp" _width="100%" alt="图片" data-report-img-idx="3" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><span leaf="">说明：RAG 或摘要本质上是</span><strong><span leaf="">减少模型需要读取的数据量</span></strong><span leaf="">；上面这些方法是当你决定把大量内容放进上下文窗口后，如何</span><strong><span leaf="">更高效地存储并处理</span></strong><span leaf="">这些数据。前者是架构策略，后者是算法/系统优化。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">并行化（Parallelism）</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">前沿大模型无法装进单卡。FP8 下可粗略按“每十亿参数约 1GB”估算：DeepSeek V3 的 671B 参数约需 671GB，仅权重就远超 B200 的 180GB VRAM。即便 4 卡总量接近可容纳，也还要给 KV Cache 预留大量空间。很多场景下，整节点并行是必选项。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><strong><span leaf="">关键约束：</span></strong><span leaf="">多 GPU 推理最大的瓶颈是 GPU 间通信开销。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><span leaf="">NVLink 与 InfiniBand 带宽都远低于显存带宽。decode 又是显存带宽受限型任务，因此并行策略必须结合硬件拓扑设计，这就是&nbsp;</span><strong><span leaf="">topology-aware parallelism</span></strong><span leaf="">。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">三种并行方式</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><strong><span leaf="">Tensor Parallelism（TP）</span></strong><span leaf="">：层内切分</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.5814285714285714" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="7" src="../assets/images/bb46175e_640(4).webp" _width="100%" alt="图片" data-report-img-idx="4" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">Pipeline Parallelism（PP）</span></strong><span leaf="">：按层段切分</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.42142857142857143" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="8" src="../assets/images/bb46175e_640(5).webp" _width="100%" alt="图片" data-report-img-idx="5" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">Expert Parallelism（EP）</span></strong><span leaf="">：MoE token 路由切分</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.7128571428571429" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="9" src="../assets/images/bb46175e_640(6).webp" _width="100%" alt="图片" data-report-img-idx="6" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><strong><span leaf="">三者对比：</span></strong></p>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.41714285714285715" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="10" src="../assets/images/bb46175e_640(7).webp" _width="100%" alt="图片" data-report-img-idx="7" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">TP + EP 混合部署</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><strong><span leaf="">稠密层 / 注意力层 -&gt; Tensor Parallelism</span></strong><span leaf=""><br></span><span leaf="">每个注意力层跨 GPU 切分，权重与矩阵乘分摊执行，并在下一层前通过 all-reduce 同步结果。它主要降低单用户时延，但依赖 NVLink 级别带宽。</span><span leaf=""><br></span><strong><span leaf="">稀疏 MoE 层 -&gt; Expert Parallelism</span></strong><span leaf=""><br></span><span leaf="">每张 GPU 承载部分专家，token 被路由到对应专家所在 GPU。这里不需要 all-reduce，token 直接“去找专家”。它主要提升系统总吞吐，且避免 all-reduce 成为瓶颈。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.44285714285714284" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="11" src="../assets/images/bb46175e_640(8).png" _width="100%" alt="图片" data-report-img-idx="8" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">在稠密层使用 TP、在 MoE 层使用 EP 是互补关系：TP 针对计算重的注意力块降低时延，EP 则把专家路由负载高效分散到多卡，二者共同作用于同一次前向中的不同瓶颈。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">多节点推理（Multi-node Inference）</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">当模型权重 + KV Cache 需求超过单节点（8 卡）容量时，就要扩展到多节点。多节点推理通常比多节点训练更复杂。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">多节点挑战</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <ul>
+                    <li>
+                      <div><span leaf="">节点间 InfiniBand 远慢于节点内 NVLink，因此 TP 的 all-reduce 跨节点会成为瓶颈。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">多 GPU 云环境下的基础设施抽象与编排复杂度高。</span></div>
+                    </li>
+                    <li><strong><span leaf="">Dense 模型</span></strong>
+                      <div><span leaf="">：通常节点内 TP，节点间 PP。</span></div>
+                    </li>
+                    <li><strong><span leaf="">MoE 模型</span></strong>
+                      <div><span leaf="">：节点内 TP + 节点间 PP + EP 负责专家路由。TP8PP2 可降低单用户时延，叠加 EP 可提升整体输出吞吐。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">若不是模型和 KV Cache 规模强制要求，多节点推理通常不是最优资源使用方式；横向副本扩展或解耦式服务往往更高效。</span></div>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">解耦（PD分离，Prefill Decode Disaggregation）</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">在这五类技术中，解耦是架构上最激进的一种。它基于三个关键观察：</span></p>
+                  <ul>
+                    <li><strong><span leaf="">Prefill 算力密集，Decode 显存带宽密集</span></strong>
+                      <div><span leaf="">。batch 变大后，两者会争夺同一批硬件资源。</span></div>
+                    </li>
+                    <li><strong><span leaf="">专用化能提升性能</span></strong>
+                      <div><span leaf="">：从 kernel 选择到推理引擎调参，prefill 优化引擎与 decode 优化引擎各自都优于“一套引擎包办全部”。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">高效并行化需要</span><strong><span leaf="">尽量规避通信瓶颈</span></strong><span leaf="">。拆开 prefill 与 decode 后，每个阶段可采用更匹配自身工作负载的并行策略。</span></div>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">工作机制</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">解耦架构把 prefill 与 decode 分到不同引擎，在不同 GPU 或节点上运行。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">标准解耦流程</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.15428571428571428" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="12" src="../assets/images/bb46175e_640(9).webp" _width="100%" alt="图片" data-report-img-idx="9" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li><strong><span leaf="">Prefill 引擎</span></strong>
+              <div><span leaf="">接收输入序列，执行完整 prefill，计算 KV Cache，并生成首 token。</span></div>
+            </li>
+            <li>
+              <div><span leaf="">计算出的 KV Cache 通过硬件互联传给 decode 引擎（节点内 NVLink，节点间 InfiniBand）。</span></div>
+            </li>
+            <li><strong><span leaf="">Decode 引擎</span></strong>
+              <div><span leaf="">接收 KV Cache 后继续自回归生成后续 token。</span></div>
+            </li>
+            <li>
+              <div><span leaf="">两个引擎可分别扩缩容、分别调优、分别并行化。</span></div>
+            </li>
+          </ul>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">条件聚合（Conditional Aggregation）：更实用的变体</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">全量解耦会让每个请求都承担额外开销。条件聚合更贴近真实流量。</span><span leaf=""><br></span><strong><span leaf="">工作方式</span></strong></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <div><img class="rich_pages wxw-img" data-ratio="0.33" data-w="700" width="100%" data-aistatus="1" data-original-style="display:block;" data-index="13" src="../assets/images/bb46175e_640(10).webp" _width="100%" alt="图片" data-report-img-idx="10" data-fail="0"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><span leaf="">请求先到&nbsp;</span><strong><span leaf="">decode 引擎</span></strong><span leaf="">，先判断：该序列是否已命中缓存？是否足够短可本地处理？如果是，就在 decode 引擎本地完成 prefill，跳过解耦路径；如果否，再转发到 prefill 引擎走解耦流程。</span><span leaf=""><br></span><strong><span leaf="">为什么这样会更好呢？</span></strong><span leaf=""><br></span><span leaf="">真实流量是混合分布，并非每个请求都值得走解耦。短请求或缓存命中请求可以完全绕过 KV 传输开销；只有长输入、未命中、prefill 计算重的请求才走解耦路径，此时额外开销才划算。</span></p>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">何时值得使用PD分离</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><span leaf="">解耦需要较高工程投入，一般仅在以下条件同时满足时才值得：</span><span leaf=""><br></span><strong><span leaf="">条件1（规模）</span></strong><span leaf="">：日服务量达到 1 亿到数十亿 token。低于这个量级，工程复杂度通常不划算。</span><strong><span leaf="">条件2（模型）</span></strong><span leaf="">：模型规模至少 100B 参数。更小模型单请求开销不够大，难以摊薄解耦成本。</span><strong><span leaf="">条件3（流量画像）</span></strong><span leaf="">：prefill 占比高，且输入序列长。若输入普遍较短，横向副本扩展通常更优。</span></p>
+                  <table></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><span leaf="">如果条件 1 或 2 不成立，往往是“用更贵硬件换来很小收益”；如果条件 3 不成立，优先做横向扩展。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td><span><span leaf="">Nvidia Dynamo 与动态解耦</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <p><strong><span leaf="">Nvidia Dynamo</span></strong><span leaf="">&nbsp;是一个整合多种推理优化技术的服务框架。针对解耦场景，Dynamo 支持动态聚合/解耦：根据实时条件（序列长度、缓存状态、引擎负载）在聚合路径与解耦路径之间自适应路由。它不是静态配置，而是按请求做决策，在需要时享受解耦收益，在不需要时避免无谓开销。</span></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td align="center"><span><span leaf="">上述总结：Caching、Parallelism 与 Disaggregation</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <ul>
+                    <li>
+                      <div><span leaf="">KV Cache 把注意力计算从 O(n²) 降到 O(n)，没有它就没有大规模生产推理。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">Prefix Caching 把 KV 复用扩展到跨请求；稳定 token 放前、变化 token 放后可提升命中率。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">KV Cache 存储可看作四层层级：GPU VRAM -&gt; CPU RAM -&gt; 本地 SSD -&gt; 网络 SSD；Nvidia Dynamo 的 KVBM 负责层间迁移。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">缓存感知路由（按用户粘性或全局共享缓存）是多副本场景吃满 Prefix Caching 的关键。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">FlashAttention、PagedAttention、Chunked Prefill 是长上下文高效处理的基础算法。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">Tensor Parallelism 是默认多 GPU 低时延策略，强依赖 NVLink；多节点通常采用“节点内 TP + 节点间 PP”。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">Expert Parallelism 面向 MoE 模型，通过分布式专家路由提升系统总吞吐。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">在稠密/注意力层用 TP，在 MoE 层用 EP，可同时命中不同瓶颈。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">Disaggregation 将 prefill 与 decode 分离，仅在超大规模（1e8+ token/day）、超大模型（100B+）与 prefill-heavy 流量下值得投入。</span></div>
+                    </li>
+                    <li>
+                      <div><span leaf="">Conditional Aggregation 是更实用形态：只让长且未命中的请求走解耦路径。</span></div>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p></p>
         </div>
-                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
-                
-        <div 
-</div>
-<footer class="article-footer">
-<div class="article-nav">
-<a href="理解-kv-cachellm-推理为什么能越写越快.html" class="nav-prev">&larr; 上一篇</a>
-<a href="../chapters/ch2-inference.html" class="nav-toc">目录</a>
-<a href="大模型推理系统入门从模型优化到调度优化.html" class="nav-next">下一篇 &rarr;</a>
-</div>
-</footer>
-</article>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+        <script type="text/javascript" nonce="" reportloaderror="">
+          var first_sceen__time = (+new Date());
+          if ("" == 1 && document.getElementById('js_content')) {
+            document.getElementById('js_content').addEventListener("selectstart", function(e) {
+              e.preventDefault();
+            });
+          }
+
+        </script>
+        </div>
+        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+
+        <div </div>
+          <footer class="article-footer">
+            <div class="article-nav">
+              <a href="理解-kv-cachellm-推理为什么能越写越快.html" class="nav-prev">&larr; 上一篇</a>
+              <a href="../chapters/ch2-inference.html" class="nav-toc">目录</a>
+              <a href="大模型推理系统入门从模型优化到调度优化.html" class="nav-next">下一篇 &rarr;</a>
+            </div>
+          </footer>
+      </article>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

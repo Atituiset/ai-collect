@@ -1,56 +1,353 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="../chapters/ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
-<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
-<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<article class="article">
-<header class="article-header">
-<div class="article-meta">第2章 · LLM 推理机制与优化</div>
-<h1 class="article-title">大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程</h1>
-<p class="article-summary">推理加速全流程：从 Prefill 到 KV Cache 优化</p>
-</header>
-<div class="article-body">
-<p data-pm-slice="0 0 []"><span leaf="">&nbsp;</span></p><div><div><img class="rich_pages wxw-img js_insertlocalimg" data-ratio="0.5583333333333333" data-s="300,640" data-type="png" data-w="1080" type="block" data-imgfileid="100000082" data-aistatus="1" data-original-style="null" data-index="3" src="../assets/images/4fff6105_640.webp" _width="677px" alt="图片" data-report-img-idx="0" data-fail="0"></div><p><span leaf=""><br></span></p><p data-pm-slice="0 0 []"><span leaf="">&nbsp;</span></p><div><p><span leaf="">大模型推理慢，很多时候并不是因为部署模型的GPU算力不够强，也不是因为模型本身参数太大，结构复杂算不动。真正的问题在于</span></p><p><strong><span leaf="">大模型生成文本不是一次性算出完整答案，而是一个自回归生成token的过程，一个Token一个Token的往外吐，而且每一步都要访问越来越长的上下文和 KV Cache。</span></strong></p><p><span leaf="">我们在前端看到的“打字机”的效果，不是产品经理为了营造氛围故意加的动画，而是大模型真的是这么干的。大模型每生成一个新的token都需要重新看一遍已有的上下文，结合之前的历史信息然后再预测下一个新的token。</span></p><p><span leaf="">这也是为什么同一个模型：</span></p><ul ><li><div><span leaf="">• 输入越长，首字越慢</span></div></li><li><div><span leaf="">• 输出越长，显存越吃紧</span></div></li><li><div><span leaf="">• 并发越高，吞吐越容易崩</span></div></li><li><div><span leaf="">• 上下文越大，部署成本越高</span></div></li></ul><p><span leaf="">一般来讲，我们将大模型推理分成两个阶段：</span></p><ul ><li><div><span leaf="">• Prefill阶段：把用户输入的提示词prompt读完</span></div></li><li><div><span leaf="">• Decode阶段：一个一个依次生成Token</span></div></li></ul><h1 data-heading="true"><span leaf="">1 大模型推理为什么会慢？</span></h1><p><span leaf="">我们来用大白话说下最简单的大模型推理过程，假设用户在前端聊天框输入了一句话：</span></p><blockquote><p><span leaf="">请解释KV Cache是什么？</span></p></blockquote><p><span leaf="">大模型在接收到这句用户输入之后，并不是直接生成最终的完整答案，而是根据这句话预测下一个Token。</span></p><p><span leaf="">比如先生成：</span></p><blockquote><p><span leaf="">KV</span></p></blockquote><p><span leaf="">然后把KV拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV”，再继续预测下一个Token：</span></p><blockquote><p><span leaf="">Cache</span></p></blockquote><p><span leaf="">再拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV Cache”，再预测下一个Token：</span></p><blockquote><p><span leaf="">是</span></p></blockquote><p><span leaf="">再拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV Cache是”，再预测下一个Token，这样一直循环最终生成这个问题的完整回答。</span></p><p><span leaf="">所以，大模型推理的过程就是：</span></p><ol ><li><div><span leaf="">1. 看已有的上下文</span></div></li><li><div><span leaf="">2. 预测下一个Token</span></div></li><li><div><span leaf="">3. 把新的Token加入上下文</span></div></li><li><div><span leaf="">4. 再预测下一个Token</span></div></li><li><div><span leaf="">5. 循环</span></div></li></ol><p><span leaf="">这就是上面说的“自回归生成”。</span></p><p><span leaf="">大模型在训练的时候是可以并行处理一整段文本，但是在推理的时候，模型没有办法知道自己后面要生成什么，只能一步一步往前预测，生成Token没办法并行，只能串行，这就是大模型推理为什么慢的根本原因。</span></p><p><span leaf="">模型推理我们经常看以下指标：</span></p><ul ><li><div><span leaf="">•&nbsp;</span><strong><span leaf="">TTFT</span></strong><span leaf="">：Time To First Token，首 Token 延迟，主要受 Prefill 影响</span></div></li><li><div><span leaf="">•&nbsp;</span><strong><span leaf="">TPOT</span></strong><span leaf="">：Time Per Output Token，每个输出 Token 的耗时，主要受 Decode 影响</span></div></li><li><div><span leaf="">•&nbsp;</span><strong><span leaf="">Throughput</span></strong><span leaf="">：吞吐量，通常指每秒处理多少 Token 或多少请求</span></div></li></ul><p><span leaf="">后面详细介绍下大模型推理的的Prefill和Decode阶段分别做了什么。</span></p><h1 data-heading="true"><span leaf="">2 Prefill阶段</span></h1><p><span leaf="">大模型推理的第一个阶段是Prefill阶段，Prefill阶段就是模型先把用户输入的Prompt全部读进去，</span></p><ul ><li><div><span leaf="">• 如果用户输入1000个Token，模型就读入这1000个Token，计算他们之间的注意力关系</span></div></li><li><div><span leaf="">• 如果用户输入100000个Token，模型就读入这100000个Token，计算他们之间的注意力关系</span></div></li></ul><p><span leaf="">这一个过程我们可以理解为大模型在读题，题目越长，读题的速度越慢，时间越久。在这一阶段，模型需要完整的处理输入的Token序列，计算他们之间的注意力关系，尤其是当输入的上下文很长时，中间注意力矩阵越大，显存和带宽的压力越大。</span></p><p><span leaf="">之前在FlashAttention的那个文章中我们说过一个核心的问题：</span><strong><span leaf="">GPU算得快，并不一定推理速度就快</span></strong><span leaf="">。原因就是因为虽然GPU的计算速度很快，但是数据需要在HBM和SRAM之间来回搬运，如果在Attention计算过程中生成了很大的中间矩阵，GPU就会频繁的从HBM中搬数据，这个时候GPU的计算单元实际上不是很忙，而是在等数据喂进来。</span></p><p><span leaf="">所以，在Prefill阶段：</span></p><blockquote><p><span leaf="">Prompt越长，Attention 中间结果越大，显存压力越大，数据搬运越多，GPU 越容易被内存带宽卡住，首Token的时延越高</span></p></blockquote><p><span leaf="">给我们的感觉就是，当我们问大模型一个简单的问题，感觉大模型回答的很快，但是当我们给大模型丢了一个论文的PDF，然后让他总结论文创新点时，感觉就会先卡一会然后再回答了。</span></p><h1 data-heading="true"><span leaf="">3 Decode阶段</span></h1><p><span leaf="">在Prefill阶段结束之后，大模型推理进入到第二个阶段Decode阶段。Decode 阶段每次只生成一个新 Token，好像看起来每次只算一个新Token应该很很快，但是这个阶段最主要的问题是：每生成一个新Token，都要访问之前所有Token的历史信息。</span></p><p><span leaf="">假设Prompt有8000个Token：</span></p><ul ><li><div><span leaf="">• 生成第 1 个 Token 时，要看前面 8000 个 Token</span></div></li><li><div><span leaf="">• 生成第 100 个 Token 时，要看前面 8100 个 Token</span></div></li><li><div><span leaf="">• 生成第 1000 个 Token 时，要看前面 9000 个 Token</span></div></li></ul><p><span leaf="">模型的上下文会越滚越长，这个时候GPU虽然每一步只生成一个Token，但是每一步都要访问之前大量的历史缓存，所以Decode阶段GPU不是算不过来，而是在等数据进来计算，计算单元很闲而显存带宽很忙。GPU的算力很强，但是要等历史缓存从显存里搬过来。</span></p><p><span leaf="">所以很多大模型推理加速的技术，并不是在模型结构和数学公式，而是想办法减少数据搬运，充分利用计算算力。</span></p><h1 data-heading="true"><span leaf="">4 KV Cache：用显存换速度</span></h1><p><span leaf="">如果像Decode阶段常规的计算方式，每次生成一个Token都要重新计算前面所有Token的K和V，那速度肯定是慢的惊人呢，所以从工程上人们自然而然的想出了KV Cache这种方式。</span></p><p><span leaf="">我们在计算Transformer的Attention时，每一个Token都会生成Query、Key、Value，对于历史的Token来说，他们的Key和Value我们已经算过了，而且不会再变，那么最直接的加速方式就是把已经算过的K和V缓存起来，不要重复计算，下次用的时候直接从缓存里面拿，这就是KV Cache，本质就是用显存换取计算速度。</span></p><ul ><li><div><span leaf="">• 如果大模型推理我们不用KV Cache，那么每生成一个Token，都要把历史的上下文Token的K和V都计算一遍</span></div></li><li><div><span leaf="">• 如果大模型推理我们用了KV Cache，每生成一个Token，我们只需要计算当前Token的Q，然后直接读历史Token的K和V进行计算，显而易见推理速度会快很多。</span></div></li></ul><p><span leaf="">但是KV Cache也有问题，就是非常吃显存，显存占用大小与下面的因素相关：</span></p><ul ><li><div><span leaf="">• 模型层数</span></div></li><li><div><span leaf="">• hidden size</span></div></li><li><div><span leaf="">• attention head数量</span></div></li><li><div><span leaf="">• 上下文长度</span></div></li><li><div><span leaf="">• batch size</span></div></li><li><div><span leaf="">• 数据精度</span></div></li></ul><p><span leaf="">通常来讲：</span></p><ul ><li><div><span leaf="">• 上下文越长，KV Cache越大</span></div></li><li><div><span leaf="">• 并发越高，KV Cache越大</span></div></li><li><div><span leaf="">• 输出越长，KV Cache越大</span></div></li></ul><p><span leaf="">所以很多时候在部署大模型进行推理的时候并不是放不下模型权重，而是存不下KV Cache。</span></p><blockquote><p><span leaf="">举个栗子，模型权重就像饭店里的厨房设备，开店之前就固定在那里了。KV Cache 更像每个客人桌上的餐盘和临时物品，客人越多、吃得越久、点得越多，桌面占用就越大。最后厨房没问题，反而是大厅先被堆满了。</span></p></blockquote><h1 data-heading="true"><span leaf="">5 PagedAttention：管理显存，提高利用率</span></h1><p><span leaf="">原生的KV Cache的管理方式有一个问题在于它需要为每个请求都预留一块连续的显存空间，但是用户的输入Prompt长度是不固定，有的人只问一句话、有的人直接塞进来一本电子书。</span></p><p><span leaf="">那么这种显存管理方式就有问题了，如果显存预留的太多，会浪费显存；如果显存预留的太少后面不够用；用户请求一多，还容易产生显存碎片。</span></p><p><span leaf="">由于传统的KV Cache显存管理有上述问题，天才提出PagedAttention解决上述问题。PagedAttention借鉴了操作系统分页的思想，把KV Cache切成一个一个固定大小的Block。每个请求不再需要申请一整块连续的显存，而是通过Block Table记录逻辑Token到物理Token的映射关系。用大白话说，就是KV Cache不需要连续存了，而是用到哪里分配到哪里。</span></p><p><span leaf="">举个栗子，传统 KV Cache 就像图书馆必须给每个人留一整排书架，不管你最后借几本书，这排书架都先占着。PagedAttention 则像给每个人一张借书卡，书可以放在图书馆任意空位置，只要借书卡上记录了位置就行，这样显存利用率就高很多。所以 PagedAttention 的本质不是改 Attention 公式，也不会改Attention的计算量，而是：用更聪明的显存管理方式，提高 KV Cache 的利用率，提升显存利用率和并发承载能力。</span></p><h1 data-heading="true"><span leaf="">6 常见的推理加速技术</span></h1><p><span leaf="">理解了 Prefill、Decode 和 KV Cache，再看各种推理加速技术就比较清楚了，这些技术看起来名字很多，但其实都在解决几个固定问题。</span></p><h2 data-heading="true"><span leaf="">6.1 FlashAttention</span></h2><p><span leaf="">FlashAttention 主要解决 Attention 计算中的内存访问问题。它不改数学公式，而是通过分块计算和减少 HBM 读写，让 Attention 计算尽可能在 SRAM 中完成。</span></p><p><span leaf="">所以它主要优化的是：</span></p><ul ><li><div><span leaf="">• 长上下文 Prefill</span></div></li><li><div><span leaf="">• Attention 中间矩阵过大</span></div></li><li><div><span leaf="">• HBM 和 SRAM 之间频繁搬数据</span></div></li></ul><p><span leaf="">核心思想是：能少搬就少搬。</span></p><h2 data-heading="true"><span leaf="">6.2 PagedAttention</span></h2><p><span leaf="">PagedAttention 主要解决 KV Cache 的显存管理问题。它不让每个请求预留一大块连续显存，而是把 KV Cache 切成块，按需分配。</span></p><p><span leaf="">它主要优化的是：</span></p><ul ><li><div><span leaf="">• 显存碎片</span></div></li><li><div><span leaf="">• KV Cache 浪费</span></div></li><li><div><span leaf="">• 多用户并发</span></div></li><li><div><span leaf="">• 长短请求混合调度</span></div></li></ul><p><span leaf="">核心思想是：像操作系统管理内存一样管理 KV Cache。</span></p><h2 data-heading="true"><span leaf="">6.3 Continuous Batching</span></h2><p><span leaf="">普通 batching 很适合训练，但是推理不太一样。因为每个用户的请求长度不同，生成长度也不同。有的请求已经生成完了，有的请求还在继续生成，如果 batch 不能动态调整，GPU 就会出现空转。</span></p><p><span leaf="">Continuous Batching 解决的就是这个问题，它会动态把不同阶段的请求拼在一起，让 GPU 尽量一直有活干。</span></p><p><span leaf="">核心思想是：减少 GPU 等请求的时间，提高吞吐。</span></p><h2 data-heading="true"><span leaf="">6.4 Speculative Decoding</span></h2><p><span leaf="">Decode 阶段最大的麻烦是一个 Token 一个 Token 生成，速度太慢。</span></p><p><span leaf="">Speculative Decoding 的思路是：让一个小模型先猜几个 Token，然后让大模型验证。如果小模型猜对了，大模型就可以一次接受多个 Token。如果猜错了，再回退重新生成。这就像让一个便宜的实习生先写草稿，再让专家快速审核，如果草稿大差不差，专家就不用一个字一个字重写。</span></p><p><span leaf="">它主要优化的是：</span></p><ul ><li><div><span leaf="">• Decode 串行生成</span></div></li><li><div><span leaf="">• 单 Token 生成太慢</span></div></li><li><div><span leaf="">• 大模型每一步都太贵</span></div></li></ul><p><span leaf="">核心思想是：用小模型的低成本猜测，换大模型的生成步数减少。</span></p><h2 data-heading="true"><span leaf="">6.5 MQA、GQA、MLA</span></h2><p><span leaf="">这些都是注意力结构优化，本质上也和 KV Cache 有关。普通 Multi-Head Attention 中，每个 head 都有自己的 K 和 V，这样效果灵活，但是 KV Cache 很大。MQA、GQA、MLA 这类方法，都是在想办法减少 K 和 V 的存储与读取压力。</span></p><ul ><li><div><span leaf="">• MQA：所有 Query head 共用一组 K/V</span></div></li><li><div><span leaf="">• GQA：多个 Query head 共用一组 K/V，是 MHA 和 MQA 的折中</span></div></li><li><div><span leaf="">• MLA：通过更紧凑的潜在表示压缩 KV Cache，进一步降低缓存压力</span></div></li></ul><p><span leaf="">简单理解就是：不要让每个 Query 都带一整套独立的 K/V。</span></p><p><span leaf="">这样可以降低 KV Cache 占用，也能减少 Decode 阶段的数据搬运。</span></p><h2 data-heading="true"><span leaf="">6.6 量化</span></h2><p><span leaf="">量化可以分为模型权重量化和KV Cache量化，量化本质上主要解决的是显存和带宽问题。</span></p><p><span leaf="">模型权重量化压缩的是模型本体，可以让模型更容易放进显存；KV Cache量化压缩的是推理过程中的缓存，可以让长上下文和高并发更省显存。尤其在 Decode 阶段，很多时候瓶颈是读取 KV Cache 的带宽，如果 KV Cache 变小了，每一步需要搬的数据也会变少，所以量化不只是为了省钱，也是在减轻带宽压力。</span></p><h1 data-heading="true"><span leaf="">7 结论</span></h1><p><span leaf="">大模型推理慢，主要有以下几个原因：</span></p><ul ><li><div><span leaf="">• Prefill 阶段要处理完整 Prompt，长上下文会带来很高的首 Token 延迟</span></div></li><li><div><span leaf="">• Decode 阶段只能一个 Token 一个 Token 生成，只能串行运行</span></div></li><li><div><span leaf="">• KV Cache 避免了重复计算，但会吃掉大量显存</span></div></li><li><div><span leaf="">• 并发请求越多，KV Cache 管理越复杂</span></div></li><li><div><span leaf="">• 很多时候瓶颈不是算力，而是显存带宽和调度</span></div></li></ul><p><span leaf="">而目前的大模型推理加速的技术主要的优化点在于解决上述的问题：</span></p><ul ><li><div><span leaf="">• FlashAttention 减少 Attention 过程中的数据搬运</span></div></li><li><div><span leaf="">• PagedAttention 提高 KV Cache 的显存利用率</span></div></li><li><div><span leaf="">• Continuous Batching 让 GPU 尽量别闲着</span></div></li><li><div><span leaf="">• Speculative Decoding 减少大模型 Decode 步数</span></div></li><li><div><span leaf="">• 量化降低权重和 KV Cache 的显存与带宽压力</span></div></li><li><div><span leaf="">• MQA、GQA、MLA 从结构上减少 K/V 的存储和读取</span></div></li></ul><p><span leaf="">所以，大模型推理优化的核心不是单纯“堆更强的 GPU”，而是让计算、显存、带宽和调度协同起来：少搬数据、少浪费显存、少空转 GPU，让每一次生成都尽可能高效。</span></p></div><p><span leaf="">&nbsp;</span></p><p><span leaf=""><br></span></p></div><p><span leaf="">&nbsp;</span></p><div><span leaf=""><br></span></div><p></p></div>
-          <script type="text/javascript" nonce="" reportloaderror="">
-            var first_sceen__time = (+new Date());
-            if ("" == 1 && document.getElementById('js_content')) {
-              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
-            }
-          </script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="../chapters/ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
+        <a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="../chapters/ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+        <a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <article class="article">
+        <header class="article-header">
+          <div class="article-meta">第2章 · LLM 推理机制与优化</div>
+          <h1 class="article-title">大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程</h1>
+          <p class="article-summary">推理加速全流程：从 Prefill 到 KV Cache 优化</p>
+        </header>
+        <div class="article-body">
+          <p data-pm-slice="0 0 []"><span leaf="">&nbsp;</span></p>
+          <div>
+            <div><img class="rich_pages wxw-img js_insertlocalimg" data-ratio="0.5583333333333333" data-s="300,640" data-type="png" data-w="1080" type="block" data-imgfileid="100000082" data-aistatus="1" data-original-style="null" data-index="3" src="../assets/images/4fff6105_640.webp" _width="677px" alt="图片" data-report-img-idx="0" data-fail="0"></div>
+            <p><span leaf=""><br></span></p>
+            <p data-pm-slice="0 0 []"><span leaf="">&nbsp;</span></p>
+            <div>
+              <p><span leaf="">大模型推理慢，很多时候并不是因为部署模型的GPU算力不够强，也不是因为模型本身参数太大，结构复杂算不动。真正的问题在于</span></p>
+              <p><strong><span leaf="">大模型生成文本不是一次性算出完整答案，而是一个自回归生成token的过程，一个Token一个Token的往外吐，而且每一步都要访问越来越长的上下文和 KV Cache。</span></strong></p>
+              <p><span leaf="">我们在前端看到的“打字机”的效果，不是产品经理为了营造氛围故意加的动画，而是大模型真的是这么干的。大模型每生成一个新的token都需要重新看一遍已有的上下文，结合之前的历史信息然后再预测下一个新的token。</span></p>
+              <p><span leaf="">这也是为什么同一个模型：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 输入越长，首字越慢</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 输出越长，显存越吃紧</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 并发越高，吞吐越容易崩</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 上下文越大，部署成本越高</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">一般来讲，我们将大模型推理分成两个阶段：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• Prefill阶段：把用户输入的提示词prompt读完</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• Decode阶段：一个一个依次生成Token</span></div>
+                </li>
+              </ul>
+              <h1 data-heading="true"><span leaf="">1 大模型推理为什么会慢？</span></h1>
+              <p><span leaf="">我们来用大白话说下最简单的大模型推理过程，假设用户在前端聊天框输入了一句话：</span></p>
+              <blockquote>
+                <p><span leaf="">请解释KV Cache是什么？</span></p>
+              </blockquote>
+              <p><span leaf="">大模型在接收到这句用户输入之后，并不是直接生成最终的完整答案，而是根据这句话预测下一个Token。</span></p>
+              <p><span leaf="">比如先生成：</span></p>
+              <blockquote>
+                <p><span leaf="">KV</span></p>
+              </blockquote>
+              <p><span leaf="">然后把KV拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV”，再继续预测下一个Token：</span></p>
+              <blockquote>
+                <p><span leaf="">Cache</span></p>
+              </blockquote>
+              <p><span leaf="">再拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV Cache”，再预测下一个Token：</span></p>
+              <blockquote>
+                <p><span leaf="">是</span></p>
+              </blockquote>
+              <p><span leaf="">再拼回上下文，整个上下文就变成了“请解释KV Cache是什么？ KV Cache是”，再预测下一个Token，这样一直循环最终生成这个问题的完整回答。</span></p>
+              <p><span leaf="">所以，大模型推理的过程就是：</span></p>
+              <ol>
+                <li>
+                  <div><span leaf="">1. 看已有的上下文</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">2. 预测下一个Token</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">3. 把新的Token加入上下文</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">4. 再预测下一个Token</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">5. 循环</span></div>
+                </li>
+              </ol>
+              <p><span leaf="">这就是上面说的“自回归生成”。</span></p>
+              <p><span leaf="">大模型在训练的时候是可以并行处理一整段文本，但是在推理的时候，模型没有办法知道自己后面要生成什么，只能一步一步往前预测，生成Token没办法并行，只能串行，这就是大模型推理为什么慢的根本原因。</span></p>
+              <p><span leaf="">模型推理我们经常看以下指标：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">•&nbsp;</span><strong><span leaf="">TTFT</span></strong><span leaf="">：Time To First Token，首 Token 延迟，主要受 Prefill 影响</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">•&nbsp;</span><strong><span leaf="">TPOT</span></strong><span leaf="">：Time Per Output Token，每个输出 Token 的耗时，主要受 Decode 影响</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">•&nbsp;</span><strong><span leaf="">Throughput</span></strong><span leaf="">：吞吐量，通常指每秒处理多少 Token 或多少请求</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">后面详细介绍下大模型推理的的Prefill和Decode阶段分别做了什么。</span></p>
+              <h1 data-heading="true"><span leaf="">2 Prefill阶段</span></h1>
+              <p><span leaf="">大模型推理的第一个阶段是Prefill阶段，Prefill阶段就是模型先把用户输入的Prompt全部读进去，</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 如果用户输入1000个Token，模型就读入这1000个Token，计算他们之间的注意力关系</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 如果用户输入100000个Token，模型就读入这100000个Token，计算他们之间的注意力关系</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">这一个过程我们可以理解为大模型在读题，题目越长，读题的速度越慢，时间越久。在这一阶段，模型需要完整的处理输入的Token序列，计算他们之间的注意力关系，尤其是当输入的上下文很长时，中间注意力矩阵越大，显存和带宽的压力越大。</span></p>
+              <p><span leaf="">之前在FlashAttention的那个文章中我们说过一个核心的问题：</span><strong><span leaf="">GPU算得快，并不一定推理速度就快</span></strong><span leaf="">。原因就是因为虽然GPU的计算速度很快，但是数据需要在HBM和SRAM之间来回搬运，如果在Attention计算过程中生成了很大的中间矩阵，GPU就会频繁的从HBM中搬数据，这个时候GPU的计算单元实际上不是很忙，而是在等数据喂进来。</span></p>
+              <p><span leaf="">所以，在Prefill阶段：</span></p>
+              <blockquote>
+                <p><span leaf="">Prompt越长，Attention 中间结果越大，显存压力越大，数据搬运越多，GPU 越容易被内存带宽卡住，首Token的时延越高</span></p>
+              </blockquote>
+              <p><span leaf="">给我们的感觉就是，当我们问大模型一个简单的问题，感觉大模型回答的很快，但是当我们给大模型丢了一个论文的PDF，然后让他总结论文创新点时，感觉就会先卡一会然后再回答了。</span></p>
+              <h1 data-heading="true"><span leaf="">3 Decode阶段</span></h1>
+              <p><span leaf="">在Prefill阶段结束之后，大模型推理进入到第二个阶段Decode阶段。Decode 阶段每次只生成一个新 Token，好像看起来每次只算一个新Token应该很很快，但是这个阶段最主要的问题是：每生成一个新Token，都要访问之前所有Token的历史信息。</span></p>
+              <p><span leaf="">假设Prompt有8000个Token：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 生成第 1 个 Token 时，要看前面 8000 个 Token</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 生成第 100 个 Token 时，要看前面 8100 个 Token</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 生成第 1000 个 Token 时，要看前面 9000 个 Token</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">模型的上下文会越滚越长，这个时候GPU虽然每一步只生成一个Token，但是每一步都要访问之前大量的历史缓存，所以Decode阶段GPU不是算不过来，而是在等数据进来计算，计算单元很闲而显存带宽很忙。GPU的算力很强，但是要等历史缓存从显存里搬过来。</span></p>
+              <p><span leaf="">所以很多大模型推理加速的技术，并不是在模型结构和数学公式，而是想办法减少数据搬运，充分利用计算算力。</span></p>
+              <h1 data-heading="true"><span leaf="">4 KV Cache：用显存换速度</span></h1>
+              <p><span leaf="">如果像Decode阶段常规的计算方式，每次生成一个Token都要重新计算前面所有Token的K和V，那速度肯定是慢的惊人呢，所以从工程上人们自然而然的想出了KV Cache这种方式。</span></p>
+              <p><span leaf="">我们在计算Transformer的Attention时，每一个Token都会生成Query、Key、Value，对于历史的Token来说，他们的Key和Value我们已经算过了，而且不会再变，那么最直接的加速方式就是把已经算过的K和V缓存起来，不要重复计算，下次用的时候直接从缓存里面拿，这就是KV Cache，本质就是用显存换取计算速度。</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 如果大模型推理我们不用KV Cache，那么每生成一个Token，都要把历史的上下文Token的K和V都计算一遍</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 如果大模型推理我们用了KV Cache，每生成一个Token，我们只需要计算当前Token的Q，然后直接读历史Token的K和V进行计算，显而易见推理速度会快很多。</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">但是KV Cache也有问题，就是非常吃显存，显存占用大小与下面的因素相关：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 模型层数</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• hidden size</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• attention head数量</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 上下文长度</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• batch size</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 数据精度</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">通常来讲：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 上下文越长，KV Cache越大</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 并发越高，KV Cache越大</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 输出越长，KV Cache越大</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">所以很多时候在部署大模型进行推理的时候并不是放不下模型权重，而是存不下KV Cache。</span></p>
+              <blockquote>
+                <p><span leaf="">举个栗子，模型权重就像饭店里的厨房设备，开店之前就固定在那里了。KV Cache 更像每个客人桌上的餐盘和临时物品，客人越多、吃得越久、点得越多，桌面占用就越大。最后厨房没问题，反而是大厅先被堆满了。</span></p>
+              </blockquote>
+              <h1 data-heading="true"><span leaf="">5 PagedAttention：管理显存，提高利用率</span></h1>
+              <p><span leaf="">原生的KV Cache的管理方式有一个问题在于它需要为每个请求都预留一块连续的显存空间，但是用户的输入Prompt长度是不固定，有的人只问一句话、有的人直接塞进来一本电子书。</span></p>
+              <p><span leaf="">那么这种显存管理方式就有问题了，如果显存预留的太多，会浪费显存；如果显存预留的太少后面不够用；用户请求一多，还容易产生显存碎片。</span></p>
+              <p><span leaf="">由于传统的KV Cache显存管理有上述问题，天才提出PagedAttention解决上述问题。PagedAttention借鉴了操作系统分页的思想，把KV Cache切成一个一个固定大小的Block。每个请求不再需要申请一整块连续的显存，而是通过Block Table记录逻辑Token到物理Token的映射关系。用大白话说，就是KV Cache不需要连续存了，而是用到哪里分配到哪里。</span></p>
+              <p><span leaf="">举个栗子，传统 KV Cache 就像图书馆必须给每个人留一整排书架，不管你最后借几本书，这排书架都先占着。PagedAttention 则像给每个人一张借书卡，书可以放在图书馆任意空位置，只要借书卡上记录了位置就行，这样显存利用率就高很多。所以 PagedAttention 的本质不是改 Attention 公式，也不会改Attention的计算量，而是：用更聪明的显存管理方式，提高 KV Cache 的利用率，提升显存利用率和并发承载能力。</span></p>
+              <h1 data-heading="true"><span leaf="">6 常见的推理加速技术</span></h1>
+              <p><span leaf="">理解了 Prefill、Decode 和 KV Cache，再看各种推理加速技术就比较清楚了，这些技术看起来名字很多，但其实都在解决几个固定问题。</span></p>
+              <h2 data-heading="true"><span leaf="">6.1 FlashAttention</span></h2>
+              <p><span leaf="">FlashAttention 主要解决 Attention 计算中的内存访问问题。它不改数学公式，而是通过分块计算和减少 HBM 读写，让 Attention 计算尽可能在 SRAM 中完成。</span></p>
+              <p><span leaf="">所以它主要优化的是：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 长上下文 Prefill</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• Attention 中间矩阵过大</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• HBM 和 SRAM 之间频繁搬数据</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">核心思想是：能少搬就少搬。</span></p>
+              <h2 data-heading="true"><span leaf="">6.2 PagedAttention</span></h2>
+              <p><span leaf="">PagedAttention 主要解决 KV Cache 的显存管理问题。它不让每个请求预留一大块连续显存，而是把 KV Cache 切成块，按需分配。</span></p>
+              <p><span leaf="">它主要优化的是：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• 显存碎片</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• KV Cache 浪费</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 多用户并发</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 长短请求混合调度</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">核心思想是：像操作系统管理内存一样管理 KV Cache。</span></p>
+              <h2 data-heading="true"><span leaf="">6.3 Continuous Batching</span></h2>
+              <p><span leaf="">普通 batching 很适合训练，但是推理不太一样。因为每个用户的请求长度不同，生成长度也不同。有的请求已经生成完了，有的请求还在继续生成，如果 batch 不能动态调整，GPU 就会出现空转。</span></p>
+              <p><span leaf="">Continuous Batching 解决的就是这个问题，它会动态把不同阶段的请求拼在一起，让 GPU 尽量一直有活干。</span></p>
+              <p><span leaf="">核心思想是：减少 GPU 等请求的时间，提高吞吐。</span></p>
+              <h2 data-heading="true"><span leaf="">6.4 Speculative Decoding</span></h2>
+              <p><span leaf="">Decode 阶段最大的麻烦是一个 Token 一个 Token 生成，速度太慢。</span></p>
+              <p><span leaf="">Speculative Decoding 的思路是：让一个小模型先猜几个 Token，然后让大模型验证。如果小模型猜对了，大模型就可以一次接受多个 Token。如果猜错了，再回退重新生成。这就像让一个便宜的实习生先写草稿，再让专家快速审核，如果草稿大差不差，专家就不用一个字一个字重写。</span></p>
+              <p><span leaf="">它主要优化的是：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• Decode 串行生成</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 单 Token 生成太慢</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 大模型每一步都太贵</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">核心思想是：用小模型的低成本猜测，换大模型的生成步数减少。</span></p>
+              <h2 data-heading="true"><span leaf="">6.5 MQA、GQA、MLA</span></h2>
+              <p><span leaf="">这些都是注意力结构优化，本质上也和 KV Cache 有关。普通 Multi-Head Attention 中，每个 head 都有自己的 K 和 V，这样效果灵活，但是 KV Cache 很大。MQA、GQA、MLA 这类方法，都是在想办法减少 K 和 V 的存储与读取压力。</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• MQA：所有 Query head 共用一组 K/V</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• GQA：多个 Query head 共用一组 K/V，是 MHA 和 MQA 的折中</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• MLA：通过更紧凑的潜在表示压缩 KV Cache，进一步降低缓存压力</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">简单理解就是：不要让每个 Query 都带一整套独立的 K/V。</span></p>
+              <p><span leaf="">这样可以降低 KV Cache 占用，也能减少 Decode 阶段的数据搬运。</span></p>
+              <h2 data-heading="true"><span leaf="">6.6 量化</span></h2>
+              <p><span leaf="">量化可以分为模型权重量化和KV Cache量化，量化本质上主要解决的是显存和带宽问题。</span></p>
+              <p><span leaf="">模型权重量化压缩的是模型本体，可以让模型更容易放进显存；KV Cache量化压缩的是推理过程中的缓存，可以让长上下文和高并发更省显存。尤其在 Decode 阶段，很多时候瓶颈是读取 KV Cache 的带宽，如果 KV Cache 变小了，每一步需要搬的数据也会变少，所以量化不只是为了省钱，也是在减轻带宽压力。</span></p>
+              <h1 data-heading="true"><span leaf="">7 结论</span></h1>
+              <p><span leaf="">大模型推理慢，主要有以下几个原因：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• Prefill 阶段要处理完整 Prompt，长上下文会带来很高的首 Token 延迟</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• Decode 阶段只能一个 Token 一个 Token 生成，只能串行运行</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• KV Cache 避免了重复计算，但会吃掉大量显存</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 并发请求越多，KV Cache 管理越复杂</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 很多时候瓶颈不是算力，而是显存带宽和调度</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">而目前的大模型推理加速的技术主要的优化点在于解决上述的问题：</span></p>
+              <ul>
+                <li>
+                  <div><span leaf="">• FlashAttention 减少 Attention 过程中的数据搬运</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• PagedAttention 提高 KV Cache 的显存利用率</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• Continuous Batching 让 GPU 尽量别闲着</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• Speculative Decoding 减少大模型 Decode 步数</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• 量化降低权重和 KV Cache 的显存与带宽压力</span></div>
+                </li>
+                <li>
+                  <div><span leaf="">• MQA、GQA、MLA 从结构上减少 K/V 的存储和读取</span></div>
+                </li>
+              </ul>
+              <p><span leaf="">所以，大模型推理优化的核心不是单纯“堆更强的 GPU”，而是让计算、显存、带宽和调度协同起来：少搬数据、少浪费显存、少空转 GPU，让每一次生成都尽可能高效。</span></p>
+            </div>
+            <p><span leaf="">&nbsp;</span></p>
+            <p><span leaf=""><br></span></p>
+          </div>
+          <p><span leaf="">&nbsp;</span></p>
+          <div><span leaf=""><br></span></div>
+          <p></p>
         </div>
-                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
-                
-        <div 
-</div>
-<footer class="article-footer">
-<div class="article-nav">
-<a href="llm-推理为什么先慢后快从-prefilldecode-到-kv-cache-讲清楚.html" class="nav-prev">&larr; 上一篇</a>
-<a href="../chapters/ch2-inference.html" class="nav-toc">目录</a>
-<a href="大模型推理到底在做什么从-prefilldecode-到-vllm一次讲透.html" class="nav-next">下一篇 &rarr;</a>
-</div>
-</footer>
-</article>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+        <script type="text/javascript" nonce="" reportloaderror="">
+          var first_sceen__time = (+new Date());
+          if ("" == 1 && document.getElementById('js_content')) {
+            document.getElementById('js_content').addEventListener("selectstart", function(e) {
+              e.preventDefault();
+            });
+          }
+
+        </script>
+        </div>
+        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+
+        <div </div>
+          <footer class="article-footer">
+            <div class="article-nav">
+              <a href="llm-推理为什么先慢后快从-prefilldecode-到-kv-cache-讲清楚.html" class="nav-prev">&larr; 上一篇</a>
+              <a href="../chapters/ch2-inference.html" class="nav-toc">目录</a>
+              <a href="大模型推理到底在做什么从-prefilldecode-到-vllm一次讲透.html" class="nav-next">下一篇 &rarr;</a>
+            </div>
+          </footer>
+      </article>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

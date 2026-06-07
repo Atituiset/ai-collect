@@ -1,56 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>又一个神级 Claude Code 插件，开源了！ - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
-<a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
-<a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<article class="article">
-<header class="article-header">
-<div class="article-meta">第5章 · Claude Code 源码深度解读</div>
-<h1 class="article-title">又一个神级 Claude Code 插件，开源了！</h1>
-<p class="article-summary">Claude Code 插件生态与开源工具</p>
-</header>
-<div class="article-body">
-<p data-pm-slice="0 0 []"><span><span leaf="">现在越来越觉得，Claude Code 或 Codex 最大的问题，已经不是写不出代码。</span></span></p><p><span><span leaf="">而是它记不住项目是怎么走到今天的。</span></span></p><p><span><span leaf="">上周刚跟它折腾两小时解决的一个 Bug，今天新开对话，它便完全不记得之前走到哪一步。</span></span></p><p><span><span leaf="">还有前天定下来的接口设计，AI 又找不到，直接给我们返回一套全新的方案。</span></span></p><p><span><span leaf="">为了让它有点记性，我们会习惯写一份 CLAUDE.md，把项目相关规则塞进去。</span></span></p><p><span><span leaf="">但这份文件得自己手动维护，对话里聊的关键决策、踩过的坑，AI 统统不会自动记下来。</span></span></p><p><span><span leaf="">直到最近，在 GitHub 上看到&nbsp;</span></span><strong><span><span leaf="">EverOS</span></span></strong><span><span leaf="">&nbsp;这个开源项目，它给 AI 装上了能自我进化的记忆。</span></span></p><p><span><span leaf="">GitHub：</span></span><span leaf="">https://github.com/EverMind-AI/EverOS</span></p><div><img alt="image-20260519004220124" class="rich_pages wxw-img" data-ratio="0.6251226692836114" data-type="png" data-w="1019" data-imgfileid="310510339" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="3" src="../assets/images/b78caf76_640.webp" _width="677px" data-report-img-idx="0" data-fail="0"></div><p><span><span leaf="">项目由 EverMind（盛大旗下）团队开源。当打开项目看到的第一眼，有点被惊讶到了。</span></span></p><p><span><span leaf="">有超过 20 个真实落地的应用案例，覆盖各种不同的场景，而且全部均已开源可用。</span></span></p><p><span><span leaf="">其中就有一个 EverOS Claude Code 插件，正好解决了开头提及到的痛点。</span></span></p><div><img alt="image-20260519093445494" class="rich_pages wxw-img" data-ratio="0.45925925925925926" data-type="png" data-w="1080" data-imgfileid="310510337" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="4" src="../assets/images/b78caf76_640(1).webp" _width="677px" data-report-img-idx="1" data-fail="0"></div><p><span><span leaf="">装上插件之后，与 Claude Code 的每次对话内容它会自动保存下来。</span></span></p><p><span><span leaf="">当打开新对话，它会自动检索最近的内容，让 Claude 一上来就知道我们最近在哪个项目、做到了哪一步。</span></span></p><p><span><span leaf="">然后在提问的时候，它还会先去搜相关历史记忆，把检索到的内容塞进 Claude 的上下文。</span></span></p><p><span><span leaf="">比如问一句「我该怎么处理身份认证」，它会自动找回 2 天前讨论过的 JWT 实现方案。</span></span></p><div><img alt="image-20260520124705623" class="rich_pages wxw-img" data-ratio="0.6441073512252042" data-type="png" data-w="857" data-imgfileid="310510338" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="5" src="../assets/images/b78caf76_640(2).webp" _width="677px" data-report-img-idx="2" data-fail="0"></div><p><span><span leaf="">想翻看历史决策的时候，还能在记忆库里直接搜索，定位到某次讨论。</span></span></p><p><span><span leaf="">不止这些。它还自带一个仿 GitHub 风格的记忆面板。</span></span></p><p><span><span leaf="">面板里有 6 个月的活动热力图、按项目分组的记忆时间线、最近 7 天的增长曲线。</span></span></p><p><span><span leaf="">最近在做哪个项目、聊了多少轮对话、讨论过什么决策，打开面板一目了然。</span></span></p><div><img alt="image-20260520124805319" class="rich_pages wxw-img" data-ratio="0.5888888888888889" data-type="png" data-w="1080" data-imgfileid="310510340" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="6" src="../assets/images/b78caf76_640(3).webp" _width="677px" data-report-img-idx="3" data-fail="0"></div><p><span><span leaf="">这个插件安装也非常简单，一行命令就搞定：</span></span></p><div><ul class="code-snippet__line-index code-snippet__js"><li></li></ul><pre class="code-snippet__js" data-lang="bash"><code><span leaf="">curl-fsSL https://raw.githubusercontent.com/EverMind-AI/evermem-claude-code/main/install.sh | bash</span></code></pre></div><p><span><span leaf="">脚本会引导填写 API 密钥、保存到配置、接着自动进行插件安装，全程基本不需要动手。</span></span></p><p><span><span leaf="">然而 Claude Code 插件，只是 EverOS 在开发者场景里的一个落地案例。</span></span></p><p><span><span leaf="">在仓库里还放着其他领域、完全不同应用场景的产品。</span></span></p><p><span><span leaf="">比如给中学生用的学习陪伴助手、给阿尔茨海默症患者用的记忆辅助应用、 AI 可穿戴设备等。</span></span></p><div><img class="rich_pages wxw-img" data-ratio="3.2052274927395934" data-s="300,640" data-type="png" data-w="1033" type="block" data-imgfileid="310510341" data-aistatus="1" data-original-style="null" data-index="7" src="../assets/images/b78caf76_640(4).webp" _width="677px" alt="图片" data-report-img-idx="4" data-fail="0"></div><p><span leaf="">可以上下滚动的图片&nbsp;</span><span leaf=""><br></span></div><p><span><span leaf="">同一套底层记忆服务，撑起完全不同形态的应用，而且所有案例的代码都开源。</span></span></p><p><span><span leaf="">我们可以把 EverOS 项目克隆下来、在本地跑通之后，挑选一个案例改造变成自己的东西。</span></span></p><p><span><span leaf="">对于 EverOS 的安装也不复杂，核心命令主要如下几条，可用 Docker 快速部署：</span></span></p><div><ul class="code-snippet__line-index code-snippet__js"><li></li><li></li><li></li><li></li></ul><pre class="code-snippet__js" data-lang="bash"><code><span leaf="">git&nbsp;<span class="code-snippet__built_in">clone</span>&nbsp;https://github.com/EverMind-AI/EverOS.git</span></code><code><span leaf=""><span class="code-snippet__built_in">cd</span>&nbsp;EverOS/methods/EverCore</span></code><code><span leaf="">docker compose up -d</span></code><code><span leaf="">uv&nbsp;<span class="code-snippet__built_in">sync</span>&nbsp;&amp;&amp; uv run python src/run.py</span></code></pre></div><p><span><span leaf="">配好相关密钥，即可接入到自己的 AI 应用里，具体步骤可查看项目 README 文档。</span></span></p><h3><span><span leaf="">写在最后</span></span></h3><p><span><span leaf="">回看 2026 年这半年，AI 行业正从「拼模型参数」，转向「Agent 长期可用」。</span></span></p><p><span><span leaf="">EverOS 把 AI 长期记忆这事，从提示词技巧推进成了一个可运行的基础设施。</span></span></p><p><span><span leaf="">这意味着 AI 可以跨会话、跨场景记住更多事情，就像前面介绍的 Claude Code 插件。</span></span></p><p><span><span leaf="">一个能记住我们项目迭代每一步的 AI 编程助手，才是真正的编程伙伴。</span></span></p><p><span><span leaf="">此外，EverOS 仓库里还有超 20 个已开源真实落地的案例，每一个都值得我们克隆下来学习。</span></span></p><p><span><span leaf="">有动手能力的开发者，还可以对它们进行改动，变成自己的东西。</span></span></p><p><span><span leaf="">也可以顺手 Star 关注一下，留意 EverOS 仓库后续更多的落地案例开源。</span></span></p><p><span><span leaf="">GitHub 项目地址：</span></span><span leaf="">https://github.com/EverMind-AI/EverOS</span></p><p><span><span leaf="">今天的分享到此结束，感谢大家抽空阅读，我们下期再见，Respect！</span></span></p><p></p></div>
-          <script type="text/javascript" nonce="" reportloaderror="">
-            var first_sceen__time = (+new Date());
-            if ("" == 1 && document.getElementById('js_content')) {
-              document.getElementById('js_content').addEventListener("selectstart",function(e){ e.preventDefault(); });
-            }
-          </script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>又一个神级 Claude Code 插件，开源了！ - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
+
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../chapters/ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="../chapters/ch2-inference.html" class="nav-chapter ">LLM 推理机制与优化</a>
+        <a href="../chapters/ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="../chapters/ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="../chapters/ch5-claude-code.html" class="nav-chapter active">Claude Code 源码深度解读</a>
+        <a href="../chapters/ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <article class="article">
+        <header class="article-header">
+          <div class="article-meta">第5章 · Claude Code 源码深度解读</div>
+          <h1 class="article-title">又一个神级 Claude Code 插件，开源了！</h1>
+          <p class="article-summary">Claude Code 插件生态与开源工具</p>
+        </header>
+        <div class="article-body">
+          <p data-pm-slice="0 0 []"><span><span leaf="">现在越来越觉得，Claude Code 或 Codex 最大的问题，已经不是写不出代码。</span></span></p>
+          <p><span><span leaf="">而是它记不住项目是怎么走到今天的。</span></span></p>
+          <p><span><span leaf="">上周刚跟它折腾两小时解决的一个 Bug，今天新开对话，它便完全不记得之前走到哪一步。</span></span></p>
+          <p><span><span leaf="">还有前天定下来的接口设计，AI 又找不到，直接给我们返回一套全新的方案。</span></span></p>
+          <p><span><span leaf="">为了让它有点记性，我们会习惯写一份 CLAUDE.md，把项目相关规则塞进去。</span></span></p>
+          <p><span><span leaf="">但这份文件得自己手动维护，对话里聊的关键决策、踩过的坑，AI 统统不会自动记下来。</span></span></p>
+          <p><span><span leaf="">直到最近，在 GitHub 上看到&nbsp;</span></span><strong><span><span leaf="">EverOS</span></span></strong><span><span leaf="">&nbsp;这个开源项目，它给 AI 装上了能自我进化的记忆。</span></span></p>
+          <p><span><span leaf="">GitHub：</span></span><span leaf="">https://github.com/EverMind-AI/EverOS</span></p>
+          <div><img alt="image-20260519004220124" class="rich_pages wxw-img" data-ratio="0.6251226692836114" data-type="png" data-w="1019" data-imgfileid="310510339" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="3" src="../assets/images/b78caf76_640.webp" _width="677px" data-report-img-idx="0" data-fail="0"></div>
+          <p><span><span leaf="">项目由 EverMind（盛大旗下）团队开源。当打开项目看到的第一眼，有点被惊讶到了。</span></span></p>
+          <p><span><span leaf="">有超过 20 个真实落地的应用案例，覆盖各种不同的场景，而且全部均已开源可用。</span></span></p>
+          <p><span><span leaf="">其中就有一个 EverOS Claude Code 插件，正好解决了开头提及到的痛点。</span></span></p>
+          <div><img alt="image-20260519093445494" class="rich_pages wxw-img" data-ratio="0.45925925925925926" data-type="png" data-w="1080" data-imgfileid="310510337" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="4" src="../assets/images/b78caf76_640(1).webp" _width="677px" data-report-img-idx="1" data-fail="0"></div>
+          <p><span><span leaf="">装上插件之后，与 Claude Code 的每次对话内容它会自动保存下来。</span></span></p>
+          <p><span><span leaf="">当打开新对话，它会自动检索最近的内容，让 Claude 一上来就知道我们最近在哪个项目、做到了哪一步。</span></span></p>
+          <p><span><span leaf="">然后在提问的时候，它还会先去搜相关历史记忆，把检索到的内容塞进 Claude 的上下文。</span></span></p>
+          <p><span><span leaf="">比如问一句「我该怎么处理身份认证」，它会自动找回 2 天前讨论过的 JWT 实现方案。</span></span></p>
+          <div><img alt="image-20260520124705623" class="rich_pages wxw-img" data-ratio="0.6441073512252042" data-type="png" data-w="857" data-imgfileid="310510338" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="5" src="../assets/images/b78caf76_640(2).webp" _width="677px" data-report-img-idx="2" data-fail="0"></div>
+          <p><span><span leaf="">想翻看历史决策的时候，还能在记忆库里直接搜索，定位到某次讨论。</span></span></p>
+          <p><span><span leaf="">不止这些。它还自带一个仿 GitHub 风格的记忆面板。</span></span></p>
+          <p><span><span leaf="">面板里有 6 个月的活动热力图、按项目分组的记忆时间线、最近 7 天的增长曲线。</span></span></p>
+          <p><span><span leaf="">最近在做哪个项目、聊了多少轮对话、讨论过什么决策，打开面板一目了然。</span></span></p>
+          <div><img alt="image-20260520124805319" class="rich_pages wxw-img" data-ratio="0.5888888888888889" data-type="png" data-w="1080" data-imgfileid="310510340" data-aistatus="1" data-original-style="box-sizing: border-box;max-width: 100%;vertical-align: middle;image-orientation: from-image;display: block;margin: auto;" data-index="6" src="../assets/images/b78caf76_640(3).webp" _width="677px" data-report-img-idx="3" data-fail="0"></div>
+          <p><span><span leaf="">这个插件安装也非常简单，一行命令就搞定：</span></span></p>
+          <div>
+            <ul class="code-snippet__line-index code-snippet__js">
+              <li></li>
+            </ul><pre class="code-snippet__js" data-lang="bash"><code><span leaf="">curl-fsSL https://raw.githubusercontent.com/EverMind-AI/evermem-claude-code/main/install.sh | bash</span></code></pre>
+          </div>
+          <p><span><span leaf="">脚本会引导填写 API 密钥、保存到配置、接着自动进行插件安装，全程基本不需要动手。</span></span></p>
+          <p><span><span leaf="">然而 Claude Code 插件，只是 EverOS 在开发者场景里的一个落地案例。</span></span></p>
+          <p><span><span leaf="">在仓库里还放着其他领域、完全不同应用场景的产品。</span></span></p>
+          <p><span><span leaf="">比如给中学生用的学习陪伴助手、给阿尔茨海默症患者用的记忆辅助应用、 AI 可穿戴设备等。</span></span></p>
+          <div><img class="rich_pages wxw-img" data-ratio="3.2052274927395934" data-s="300,640" data-type="png" data-w="1033" type="block" data-imgfileid="310510341" data-aistatus="1" data-original-style="null" data-index="7" src="../assets/images/b78caf76_640(4).webp" _width="677px" alt="图片" data-report-img-idx="4" data-fail="0"></div>
+          <p><span leaf="">可以上下滚动的图片&nbsp;</span><span leaf=""><br></span>
         </div>
-                        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
-                
-        <div 
-</div>
-<footer class="article-footer">
-<div class="article-nav">
-<a href="claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="nav-prev">&larr; 上一篇</a>
-<a href="../chapters/ch5-claude-code.html" class="nav-toc">目录</a>
-<a href="基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案.html" class="nav-next">下一篇 &rarr;</a>
-</div>
-</footer>
-</article>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+        <p><span><span leaf="">同一套底层记忆服务，撑起完全不同形态的应用，而且所有案例的代码都开源。</span></span></p>
+        <p><span><span leaf="">我们可以把 EverOS 项目克隆下来、在本地跑通之后，挑选一个案例改造变成自己的东西。</span></span></p>
+        <p><span><span leaf="">对于 EverOS 的安装也不复杂，核心命令主要如下几条，可用 Docker 快速部署：</span></span></p>
+        <div>
+          <ul class="code-snippet__line-index code-snippet__js">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul><pre class="code-snippet__js" data-lang="bash"><code><span leaf="">git&nbsp;<span class="code-snippet__built_in">clone</span>&nbsp;https://github.com/EverMind-AI/EverOS.git</span></code><code><span leaf=""><span class="code-snippet__built_in">cd</span>&nbsp;EverOS/methods/EverCore</span></code><code><span leaf="">docker compose up -d</span></code><code><span leaf="">uv&nbsp;<span class="code-snippet__built_in">sync</span>&nbsp;&amp;&amp; uv run python src/run.py</span></code></pre>
+        </div>
+        <p><span><span leaf="">配好相关密钥，即可接入到自己的 AI 应用里，具体步骤可查看项目 README 文档。</span></span></p>
+        <h3><span><span leaf="">写在最后</span></span></h3>
+        <p><span><span leaf="">回看 2026 年这半年，AI 行业正从「拼模型参数」，转向「Agent 长期可用」。</span></span></p>
+        <p><span><span leaf="">EverOS 把 AI 长期记忆这事，从提示词技巧推进成了一个可运行的基础设施。</span></span></p>
+        <p><span><span leaf="">这意味着 AI 可以跨会话、跨场景记住更多事情，就像前面介绍的 Claude Code 插件。</span></span></p>
+        <p><span><span leaf="">一个能记住我们项目迭代每一步的 AI 编程助手，才是真正的编程伙伴。</span></span></p>
+        <p><span><span leaf="">此外，EverOS 仓库里还有超 20 个已开源真实落地的案例，每一个都值得我们克隆下来学习。</span></span></p>
+        <p><span><span leaf="">有动手能力的开发者，还可以对它们进行改动，变成自己的东西。</span></span></p>
+        <p><span><span leaf="">也可以顺手 Star 关注一下，留意 EverOS 仓库后续更多的落地案例开源。</span></span></p>
+        <p><span><span leaf="">GitHub 项目地址：</span></span><span leaf="">https://github.com/EverMind-AI/EverOS</span></p>
+        <p><span><span leaf="">今天的分享到此结束，感谢大家抽空阅读，我们下期再见，Respect！</span></span></p>
+        <p></p>
+        </div>
+        <script type="text/javascript" nonce="" reportloaderror="">
+          var first_sceen__time = (+new Date());
+          if ("" == 1 && document.getElementById('js_content')) {
+            document.getElementById('js_content').addEventListener("selectstart", function(e) {
+              e.preventDefault();
+            });
+          }
+
+        </script>
+        </div>
+        <div id="js_tags_preview_toast" class="article-tag__error-tips">预览时标签不可点</div>
+
+        <div </div>
+          <footer class="article-footer">
+            <div class="article-nav">
+              <a href="claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="nav-prev">&larr; 上一篇</a>
+              <a href="../chapters/ch5-claude-code.html" class="nav-toc">目录</a>
+              <a href="基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案.html" class="nav-next">下一篇 &rarr;</a>
+            </div>
+          </footer>
+      </article>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>

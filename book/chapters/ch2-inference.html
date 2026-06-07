@@ -1,152 +1,155 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第2章 LLM 推理机制与优化 - AI 技术全景：从 Transformer 到 Agent 工程</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<aside class="sidebar">
-<div class="sidebar-header">
-<a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
-</div>
-<nav class="sidebar-nav">
-<a href="ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
-<a href="ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
-<a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
-<a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
-<a href="ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
-<a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
 
-</nav>
-</aside>
-<main class="main-content">
-<div class="chapter-page">
-<header class="chapter-header">
-<span class="chapter-number">第 2 章</span>
-<h1>LLM 推理机制与优化</h1>
-<p class="chapter-desc">Prefill/Decode、KV Cache、vLLM、SGLang、RL对齐 —— 推理与训练优化全栈</p>
-</header>
-<div class="article-list">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第2章 LLM 推理机制与优化 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
 
-<a href="../articles/llm-推理为什么先慢后快从-prefilldecode-到-kv-cache-讲清楚.html" class="article-card">
-<span class="article-order">01</span>
-<div class="article-card-body">
-<h3>LLM 推理为什么先慢后快？从 Prefill、Decode 到 KV Cache 讲清楚</h3>
-<p>Prefill/Decode 两阶段与自回归生成原理</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/大模型推理为什么慢从-prefilldecode-到-kv-cache一文讲透推理加速全流程.html" class="article-card">
-<span class="article-order">02</span>
-<div class="article-card-body">
-<h3>大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程</h3>
-<p>推理加速全流程：从 Prefill 到 KV Cache 优化</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/大模型推理到底在做什么从-prefilldecode-到-vllm一次讲透.html" class="article-card">
-<span class="article-order">03</span>
-<div class="article-card-body">
-<h3>大模型推理到底在做什么？从 Prefill、Decode 到 vLLM，一次讲透</h3>
-<p>推理本质：预测下一个 token 的完整流程</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/彻底搞懂-llm-推理全过程.html" class="article-card">
-<span class="article-order">04</span>
-<div class="article-card-body">
-<h3>彻底搞懂 LLM 推理全过程</h3>
-<p>LLM 推理从输入到输出的每个环节</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/llm推理全流程解析从输入到输出的底层逻辑.html" class="article-card">
-<span class="article-order">05</span>
-<div class="article-card-body">
-<h3>LLM推理全流程解析：从输入到输出的底层逻辑</h3>
-<p>9 步推理流水线：分词、嵌入、采样、解码</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/理解-kv-cachellm-推理为什么能越写越快.html" class="article-card">
-<span class="article-order">06</span>
-<div class="article-card-body">
-<h3>理解 KV Cache：LLM 推理为什么能越写越快</h3>
-<p>KV Cache 原理、GQA/MQA 优化与内存管理</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/llm推理优化核心技术.html" class="article-card">
-<span class="article-order">07</span>
-<div class="article-card-body">
-<h3>LLM推理优化核心技术</h3>
-<p>量化、蒸馏、投机解码等推理优化技术全景</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/大模型推理系统入门从模型优化到调度优化.html" class="article-card">
-<span class="article-order">08</span>
-<div class="article-card-body">
-<h3>大模型推理系统入门：从模型优化到调度优化</h3>
-<p>vLLM 技术路线图：模型优化与调度优化</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/vllm-如何管理-kv-cache从-vllm-本地-block-管理到跨实例缓存池.html" class="article-card">
-<span class="article-order">09</span>
-<div class="article-card-body">
-<h3>vLLM 如何管理 KV Cache：从 vLLM 本地 Block 管理到跨实例缓存池</h3>
-<p>Block 状态机、PagedAttention、Prefix Caching</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/llm大模型是如何运行起来的从hello-world到vllm的运行时深度解析.html" class="article-card">
-<span class="article-order">10</span>
-<div class="article-card-body">
-<h3>LLM大模型是如何运行起来的：从Hello World到vLLM的运行时深度解析</h3>
-<p>vLLM 运行时架构与请求处理全流程</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/sglang推理优化-调度器核心schedulebatch.html" class="article-card">
-<span class="article-order">11</span>
-<div class="article-card-body">
-<h3>SGLang推理优化-调度器核心ScheduleBatch</h3>
-<p>SGLang 调度器核心 ScheduleBatch 实现</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/sglang推理优化-scheduler-到-forward-推理的-batch-数据流.html" class="article-card">
-<span class="article-order">12</span>
-<div class="article-card-body">
-<h3>SGLang推理优化-Scheduler 到 Forward 推理的 Batch 数据流</h3>
-<p>从 Scheduler 到 Forward 的 Batch 数据流</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/sglang推理优化-dp并行.html" class="article-card">
-<span class="article-order">13</span>
-<div class="article-card-body">
-<h3>SGLang推理优化-DP并行</h3>
-<p>SGLang DP 并行推理优化</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-<a href="../articles/2026-年面向-llm-的-rl方法总结从-ppo-到-dpo-到-grpo再到多智能体-rl.html" class="article-card">
-<span class="article-order">14</span>
-<div class="article-card-body">
-<h3>2026 年面向 LLM 的 RL方法总结：从 PPO 到 DPO 到 GRPO，再到多智能体 RL</h3>
-<p>PPO→DPO→GRPO→多智能体 RL 对齐方法演进</p>
-</div>
-<span class="arrow">&rarr;</span>
-</a>
-</div>
-<nav class="chapter-nav"><a href="ch1-transformer.html" class="nav-prev">&larr; Transformer 与模型架构基础</a><a href="../index.html" class="nav-toc">首页</a><a href="ch3-infra.html" class="nav-next">AI Infra 与硬件加速 &rarr;</a></nav>
-</div>
-</main>
-<button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
-<script src="../assets/theme.js"></script>
-</body>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="site-title">AI 技术全景：从 Transformer 到 Agent 工程</a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="ch1-transformer.html" class="nav-chapter ">Transformer 与模型架构基础</a>
+        <a href="ch2-inference.html" class="nav-chapter active">LLM 推理机制与优化</a>
+        <a href="ch3-infra.html" class="nav-chapter ">AI Infra 与硬件加速</a>
+        <a href="ch4-agent.html" class="nav-chapter ">Agent 架构与 Harness 工程</a>
+        <a href="ch5-claude-code.html" class="nav-chapter ">Claude Code 源码深度解读</a>
+        <a href="ch6-career.html" class="nav-chapter ">行业全景与职业发展</a>
+
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="chapter-page">
+        <header class="chapter-header">
+          <span class="chapter-number">第 2 章</span>
+          <h1>LLM 推理机制与优化</h1>
+          <p class="chapter-desc">Prefill/Decode、KV Cache、vLLM、SGLang、RL对齐 —— 推理与训练优化全栈</p>
+        </header>
+        <div class="article-list">
+
+          <a href="../articles/llm-推理为什么先慢后快从-prefilldecode-到-kv-cache-讲清楚.html" class="article-card">
+            <span class="article-order">01</span>
+            <div class="article-card-body">
+              <h3>LLM 推理为什么先慢后快？从 Prefill、Decode 到 KV Cache 讲清楚</h3>
+              <p>Prefill/Decode 两阶段与自回归生成原理</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/大模型推理为什么慢从-prefilldecode-到-kv-cache一文讲透推理加速全流程.html" class="article-card">
+            <span class="article-order">02</span>
+            <div class="article-card-body">
+              <h3>大模型推理为什么慢？从 Prefill、Decode 到 KV Cache，一文讲透推理加速全流程</h3>
+              <p>推理加速全流程：从 Prefill 到 KV Cache 优化</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/大模型推理到底在做什么从-prefilldecode-到-vllm一次讲透.html" class="article-card">
+            <span class="article-order">03</span>
+            <div class="article-card-body">
+              <h3>大模型推理到底在做什么？从 Prefill、Decode 到 vLLM，一次讲透</h3>
+              <p>推理本质：预测下一个 token 的完整流程</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/彻底搞懂-llm-推理全过程.html" class="article-card">
+            <span class="article-order">04</span>
+            <div class="article-card-body">
+              <h3>彻底搞懂 LLM 推理全过程</h3>
+              <p>LLM 推理从输入到输出的每个环节</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/llm推理全流程解析从输入到输出的底层逻辑.html" class="article-card">
+            <span class="article-order">05</span>
+            <div class="article-card-body">
+              <h3>LLM推理全流程解析：从输入到输出的底层逻辑</h3>
+              <p>9 步推理流水线：分词、嵌入、采样、解码</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/理解-kv-cachellm-推理为什么能越写越快.html" class="article-card">
+            <span class="article-order">06</span>
+            <div class="article-card-body">
+              <h3>理解 KV Cache：LLM 推理为什么能越写越快</h3>
+              <p>KV Cache 原理、GQA/MQA 优化与内存管理</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/llm推理优化核心技术.html" class="article-card">
+            <span class="article-order">07</span>
+            <div class="article-card-body">
+              <h3>LLM推理优化核心技术</h3>
+              <p>量化、蒸馏、投机解码等推理优化技术全景</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/大模型推理系统入门从模型优化到调度优化.html" class="article-card">
+            <span class="article-order">08</span>
+            <div class="article-card-body">
+              <h3>大模型推理系统入门：从模型优化到调度优化</h3>
+              <p>vLLM 技术路线图：模型优化与调度优化</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/vllm-如何管理-kv-cache从-vllm-本地-block-管理到跨实例缓存池.html" class="article-card">
+            <span class="article-order">09</span>
+            <div class="article-card-body">
+              <h3>vLLM 如何管理 KV Cache：从 vLLM 本地 Block 管理到跨实例缓存池</h3>
+              <p>Block 状态机、PagedAttention、Prefix Caching</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/llm大模型是如何运行起来的从hello-world到vllm的运行时深度解析.html" class="article-card">
+            <span class="article-order">10</span>
+            <div class="article-card-body">
+              <h3>LLM大模型是如何运行起来的：从Hello World到vLLM的运行时深度解析</h3>
+              <p>vLLM 运行时架构与请求处理全流程</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/sglang推理优化-调度器核心schedulebatch.html" class="article-card">
+            <span class="article-order">11</span>
+            <div class="article-card-body">
+              <h3>SGLang推理优化-调度器核心ScheduleBatch</h3>
+              <p>SGLang 调度器核心 ScheduleBatch 实现</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/sglang推理优化-scheduler-到-forward-推理的-batch-数据流.html" class="article-card">
+            <span class="article-order">12</span>
+            <div class="article-card-body">
+              <h3>SGLang推理优化-Scheduler 到 Forward 推理的 Batch 数据流</h3>
+              <p>从 Scheduler 到 Forward 的 Batch 数据流</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/sglang推理优化-dp并行.html" class="article-card">
+            <span class="article-order">13</span>
+            <div class="article-card-body">
+              <h3>SGLang推理优化-DP并行</h3>
+              <p>SGLang DP 并行推理优化</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+          <a href="../articles/2026-年面向-llm-的-rl方法总结从-ppo-到-dpo-到-grpo再到多智能体-rl.html" class="article-card">
+            <span class="article-order">14</span>
+            <div class="article-card-body">
+              <h3>2026 年面向 LLM 的 RL方法总结：从 PPO 到 DPO 到 GRPO，再到多智能体 RL</h3>
+              <p>PPO→DPO→GRPO→多智能体 RL 对齐方法演进</p>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+        </div>
+        <nav class="chapter-nav"><a href="ch1-transformer.html" class="nav-prev">&larr; Transformer 与模型架构基础</a><a href="../index.html" class="nav-toc">首页</a><a href="ch3-infra.html" class="nav-next">AI Infra 与硬件加速 &rarr;</a></nav>
+      </div>
+    </main>
+    <button class="sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">&#9776;</button>
+    <script src="../assets/theme.js"></script>
+  </body>
+
 </html>
