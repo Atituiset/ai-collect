@@ -15,5 +15,8 @@ collects/
 # Secrets
 .env
 
+# Build output
+book/
+
 # Misc
 dist/
