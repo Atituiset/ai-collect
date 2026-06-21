@@ -1,0 +1,571 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Claude Code 的 12 个可复用的 Agentic Harness 设计模式 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter05/claude-code-的-12-个可复用的-agentic-harness-设计模式.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="claude-code-的-12-个可复用的-agentic-harness-设计模式"><a class="header" href="#claude-code-的-12-个可复用的-agentic-harness-设计模式">Claude Code 的 12 个可复用的 Agentic Harness 设计模式</a></h1>
+<p>Claude Code 源码泄露后，技术圈都在研究它的实现细节。但 Bilgin lbryam 做了件更值钱的事——把实现提炼成 12 个可复用的设计模式，分成四类：<strong>记忆与上下文、工作流与编排、工具与权限、自动化</strong>。</p>
+<p>大多数中文解读在翻译"这 12 个模式分别是什么"。本文换一个入口：<strong>为什么恰好是这 12 个？每一类解决 Agent 工程的什么结构性痛点？你什么时候该用，什么时候用力过猛？</strong></p>
+<p>我第一次意识到 Agent 需要记忆管理，是跑 DecoupleAI 流水线的时候——换了一个新会话继续昨天的话题，Agent 把之前已经确认过的栏目路由又重新问了一遍。那一刻我明白：不是模型不够聪明，是它根本没地方存"我们已经决定过什么"。</p>
+<p>前天我们发了《<a href="https://mp.weixin.qq.com/s?__biz=Mzk0OTI1OTQ2MQ==&amp;mid=2247599179&amp;idx=1&amp;sn=af11cf610b2d89377c98258e50791ca0&amp;scene=21#wechat_redirect">从零搭建 Harness Engineering 架构：Rule、Skill、Sub-Agent 完整落地路径</a>》——那是"怎么做"，用一套 12 关校验脚本把 AI 的输出管起来。这篇是"为什么"——先理解模式语言，再动手实现。</p>
+<p>先看全景。这 12 个模式按"解决什么架构问题"分了四类：</p>
+<p>核心隐喻：模式 1-11 是"脚手架"——帮 Agent 更好地工作。模式 12 是"承重墙"——系统级兜底，不依赖 Agent 记性。拆了脚手架房子还能站，拆了承重墙直接塌。记住这个区分，往下看。</p>
+<h2 id="01一记忆与上下文agent-的大脑皮层"><a class="header" href="#01一记忆与上下文agent-的大脑皮层">01一、记忆与上下文：Agent 的大脑皮层</a></h2>
+<p>模式 1-5 都在回答一个问题：<strong>Agent 应该记住什么，记在哪，记多久？</strong></p>
+<p>这不是"给个配置文件就行"的简单问题。Agent 记忆有三个互相打架的诉求：<strong>容量</strong>（能记多少）、<strong>速度</strong>（多快查到）、<strong>相关性</strong>（查到的东西有没有用）。你不可能三个全要——容量大 + 速度快 = 上下文窗口塞爆；速度快 + 相关性高 = 只能记最近几轮；容量大 + 相关性高 = 检索慢。</p>
+<p>这五个模式，就是在解这个不可能三角。</p>
+<h3 id="深讲模式-3--分层记忆"><a class="header" href="#深讲模式-3--分层记忆">深讲：模式 3 — 分层记忆</a></h3>
+<p>五个模式里最体现设计哲学的一个。做法很直接：<strong>精简索引常驻上下文（控制在 ~200 行以内），相关内容按需加载，完整历史留磁盘。</strong></p>
+<p>Claude Code 的实现是教科书级的：<code>MEMORY.md</code> 是指向所有记忆文件的索引（永远在上下文里），<code>memory/</code> 目录下是分类记忆文件（按需加载），完整对话历史在磁盘上（需要时再搜）。</p>
+<p>为什么不是"把所有记忆一股脑塞进 prompt"？因为你塞进去的东西越多，模型越容易"看不见"真正重要的那一条。记忆的价值不在量，在<strong>在正确的时刻被加载到正确的上下文里</strong>。</p>
+<p>一个最小实现，展示分层记忆的加载逻辑：</p>
+<pre><code>## memory_loader.py — 三层记忆加载的最小实现  
+from pathlib import Path  
+  
+class MemoryLoader:  
+    """三层记忆：索引常驻 + 热层按需 + 冷层搜索"""  
+      
+    def __init__(self, memory_dir: Path):  
+        self.memory_dir = memory_dir  
+        self.index_path = memory_dir / "MEMORY.md"  
+      
+    def load_index(self) -&gt; str:  
+        """第 1 层：索引永远加载，硬限制 200 行"""  
+        if not self.index_path.exists():  
+            return ""  
+        content = self.index_path.read_text()  
+        lines = content.split("\n")  
+        if len(lines) &gt; 200:  
+            raise ValueError(f"MEMORY.md {len(lines)} 行 &gt; 200，请精简索引")  
+        return content  
+      
+    def load_hot(self, topic: str) -&gt; str:  
+        """第 2 层：按 topic 关键词匹配相关记忆文件"""  
+        matches = list(self.memory_dir.glob(f"*{topic}*.md"))  
+        if not matches:  
+            return ""  
+        return "\n---\n".join(f.read_text() for f in matches[:3])  
+      
+    def search_cold(self, query: str) -&gt; str:  
+        """第 3 层：冷存储全文搜索（生产环境用向量检索）"""  
+        import subprocess  
+        result = subprocess.run(  
+            ["grep", "-rl", query, str(self.memory_dir / "archive")],  
+            capture_output=True, text=True  
+        )  
+        return result.stdout
+</code></pre>
+<p>重点不在代码，在分层逻辑：<strong>索引文件有硬行数限制</strong>（200 行）。因为索引一膨胀 → 分层失效 → 退化回"全量塞 prompt"的原始状态。</p>
+<h3 id="其余四个速览"><a class="header" href="#其余四个速览">其余四个速览</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>模式</th><th>一句话</th><th>什么时候该用</th><th>什么时候过度设计</th></tr>
+</thead>
+<tbody>
+<tr><td>1. 持久化指令</td><td>给 Agent 一份项目级的"员工手册"</td><td>任何需要跨会话保持行为的项目</td><td>文件超 500 行还没拆分 → 升级到模式 2</td></tr>
+<tr><td>2. 作用域上下文</td><td>不同目录自动加载不同规则</td><td>Monorepo、多语言项目</td><td>单项目 3 个文件以内 → 一个 CLAUDE.md 够用</td></tr>
+<tr><td>4. 记忆整合</td><td>后台定期清理重复/冲突/过期记忆</td><td>Agent 持续运行数周以上</td><td>项目刚跑两周 → 手动清理就行</td></tr>
+<tr><td>5. 渐进压缩</td><td>对话长了自动对旧消息分层压缩</td><td>单会话超 20-30 轮</td><td>短会话（10 轮以内）→ 压缩反而丢信息</td></tr>
+</tbody>
+</table>
+</div>
+<p>Python 映射：用 LangGraph 搭 Agent 的话，模式 3 对应 <code>MemorySaver</code> + checkpoint 的分层——热状态在内存，温状态在 SQLite，冷状态在向量库。LangChain 的 <code>ConversationSummaryBufferMemory</code> 是模式 5 的简化版。</p>
+<p>我们的 MEMORY.md 索引文件三个月从 80 行涨到 190 行，再涨就要触发分层失效了。真正踩过的坑不是"怎么存更多"，是"怎么删旧的"——一条三个月前的项目决策记录，对今天的 Agent 判断到底是参考还是噪音？这个问题比记忆存储难得多。</p>
+<h2 id="02二工作流与编排把想和做的上下文拆开"><a class="header" href="#02二工作流与编排把想和做的上下文拆开">02二、工作流与编排：把"想"和"做"的上下文拆开</a></h2>
+<p>模式 6-8 回答一个问题：<strong>Agent 处理复杂任务时，怎么不让上下文变成垃圾场？</strong></p>
+<p>想象一个典型的灾难性长会话：前 10 轮调研（大量网页内容涌进来），中间 5 轮讨论方案，最后 3 轮才动手写代码。到写代码的时候，上下文窗口里 90% 是跟当前任务无关的历史噪音——调研文章全文、被否决的方案、跑偏的讨论。Agent 在这些噪音里找信息，就像在旧报纸堆里翻一个电话号码。</p>
+<p>这三个模式的解法都是<strong>分离</strong>——把不同阶段的上下文隔离开。</p>
+<h3 id="深讲模式-7--上下文隔离子智能体"><a class="header" href="#深讲模式-7--上下文隔离子智能体">深讲：模式 7 — 上下文隔离子智能体</a></h3>
+<p>做法简单：不同任务用不同 sub-agent，各自独立上下文窗口和权限。</p>
+<ul>
+<li>做调研的 sub-agent：只读权限，只看资料，产出一份报告</li>
+<li>做规划的 sub-agent：只设计方案，不碰代码，不碰原始资料</li>
+<li>做执行的 sub-agent：有完整工具权限，但只接收"蓝图 + 调研摘要"，不接收 100 页原始网页</li>
+</ul>
+<p><strong>关键不在"拆 sub-agent"，在主 Agent 怎么做"信息编辑"</strong>——不是把调研全文直接转发给执行 agent，是从 100 页里挑出跟当前任务相关的 3 段。传少了丢上下文，传多了回到污染原点。</p>
+<p>Claude Code 的 Agent tool 就是这个模式的直接实现——<code>subagent_type</code> 决定角色（Explore 只看不改），<code>isolation</code> 决定是否独立 worktree。每个 sub-agent 的上下文窗口独立，不会互相污染。</p>
+<h3 id="其余两个速览"><a class="header" href="#其余两个速览">其余两个速览</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>模式</th><th>一句话</th><th>什么时候该用</th><th>什么时候过度设计</th></tr>
+</thead>
+<tbody>
+<tr><td>6. 探索-规划-执行</td><td>先只读探索，再规划，最后动手改</td><td>不熟悉的代码库、涉及多文件的复杂改动</td><td>改一行配置 → 直接改比走三轮快</td></tr>
+<tr><td>8. 分支-合并并行</td><td>多个互不依赖的子任务并行跑</td><td>批量重构多个模块、独立测试</td><td>子任务之间有依赖 → 并行反而制造合并冲突</td></tr>
+</tbody>
+</table>
+</div>
+<p>Python 映射：模式 7 的本质是"进程隔离"——每个 sub-agent 是独立进程，通过受控的输入/输出接口通信，不共享内存。<code>subprocess</code> 或 <code>asyncio</code> 都能实现。模式 8 对应 <code>concurrent.futures.ProcessPoolExecutor</code> + 独立工作目录。</p>
+<p>上一节讲了记忆怎么管，这一节讲任务怎么拆——两者解决的是 Agent 工程中同一个根问题的两面：<strong>上下文是稀缺资源</strong>。记忆管理是"往上下文里放什么"，任务隔离是"不让无关的东西跑进上下文"。</p>
+<h2 id="03三工具与权限最小权限原则在-agent-系统里的落地"><a class="header" href="#03三工具与权限最小权限原则在-agent-系统里的落地">03三、工具与权限：最小权限原则在 Agent 系统里的落地</a></h2>
+<p>模式 9-11 回答一个问题：<strong>Agent 能做什么操作？怎么保证它不捅娄子？</strong></p>
+<p>用过早 AI 编程工具的读者可能见过这个死循环：Agent 可以执行任意 shell 命令，每次执行前弹确认框。第 1 次你认真看，第 10 次你麻木了直接点确认，第 50 次你连弹的什么命令都没看清手已经点下去了。<strong>确认疲劳 = 没有门控。</strong></p>
+<p>这三个模式要做的，是在"安全"和"效率"之间找到一个能落地、不依赖人的平衡。</p>
+<h3 id="深讲模式-10--命令风险分类"><a class="header" href="#深讲模式-10--命令风险分类">深讲：模式 10 — 命令风险分类</a></h3>
+<p>做法：命令执行前做三级风险判定，不是二元"放行 vs 确认"：</p>
+<ul>
+<li><strong>低风险</strong>（读文件、查看状态、搜索）：自动放行，不弹确认</li>
+<li><strong>中风险</strong>（写文件、执行脚本、安装包）：弹确认，用户看一眼再放</li>
+<li><strong>高风险</strong>（sudo、rm -rf /、修改系统设置）：直接拦截，不让执行</li>
+</ul>
+<p><strong>这个分级逻辑必须落在确定性代码里，不能靠 prompt。</strong> 靠 prompt 分级 = 模型某天"理解偏了"把 <code>rm -rf /</code> 判成低风险 = 生产事故。</p>
+<p>一个 ~30 行的实现：</p>
+<pre><code>## command_risk.py — 命令风险三级分类  
+import shlex  
+from enum import Enum  
+  
+class RiskLevel(Enum):  
+    LOW = "low"# 自动放行  
+    MEDIUM = "medium"# 需用户确认  
+    HIGH = "high"# 直接拦截  
+  
+## 匹配到即拦截  
+HIGH_RISK_PATTERNS = [  
+    "rm -rf /", "sudo ", "chmod 777", "&gt; /dev/sda",  
+    "mkfs.", "dd if=", ":(){ :|:&amp; }:",  # fork bomb  
+    "chown -R /", "mv /* /dev/null"  
+]  
+  
+## 以这些前缀开头 → 需确认  
+MEDIUM_RISK_PREFIXES = [  
+    "rm ", "git push", "git reset --hard",  
+    "pip install", "npm install -g", "brew ",  
+    "docker rm", "kubectl delete", "chmod "  
+]  
+  
+def classify_command(command: str) -&gt; tuple[RiskLevel, str]:  
+    """返回 (风险等级, 理由)"""  
+    cmd = command.strip().lower()  
+      
+    for pattern in HIGH_RISK_PATTERNS:  
+        if pattern.lower() in cmd:  
+            return RiskLevel.HIGH, f"命中高风险模式: {pattern}"  
+      
+    for prefix in MEDIUM_RISK_PREFIXES:  
+        if cmd.startswith(prefix.lower()):  
+            return RiskLevel.MEDIUM, f"中风险操作: {prefix}"  
+      
+    return RiskLevel.LOW, "低风险操作"  
+  
+## 跑一下看看  
+if __name__ == "__main__":  
+    for cmd in ["ls -la", "git status", "rm -rf /",  
+                "pip install requests", "sudo systemctl restart nginx"]:  
+        level, reason = classify_command(cmd)  
+        print(f"[{level.value.upper():6s}] {cmd:40s} — {reason}")
+</code></pre>
+<p>输出：</p>
+<pre><code>[LOW   ] ls -la                                    — 低风险操作  
+[LOW   ] git status                                — 低风险操作  
+[HIGH  ] rm -rf /                                  — 命中高风险模式: rm -rf /  
+[MEDIUM] pip install requests                      — 中风险操作: pip install  
+[HIGH  ] sudo systemctl restart nginx              — 命中高风险模式: sudo
+</code></pre>
+<p>实际项目里扩展两个列表就行，不需要引入策略引擎框架。</p>
+<h3 id="其余两个速览-1"><a class="header" href="#其余两个速览-1">其余两个速览</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>模式</th><th>一句话</th><th>什么时候该用</th><th>什么时候过度设计</th></tr>
+</thead>
+<tbody>
+<tr><td>9. 渐进式工具扩展</td><td>默认只给读文件 + 搜索，写和执行的权限按需开</td><td>项目初期快速搭建 Agent 原型</td><td>工具少于 5 个 → 直接全开放，配好权限就行</td></tr>
+<tr><td>11. 单用途工具</td><td>Read 读、Write 写、Edit 改——各自独立，不共用通用 shell</td><td>Agent 需要频繁文件操作</td><td>工具少于 3 个 → 合并反而更简单</td></tr>
+</tbody>
+</table>
+</div>
+<p>有一次 Agent 自动执行流水线，我在旁边看着它跑。它调了一个 <code>find . -name "*.md" -exec sed -i ...</code> 做批量替换——命令本身没问题，但路径没加引号，撞上了一个有空格的目录名，差点改了不该改的文件。从那以后我把"写操作"的 sandbox 路径限制加进了 PreToolUse 钩子。权限控制不是在防恶意，是在防无心之失。</p>
+<h2 id="04四自动化兜底不该让模型记住的事"><a class="header" href="#04四自动化兜底不该让模型记住的事">04四、自动化兜底：不该让模型记住的事</a></h2>
+<p>模式 12 是整个分类体系里唯一一个"不该由 LLM 参与"的模式。它单独成类，因为它贯穿前面所有维度——记忆整理可以自动化、编排校验可以自动化、权限审计也可以自动化。</p>
+<h3 id="深讲模式-12--确定性生命周期钩子"><a class="header" href="#深讲模式-12--确定性生命周期钩子">深讲：模式 12 — 确定性生命周期钩子</a></h3>
+<p><strong>痛点</strong>：有些事是每次都必须做的——改完代码跑格式化、提交前跑测试、切换目录时重载配置。但如果你只把这些写在 prompt 里（"请每次改完代码后运行 ruff"），模型会忘、会跳、会在第 20 轮对话里"理解偏了"然后直接提交未格式化的代码。</p>
+<p><strong>做法</strong>：把这些动作挂在 Agent 生命周期的关键节点上，由系统自动触发，<strong>完全不经过 LLM</strong>。常见挂载点：</p>
+<ul>
+<li><strong>PreToolUse</strong>：工具调用前触发——比如执行 shell 命令前跑风险分级（正好接上模式 10）</li>
+<li><strong>PostToolUse</strong>：工具调用后触发——比如写完文件自动 ruff 格式化</li>
+<li><strong>SessionStart</strong>：会话开始时触发——加载项目级 CLAUDE.md</li>
+<li><strong>Stop</strong>：会话结束时触发——检查是否有未提交产物、跑最终校验</li>
+</ul>
+<p><strong>类比</strong>：模式 1-11 是给 Agent 的"驾驶培训"，模式 12 是"安全带 + 刹车灯"——你不系安全带可以开很久不出事，但撞车那次，有没有安全带决定你进不进医院。</p>
+<p>一个完整可运行的 Python 实现：</p>
+<pre><code>## hook_system.py — 确定性生命周期钩子系统  
+import subprocess  
+import sys  
+from typing import Callable  
+  
+class HookManager:  
+    """Agent 生命周期钩子 — 任一钩子失败 = 阻断后续执行"""  
+      
+    def __init__(self):  
+        self._pre_tool: list[Callable] = []   # PreToolUse 钩子  
+        self._post_tool: list[Callable] = []  # PostToolUse 钩子  
+        self._stop: list[Callable] = []       # Stop 钩子  
+      
+    def on_pre_tool(self, fn: Callable):  
+        """注册 PreToolUse 钩子"""  
+        self._pre_tool.append(fn)  
+        return fn  
+      
+    def on_post_tool(self, fn: Callable):  
+        """注册 PostToolUse 钩子"""  
+        self._post_tool.append(fn)  
+        return fn  
+      
+    def on_stop(self, fn: Callable):  
+        """注册 Stop 钩子"""  
+        self._stop.append(fn)  
+        return fn  
+      
+    def _run(self, hooks: list[Callable], phase: str) -&gt; bool:  
+        """执行一组钩子。任一返回 False 或抛异常 → 阻断"""  
+        for hook in hooks:  
+            try:  
+                if hook() is False:  
+                    print(f"[HOOK FAIL] {phase}: {hook.__name__} 返回 False",  
+                          file=sys.stderr)  
+                    return False  
+            except Exception as e:  
+                print(f"[HOOK ERROR] {phase}: {hook.__name__} → {e}",  
+                      file=sys.stderr)  
+                return False  
+        return True  
+      
+    def pre_tool_check(self, tool_name: str) -&gt; bool:  
+        return self._run(self._pre_tool, f"PreToolUse:{tool_name}")  
+      
+    def post_tool_check(self, tool_name: str) -&gt; bool:  
+        return self._run(self._post_tool, f"PostToolUse:{tool_name}")  
+      
+    def stop_check(self) -&gt; bool:  
+        return self._run(self._stop, "Stop")  
+  
+  
+## === 使用示例：给一个 Agent 装上钩子 ===  
+  
+hooks = HookManager()  
+  
+@hooks.on_pre_tool  
+def check_dangerous_commands():  
+    """PreToolUse: 命令执行前做风险分级（接模式 10）"""  
+    print("  ✓ 命令风险分级通过")  
+    return True  
+  
+@hooks.on_post_tool  
+def auto_format_code():  
+    """PostToolUse: 写完代码自动 ruff 格式化"""  
+    try:  
+        subprocess.run(["ruff", "check", "--fix", "."],  
+                       capture_output=True, timeout=30, check=True)  
+        print("  ✓ ruff --fix 完成")  
+        return True  
+    except subprocess.CalledProcessError:  
+        print("  ✗ ruff 检查失败，修复后再继续", file=sys.stderr)  
+        return False# 阻断后续执行  
+  
+@hooks.on_stop  
+def final_validate():  
+    """Stop: 会话结束前跑最终校验"""  
+    checks = [  
+        ("ruff", ["ruff", "check", "."]),  
+        ("pytest", ["pytest", "--tb=short", "-q"]),  
+    ]  
+    all_pass = True  
+    for name, cmd in checks:  
+        try:  
+            subprocess.run(cmd, capture_output=True, timeout=60, check=True)  
+            print(f"  ✓ {name} 通过")  
+        except subprocess.CalledProcessError:  
+            print(f"  ✗ {name} 失败", file=sys.stderr)  
+            all_pass = False  
+    return all_pass  
+  
+## 模拟 Agent 调用流程  
+if __name__ == "__main__":  
+    print("Agent: 准备执行命令...")  
+    if not hooks.pre_tool_check("bash"):  
+        print("→ PreToolUse 阻断，命令不执行")  
+        sys.exit(1)  
+      
+    print("Agent: 命令执行完毕，进入 PostToolUse...")  
+    if not hooks.post_tool_check("bash"):  
+        print("→ PostToolUse 阻断，修复后重试")  
+        sys.exit(1)  
+      
+    print("Agent: 会话即将结束，跑 Stop 钩子...")  
+    if not hooks.stop_check():  
+        print("→ Stop 钩子阻断，有检查项未通过")  
+        sys.exit(1)  
+      
+    print("\n✓ 所有钩子通过，Agent 会话正常结束")
+</code></pre>
+<p>三个关键设计：</p>
+<ol>
+<li><strong>钩子是确定性的</strong>——不调 LLM，不做语义理解，只跑脚本检查</li>
+<li><strong>与 prompt 解耦</strong>——你可以在 prompt 里写"请每次改完代码后运行 ruff"，但就算模型忘了，引擎盖下面的 PostToolUse 钩子也会执行</li>
+<li><strong>失败即阻断</strong>——钩子返回 <code>False</code> 或抛异常，后续操作不执行。不是"建议"，是"门控"</li>
+</ol>
+<h2 id="05结尾从更聪明的模型到更可靠的系统"><a class="header" href="#05结尾从更聪明的模型到更可靠的系统">05结尾：从"更聪明的模型"到"更可靠的系统"</a></h2>
+<p>回到标题的问题：为什么恰好是这 12 个模式？</p>
+<p>因为这 12 个模式覆盖了 Agent 工程中<strong>四类不可绕过的架构问题</strong>：记忆怎么管、任务怎么拆、权限怎么控、兜底怎么做。解决这些问题的不是更好的 prompt，是更好的架构——把确定性逻辑从 LLM 推理中剥离。模型做判断，系统做执行。</p>
+<p>这和算法无关，和模型也无关。即使三年后 Llama 7 或 GPT-6 的推理能力强 10 倍，<strong>上下文窗口依然有物理上限</strong>、<strong>危险的 shell 命令依然危险</strong>、<strong>记忆依然会腐烂</strong>、<strong>模型依然会忘掉 prompt 里写的"每次都做"的步骤</strong>。12 个模式的外壳可能变——持久化指令文件可能改叫别的名字、hook 机制可能被框架原生支持——但内核不会过时。</p>
+<p>Bilgin lbryam 说得对："模型可以换，工具也会变，但这些设计很可能会一直存在。"</p>
+<p>🛠️ <strong>想动手搭？</strong> 昨天我们发了《从零搭建 AI 工程脚手架：Rule、Skill、Sub-Agent 完整落地路径》——用本文的模式语言重读那篇，会发现里面的 Rule→Skill→Sub-Agent→Script 四层正好对应这 12 个模式中的 6 个。两篇连读，理论 + 实战齐全。<a href="https://mp.weixin.qq.com/s?__biz=Mzk0OTI1OTQ2MQ==&amp;mid=2247599179&amp;idx=1&amp;sn=af11cf610b2d89377c98258e50791ca0&amp;scene=21#wechat_redirect">从零搭建 Harness Engineering 架构：Rule、Skill、Sub-Agent 完整落地路径</a></p>
+<p>参考资料</p>
+<p><code>[1]</code> Kubernetes Patterns: <em>https://k8spatterns.com/</em><br><code>[2]</code> Prompt Patterns: <em>https://promptpatterns.dev/</em><br><code>[3]</code> 12 Agentic Harness Patterns from Claude Code: <em>https://generativeprogrammer.com/p/12-agentic-harness-patterns-from</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter05/从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter05/又一个神级-claude-code-插件开源了.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter05/从启动到-agent-循环claude-code-51-万行源码架构拆解.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter05/又一个神级-claude-code-插件开源了.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

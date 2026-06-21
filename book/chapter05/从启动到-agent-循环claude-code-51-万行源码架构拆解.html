@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>从启动到 Agent 循环：Claude Code 51 万行源码架构拆解 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter05/从启动到-agent-循环claude-code-51-万行源码架构拆解.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="从启动到-agent-循环claude-code-51-万行源码架构拆解"><a class="header" href="#从启动到-agent-循环claude-code-51-万行源码架构拆解">从启动到 Agent 循环：Claude Code 51 万行源码架构拆解</a></h1>
+<blockquote>
+<p>「Claude Code 源码拆解」系列 · 第二篇</p>
+</blockquote>
+<p>Claude Code 的架构比你想象的复杂得多。这篇文章我从启动入口开始，一路拆到 Agent 核心循环，顺带挖出几个让我意外的设计决策。看完你会明白：为什么一个"命令行工具"里有 439 个 React 组件，为什么安全代码比执行代码多好几倍。</p>
+<p>直接进。</p>
+<p>一、整体架构长啥样</p>
+<p>整个系统大致分五层：</p>
+<p>cli.tsx ─── 命令行入口，处理 --version 这种快速路径<br>   │<br>   ▼<br>main.tsx─── 785KB 的"万物初始化"（是的，单文件 785KB）<br>   │<br>   ▼<br>QueryEngine / query.ts─── Agent 循环的核心<br>   │                          一直转圈：调 API → 要工具？执行 → 再调 API<br>   │<br>   ├──→ tools/─── 40+ 个工具（Bash、文件读写、搜索、Agent...）<br>   ├──→ services/─── API 客户端、MCP 协议、上下文压缩、遥测<br>   ├──→ components/─── React/Ink 终端 UI（439 个组件文件，没看错）<br>   └──→ bridge/ ─── 和 Desktop 应用 / 远程环境的桥接</p>
+<p>接下来展开讲几个我觉得值得说的部分。</p>
+<p>二、启动过程：一场毫秒级的优化战争</p>
+<blockquote>
+<p>--version 的零加载快速路径</p>
+</blockquote>
+<p>打开 cli.tsx，第一段逻辑就很有意思：</p>
+<p>async function main():Promise&lt;void&gt; {<br>constargs = process.argv.slice(2);</p>
+<p>// --version: 不加载任何模块，直接打印退出<br>if(args.length ===1&amp;&amp; (args[0] ==="--version"|| args[0] ==="-v")) {<br>    console.log(<code>${"2.1.88"} (Claude Code)</code>);<br>    return;<br>  }</p>
+<p>// 其他路径才开始加载模块<br>const{ profileCheckpoint } =awaitimport("../utils/startupProfiler.js");<br>profileCheckpoint("cli_entry");<br>// ...<br>}</p>
+<p>这个项目依赖 192 个 npm 包。正常启动要加载一大堆模块，但 --version 这种命令根本不需要——所以它被放在所有 import 之前，直接 return。</p>
+<p>看起来不起眼，但对一个重量级 CLI 工具来说，这种"能不加载就不加载"的思路贯穿了整个入口层。后面还有 --claude-in-chrome-mcp、--daemon-worker 等好几个快速路径，都是"判断 args → 动态 import 最少量的代码 → 干完活就走"。</p>
+<blockquote>
+<p>import 间隙里的"偷跑"</p>
+</blockquote>
+<p>main.tsx 的开头更有意思：</p>
+<p>// 这些副作用必须在所有其他 import 之前运行：<br>import{ profileCheckpoint }from"./utils/startupProfiler.js";<br>profileCheckpoint("main_tsx_entry");</p>
+<p>// 启动 MDM 配置子进程，让它和后面的 import 并行跑<br>import{ startMdmRawRead }from"./utils/settings/mdm/rawRead.js";<br>startMdmRawRead();</p>
+<p>// 启动 macOS 钥匙串预读取（OAuth + API Key），也并行<br>import{ startKeychainPrefetch }from"./utils/secureStorage/keychainPrefetch.js";<br>startKeychainPrefetch();</p>
+<p>// 然后才是正常的 100 多行 import...<br>import{ CommandasCommanderCommand }from"@commander-js/extra-typings";<br>importchalkfrom"chalk";<br>importReactfrom"react";</p>
+<p>Node.js 的 import 是同步串行的，光是 evaluate 这 100 多个 import 大约要 135ms。在这段时间里，钥匙串读取、MDM 配置查询这些 I/O 操作已经在后台跑了。等 import 完了，它们也差不多完了。</p>
+<p>这种在 module evaluation 阶段"偷跑"异步任务的做法，不能说优雅，但确实有效。注释里也很实诚地解释了为什么要这么做——因为 isRemoteManagedSettingsEligible() 在 macOS 上会同步 spawn 两次 keychain 读取，加起来要 65ms。</p>
+<p>三、Agent 循环：看起来简单，做起来要命</p>
+<blockquote>
+<p>核心循环本身并不复杂</p>
+</blockquote>
+<p>所有 AI Agent 的内核都是同一个模式：</p>
+<p>你说话 → 调 API → API 回答<br>                    │<br>              回答里有工具调用？<br>             /              \<br>            是                 否<br>            │                  │<br>        执行工具           结束，返回<br>        把结果塞回去<br>        重新调 API ──────→ API 回答</p>
+<p>这个循环实现在 query.ts（67KB）里。核心参数长这样：</p>
+<p>export type QueryParams= {<br>  messages:Message[];        // 对话历史<br>  systemPrompt:SystemPrompt;// 系统提示词<br>  canUseTool:CanUseToolFn;  // "这个工具能不能用？"的判断函数<br>  toolUseContext:ToolUseContext;<br>  maxTurns?:number;         // 别让它无限循环<br>  taskBudget?: { total:number};// token 预算<br>};</p>
+<p>循环本身不难理解。难的是围绕这个循环长出来的一堆东西。</p>
+<blockquote>
+<p>并发执行工具：不是所有工具都能一起跑</p>
+</blockquote>
+<p>当 AI 一次回复里要求调 5 个工具时，怎么执行？全串行太慢，全并行又有风险——如果两个 Bash 命令同时改同一个文件呢？</p>
+<p>StreamingToolExecutor 的解法是按工具类型分区：</p>
+<p>// 工具编排的核心逻辑<br>for(const{ isConcurrencySafe, blocks }of<br>     partitionToolCalls(toolUseMessages, currentContext)) {</p>
+<p>if(isConcurrencySafe) {<br>    // 只读工具（读文件、grep、glob）→ 并发跑，最多 10 路<br>    for await(constupdateofrunToolsConcurrently(...)) {<br>      yieldupdate<br>    }<br>  }else{<br>    // 有副作用的工具（bash、写文件）→ 一个一个来<br>    for await(constupdateofrunToolsSerially(...)) {<br>      yieldupdate<br>    }<br>  }<br>}</p>
+<p>每个工具在定义时就声明了自己是不是 isConcurrencySafe。FileRead、Grep、Glob 这种只读工具可以放心并发；Bash、FileEdit 这种有副作用的必须排队。</p>
+<p>并发上限默认 10，可以通过环境变量 CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY 调。这个设计不复杂，但很实用。</p>
+<p>四、40 多个工具里，Bash 最离谱</p>
+<p>工具分几大类：文件操作（读/写/编辑/搜索）、Shell 执行、Web 访问、子 Agent、MCP 协议对接、规划模式等。</p>
+<p>其中 BashTool 是绝对的重量级。主文件 157KB 已经够夸张了，但它的配套文件更吓人：</p>
+<p>BashTool/<br>├── BashTool.tsx              # 157KB - 主逻辑<br>├── bashSecurity.ts           # 100KB - 安全分析<br>├── bashPermissions.ts        #  96KB - 权限判定<br>├── readOnlyValidation.ts     #  67KB - 只读校验<br>├── pathValidation.ts         #  43KB - 路径校验<br>├── sedValidation.ts          #  21KB - sed 命令校验<br>├── prompt.ts                 #  21KB - 给 AI 看的工具说明<br>└── ... 还有 8 个文件</p>
+<p>安全相关的代码加起来超过 <strong>300KB</strong>。也就是说，"检查这条命令安不安全"的代码量，是"执行这条命令"的好几倍。</p>
+<p>为什么要这么大？因为他们自己写了一个 Bash 解析器（utils/bash/bashParser.ts，128KB），能把 shell 命令解析成 AST。只有理解了命令的语义结构，才能准确判断 rm -rf / 是危险的，而 echo "rm -rf /" 是安全的。</p>
+<blockquote>
+<p>项目里的 Bash 解析器全家桶加起来有 237KB。一个 AI 编程工具，为了安全，自己写了个 shell 解析器。这个投入说明了一件事——让 AI 执行命令这件事，安全不是锦上添花，是安身立命的根基。</p>
+</blockquote>
+<p>五、108 个被抹掉的模块</p>
+<p>读代码时到处能看到这种模式：</p>
+<p>const feature = (flag) =&gt;false;// 永远返回 false</p>
+<p>constcoordinatorModeModule =feature("COORDINATOR_MODE")<br>  ?require("./coordinator/coordinatorMode.js")<br>  :null;</p>
+<p>constassistantModule =feature("KAIROS")<br>  ?require("./assistant/index.js")<br>  :null;</p>
+<p>feature() 是 Bun 运行时的编译时函数。Anthropic 内部构建时某些 flag 返回 true，代码被保留；发到 npm 的版本全是 false，代码被死代码消除（DCE）干掉了。</p>
+<p>通过搜集所有 feature() 调用，可以发现有 <strong>108 个模块</strong>在发布版中不存在。其中一些挺有意思的：</p>
+<p><strong>COORDINATOR_MODE</strong> — 多 Agent 协调器，一个指挥多个</p>
+<p><strong>DAEMON</strong> — 后台守护进程，不退出一直跑</p>
+<p><strong>WEB_BROWSER_TOOL</strong> — 浏览器自动化工具</p>
+<p><strong>VOICE_MODE</strong> — 语音输入</p>
+<p><strong>CONTEXT_COLLAPSE</strong> — 上下文智能折叠（比压缩更激进）</p>
+<p><strong>BUDDY</strong> — 就是上篇说的电子宠物系统</p>
+<p>这些模块画出了一条很清晰的路线：从"编程助手"走向"自主代理"。KAIROS 尤其值得关注——它代表了一种不需要人一直盯着的、后台自己干活的 Agent 形态。</p>
+<p>六、三个出乎意料的工程选择</p>
+<blockquote>
+<p>终端 UI 用 React 写的，439 个组件</p>
+</blockquote>
+<p>439 个组件文件。用的是 React + Ink（一个把 React 渲染到终端的框架）。</p>
+<p>PromptInput.tsx 有 347KB。一个命令行输入框，347KB。</p>
+<p>里面有虚拟滚动（VirtualMessageList.tsx，145KB）、模糊搜索（FuzzyPicker.tsx）、完整的设计系统（Dialog、Tabs、ProgressBar、ThemedBox……）。</p>
+<p>一个命令行工具的 UI 复杂度，赶上一个中型 Web 应用了。</p>
+<blockquote>
+<p>系统提示词里的信息量</p>
+</blockquote>
+<p>constants/prompts.ts（53KB）是系统提示词的核心。几个发现：</p>
+<p>// 最前沿的模型标识<br>const FRONTIER_MODEL_NAME = "Claude Opus 4.6";</p>
+<p>const CLAUDE_4_5_OR_4_6_MODEL_IDS = {<br>  opus: "claude-opus-4-6",<br>  sonnet: "claude-sonnet-4-6",<br>  haiku: "claude-haiku-4-5-20251001",<br>};</p>
+<p>还有一个 Prompt Cache 的优化：系统提示词被分成"全局可缓存"和"用户特定"两段，中间用一个 boundary 标记隔开。boundary 之前的（工具描述、通用规则）可以跨用户复用缓存，之后的（项目记忆、个人设置）不能。这对降低 API 开销很关键。</p>
+<blockquote>
+<p>每一分钱都在追踪</p>
+</blockquote>
+<p>cost-tracker.ts 追踪了 API 调用的所有细节：总费用（精确到美元）、输入/输出 token 数、缓存命中 token 数、API 耗时、新增/删除代码行数。每次对话结束都能告诉你花了多少钱，改了多少行代码。</p>
+<p>这个设计我挺欣赏——AI 工具对用户最大的不信任感之一就是"不知道在花多少钱"，把账单透明化，是尊重用户的基本动作。</p>
+<p>写在最后</p>
+<p>拆完这一层之后，我对 Claude Code 的印象从"AI 接了个 API"彻底升级了。</p>
+<p>启动阶段的毫秒级抠优化，Agent 循环里按类型分区的并发调度，BashTool 里三百多 KB 的安全代码——这些东西加在一起，说明这是一个被真实用户打磨了很久的工具，不是一个 demo。</p>
+<p>当然也有让我皱眉的地方：main.tsx 单文件 785KB，PromptInput.tsx 单文件 347KB，这种文件规模放哪都是维护噩梦。但也许 Anthropic 的工程师觉得：有 AI 帮我看代码，大文件也没那么可怕了？</p>
+<blockquote>
+<p><strong>一个问题留给大家：</strong></p>
+<p>main.tsx</p>
+<p>单文件 785KB、终端 UI 439 个组件——<br>你觉得这是技术债，还是 AI 辅助开发时代"文件大小不再重要"的新信号？</p>
+<p><strong>评论区聊聊 👇</strong></p>
+</blockquote>
+<p><strong>下一篇，我们钻进 query.ts——那个 67KB 的 Agent 核心，看它怎么处理流式响应、怎么做错误恢复，还有那段"巫师注释"背后到底踩了什么坑。</strong></p>
+<p>本文基于 npm 包 @anthropic-ai/claude-code v2.1.88 的反编译源码进行分析<br>仅用于技术学习 · 源码版权归 Anthropic 所有</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter05/从claude-code源码学习系统提示词的工程系统.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter05/claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter05/从claude-code源码学习系统提示词的工程系统.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter05/claude-code-的-12-个可复用的-agentic-harness-设计模式.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

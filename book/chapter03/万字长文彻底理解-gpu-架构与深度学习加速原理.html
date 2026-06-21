@@ -1,0 +1,666 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>万字长文｜彻底理解 GPU 架构与深度学习加速原理 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter03/万字长文彻底理解-gpu-架构与深度学习加速原理.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="万字长文彻底理解-gpu-架构与深度学习加速原理"><a class="header" href="#万字长文彻底理解-gpu-架构与深度学习加速原理">万字长文｜彻底理解 GPU 架构与深度学习加速原理</a></h1>
+<p>2012 年，AlexNet 在 ImageNet 竞赛中以压倒性优势夺冠，深度学习时代正式开启。不到两年后的 2014 年，NVIDIA 发布了 Maxwell 架构 GPU，将游戏画质推向了新高度。</p>
+<p>但真正改变历史的，是 2006 年 CUDA 架构的诞生——那一年，NVIDIA 播下了一颗种子，让 GPU 从一块"游戏显卡"变成了"通用算力引擎"，最终催生了今天的大模型革命。</p>
+<p>这篇文章，我想带你从最底层出发，系统理解 GPU 到底是怎么工作的，以及它为什么能成为 AI 时代最重要的基础设施。</p>
+<blockquote>
+<p>📺 <strong>推荐配套视频：How do Graphics Cards Work?</strong> — Branch Education 出品</p>
+<p>推荐Branch Education 的科普视频，这支 GPU 视频延续了其一贯风格：从晶体管级别出发，逐层拆解 GA102 芯片的物理架构、CUDA 编程模型、Tensor Core 和 RT Core 的分工。即使你已经看过大量 GPU 文章，这支视频依然能给你"原来如此"的顿悟感。本文正是以这支视频为骨架，结合 CUDA 编程实践、Tensor Core 五代演进、深度学习训练/推理的系统性知识扩充而成。</p>
+</blockquote>
+<h2 id="一cpu-和-gpu两个物种不是两个版本"><a class="header" href="#一cpu-和-gpu两个物种不是两个版本">一、CPU 和 GPU：两个物种，不是两个版本</a></h2>
+<p>很多人一开始学 GPU，都会有一个困惑：CPU 和 GPU 到底有什么区别？是不是 GPU 更快？更强？</p>
+<p>答案是：它们不是强弱之分，是<strong>设计哲学的根本分歧</strong>。</p>
+<p><strong>CPU 的设计目标：低延迟（Low Latency）</strong></p>
+<p>当你点开一个应用、切换一个窗口，CPU 需要在最短时间内给你响应。所以 CPU 把大量晶体管投入在：</p>
+<ul>
+<li>
+<p><strong>分支预测（Branch Prediction）</strong></p>
+<p>：提前猜测代码往哪走，减少空转</p>
+</li>
+<li>
+<p><strong>乱序执行（Out-of-Order Execution）</strong></p>
+<p>：不等上一条指令完全执行完，就先执行后面独立的指令</p>
+</li>
+<li>
+<p><strong>大容量缓存</strong></p>
+<p>：用高速缓存吸收内存延迟，不用每次都去"图书馆"（内存）找数据</p>
+</li>
+</ul>
+<p>CPU 的逻辑是：<strong>让单个线程跑得尽可能快</strong>。</p>
+<p><strong>GPU 的设计目标：高吞吐（High Throughput）</strong></p>
+<p>游戏里每一帧画面，需要同时计算数百万个像素；大模型里，一个矩阵乘法有几十亿次运算——这些任务有一个共同特点：<strong>海量相同类型的计算，彼此独立</strong>。</p>
+<p>GPU 的策略是：<strong>不追求单个线程快，而是让海量的线程同时跑</strong>。</p>
+<p>这就解释了为什么 RTX 3090 有 10,752 个 CUDA Core，而一块高端服务器 CPU 最多也就 64 个核心——不是技术高低，是设计目标不同。</p>
+<blockquote>
+<p>类比：CPU 像一架 Jumbo Jet，载客量少但飞得快；GPU 像一艘巨型货轮，装载量巨大但单体速度慢。问"哪个更快"没有意义，取决于你要运输什么。</p>
+</blockquote>
+<blockquote>
+<p><strong>图 1：GPU 与 CPU 的晶体管分配对比</strong>（来源：NVIDIA CUDA 编程指南）— 左为 CPU：大量晶体管用于缓存和控制电路；右为 GPU：大多数晶体管用于数据处理（算术逻辑单元）</p>
+</blockquote>
+<h3 id="延迟掩盖gpu-的核心生存智慧"><a class="header" href="#延迟掩盖gpu-的核心生存智慧">延迟掩盖：GPU 的核心生存智慧</a></h3>
+<p>GPU 的计算单元速度极快，但访问显存（Global Memory）的延迟高达数百个时钟周期——这相当于每次计算都要等几分钟的图书馆调书。</p>
+<p>GPU 的解法是：<strong>当一个 warp（32 个线程）在等数据时，SM 立刻切换到另一个 warp 来执行计算</strong>。GPU 的实际性能，取决于<strong>并行度是否足够高</strong>，能持续喂饱计算单元。</p>
+<p>这就是所谓的 <strong>Latency Hiding（延迟掩盖）</strong>——GPU 不消除延迟，而是用高并行度把延迟"埋"起来。</p>
+<h2 id="二cuda-编程模型为什么-gpu-需要自己的编程语言"><a class="header" href="#二cuda-编程模型为什么-gpu-需要自己的编程语言">二、CUDA 编程模型：为什么 GPU 需要自己的编程语言</a></h2>
+<h3 id="问题的起源gpu-最初根本不是用来编程的"><a class="header" href="#问题的起源gpu-最初根本不是用来编程的">问题的起源：GPU 最初根本不是用来"编程"的</a></h3>
+<p>2006 年之前，GPU 的唯一任务就是画图。渲染一张游戏画面，底层发生的事情是：CPU 把顶点坐标、纹理、光照参数等数据交给 GPU，GPU 内部有一条<strong>固定的硬件流水线</strong>逐级处理，最终输出像素颜色。</p>
+<pre><code>顶点数据 → 顶点着色器 → 图元装配 → 光栅化 → 片段着色器 → 帧缓冲
+</code></pre>
+<p>这条流水线的每一级都是<strong>专用硬件</strong>——你不能改变它们的连接方式，不能让顶点着色器去做矩阵乘法。这就是为什么用 GPU 做通用计算（Scientific Computing、金融分析、AI 训练）几乎不可能：你需要用图形 API（OpenGL/DirectX）"伪装"你的计算任务，把数据塞进纹理、把计算伪装成着色器——极其繁琐，且性能损失严重。</p>
+<h3 id="cuda-的诞生一个大胆的问题"><a class="header" href="#cuda-的诞生一个大胆的问题">CUDA 的诞生：一个大胆的问题</a></h3>
+<p>2007 年，NVIDIA 问了自己一个反直觉的问题：<strong>为什么 GPU 的计算单元只能做图形？为什么不能直接命令它们做任意数学运算？</strong></p>
+<p>这个问题的答案就是 CUDA（Compute Unified Device Architecture）。</p>
+<p>CUDA 的核心创新不是发明了新硬件，而是<strong>发明了一套编程模型</strong>：让开发者用 C/C++ 的语法，直接控制 GPU 上成千上万个计算单元并行执行。</p>
+<blockquote>
+<p>这和当年为什么会有 Java 一样——不是为了造新硬件，而是为了给现有的硬件提供更好的抽象。CUDA 对 GPU 的意义，相当于 Java 对 JVM 的意义：一次编写，到处运行（只不过这里是一次编写，万核并行）。</p>
+</blockquote>
+<h3 id="为什么要分三层grid--block--thread"><a class="header" href="#为什么要分三层grid--block--thread">为什么要分三层：Grid → Block → Thread</a></h3>
+<p>这是 CUDA 设计里最精妙的地方。</p>
+<p>你写了一段代码，要在 GPU 上跑矩阵加法：把两个矩阵对应位置加起来，结果写到第三个矩阵。</p>
+<p>数学上，这个问题天然是<strong>并行的</strong>——每个位置的加法完全独立，互不依赖。那你作为程序员，你面临的问题是：<strong>我怎么把我这个"数学问题"翻译成 GPU 能理解的任务分配？</strong></p>
+<p>CUDA 给了你三个层次的抽象：</p>
+<p><strong>Thread（线程）：</strong> 最底层的执行单元。一个 Thread 负责计算结果矩阵 C 中的一个元素 <code>C[i] = A[i] + B[i]</code>。物理上，一个 Thread 就是 SM（流式多处理器）上调度和执行的一条指令流。</p>
+<p><strong>Block（线程块）：</strong> 一组 Thread（最多 1024 个）的物理分组。<strong>同一个 Block 里的所有 Thread，物理上运行在同一个 SM 上</strong>，因此它们可以通过 SM 上的 Shared Memory 互相通信、互相等待（同步）。不同 Block 之间无法直接通信——因为它们的物理位置（SM）事先未知，硬件无法保证它们在同一个地方。</p>
+<p><strong>Grid（网格）：</strong> 所有 Block 的集合，覆盖整个 GPU。一个 Grid 就是一个完整的计算任务。</p>
+<p>为什么 Block 要限制在 1024 个 Thread？<br> - 一个 SM 上的寄存器数量是固定的（每个 SM 约 256 KB 的 Register File）<br> - 一个 SM 同时最多容纳 64 个 Warp（每个 Warp 32 Threads = 2048 Threads/SM 物理上限）<br> - 但每个 Thread 需要自己的寄存器，1024 Threads/block × N registers/thread，很快就会把寄存器用光<br> - 1024 是一个经验值：在大多数 workload 下，这个上限既能保证足够并行，又不会让寄存器溢出</p>
+<blockquote>
+<p><strong>图 3：CUDA Grid of Thread Blocks</strong>（来源：NVIDIA CUDA 编程指南）— Grid 由多个 Thread Block 组成，每个 Block 在一个 SM 上执行，Block 内的 threads 可通过 shared memory 通信</p>
+</blockquote>
+<h3 id="warp32-个线程为何绑在一起"><a class="header" href="#warp32-个线程为何绑在一起">Warp：32 个线程为何绑在一起</a></h3>
+<p><strong>Warp 是硬件真正调度指令的最小单位。</strong><br><img src="../images/d29aaa19_3bdbc5f66bdf.webp" alt="图片"></p>
+<p>CUDA 编程模型里你写的是 Thread，但硬件 SM 实际上<strong>一次调度 32 个 Thread 同时执行同一条指令</strong>。这 32 个 Thread 就构成一个 Warp（字面意思：一束）。</p>
+<p>为什么要 32？<br> - 这是一个硬件决定的数字，源于 GPU 内存总线宽度和并行度的平衡<br> - GPU 的全局内存访问以 <strong>128 字节（32×4 字节）为单位</strong>，恰好一个 Warp 的所有线程访问连续内存时，一次内存事务就能满足所有 32 个线程的数据需求<br> - 如果 Warp 大小不是 32，内存合并的效率就会降低</p>
+<p>这就是为什么：<strong>同一个 Warp 内的所有线程，永远执行完全相同的指令</strong>（SIMT 的 S——Single Instruction）。如果它们执行路径分叉了（if/else），就会产生 Warp Divergence：GPU 不得不把分支的两个路径都跑一遍，让不需要的线程空转。</p>
+<p>这也告诉我们：<strong>分支越少、线程行为越一致，GPU 利用率越高</strong>。</p>
+<blockquote>
+<p>一个有趣的类比：Warp 就像划船比赛时的一排桨手。32 个人必须同时划——如果有人划、有人不划，整条船的速度反而会互相抵消。只有所有桨手节奏一致，效率才最高。</p>
+</blockquote>
+<h3 id="cuda-内存模型速度与距离的关系"><a class="header" href="#cuda-内存模型速度与距离的关系">CUDA 内存模型：速度与距离的关系</a></h3>
+<p>CUDA 把内存分成了清晰的层次，每个线程能访问的存储位置决定了速度：</p>
+<blockquote>
+<p><strong>图 4：CUDA 内存层次</strong>（来源：NVIDIA CUDA 编程指南）— 寄存器→Local Memory→Shared Memory→L2 Cache→Global Memory→Host Memory，带宽递减、延迟递增</p>
+</blockquote>
+<p>这张图值得反复琢磨：<strong>离计算单元越近，速度越快，但容量越小</strong>。这也是为什么 GPU 程序要尽量把数据"预取"到 Shared Memory，避免频繁访问显存——Global Memory 的带宽只有 L1 的千分之一，延迟是 L1 的 300 倍。</p>
+<h3 id="occupancy占用率gpu-性能的核心指标"><a class="header" href="#occupancy占用率gpu-性能的核心指标">Occupancy（占用率）：GPU 性能的核心指标</a></h3>
+<p>Occupancy = <strong>活跃 Warp 数 / SM 支持的最大 Warp 数</strong>。</p>
+<p>如果 Occupancy 很低，意味着很多 Warp 在等内存，计算单元闲置。导致低 Occupancy 的常见原因：</p>
+<ol>
+<li>
+<p><strong>寄存器溢出</strong></p>
+<p>：每个线程用太多寄存器，溢出到本地内存</p>
+</li>
+<li>
+<p><strong>Shared Memory 分配过多</strong></p>
+<p>：一个 SM 只有 128 KB Shared Memory</p>
+</li>
+<li>
+<p><strong>Block size 设置太小</strong></p>
+<p>：硬件无法调度足够的 Warp</p>
+</li>
+</ol>
+<p>NVIDIA 提供 <strong>Occupancy Calculator</strong> 工具，可以帮助开发者计算最优配置。</p>
+<h3 id="矩阵乘法理解-shared-memory-价值的最好例子"><a class="header" href="#矩阵乘法理解-shared-memory-价值的最好例子">矩阵乘法：理解 Shared Memory 价值的最好例子</a></h3>
+<p>为什么 Shared Memory 这么重要？我们用一个矩阵乘法的例子来理解。</p>
+<p><strong>无 Shared Memory 的做法</strong>：每个线程计算 C 矩阵的一个元素，需要从显存里反复读取 A 矩阵的一整行和 B 矩阵的一整列——大量的重复读取，性能极差。</p>
+<p><strong>使用 Shared Memory 的做法</strong>：先把 A 矩阵的一块瓦片（Tile）从显存一次性加载到 Shared Memory，然后 Block 内的所有线程共享这块数据——"大家分着看一本书"，而不是每个人单独去图书馆借。</p>
+<blockquote>
+<p><strong>图 5-a：矩阵乘法（无 shared memory）</strong></p>
+<p>（来源：NVIDIA CUDA 编程指南）— 每个线程独立访问全局内存，大量冗余读取</p>
+</blockquote>
+<blockquote>
+<p><strong>图 5-b：矩阵乘法（使用 shared memory）</strong></p>
+<p>（来源：NVIDIA CUDA 编程指南）— 将 A 的行加载到 shared memory，显著减少全局内存访问次数</p>
+</blockquote>
+<p>Flash Attention 之所以能极大加速 Transformer 的注意力计算，本质上就是一种极端的 Shared Memory 优化技术——把注意力矩阵的分块策略做到了极致。</p>
+<h2 id="三ga102-物理架构628-mm²283-亿晶体管"><a class="header" href="#三ga102-物理架构628-mm²283-亿晶体管">三、GA102 物理架构：628 mm²，283 亿晶体管</a></h2>
+<p>RTX 3090 用的 GA102 芯片是一个工程奇迹。</p>
+<p><strong>核心规格：</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>参数</th><th>GA102（RTX 3090）</th></tr>
+</thead>
+<tbody>
+<tr><td>工艺</td><td>Samsung 8nm</td></tr>
+<tr><td>晶体管数</td><td><strong>283 亿</strong></td></tr>
+<tr><td>Die 面积</td><td>628 mm²</td></tr>
+<tr><td>GPC 数量</td><td>7</td></tr>
+<tr><td>CUDA Core 总数</td><td>10,752</td></tr>
+<tr><td>Tensor Core 总数</td><td>336</td></tr>
+<tr><td>Ray Tracing Core 总数</td><td>84</td></tr>
+<tr><td>L2 Cache</td><td>6 MB</td></tr>
+<tr><td>显存</td><td>24 GB GDDR6X，384-bit</td></tr>
+<tr><td>显存带宽</td><td>936 GB/s</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>分层结构：</strong></p>
+<h3 id="sm-内部结构gpu-的基本作战单元"><a class="header" href="#sm-内部结构gpu-的基本作战单元">SM 内部结构：GPU 的基本作战单元</a></h3>
+<p><strong>SM（Streaming Multiprocessor，流式多处理器）是 GPU 的基本执行单元。</strong> 理解 SM 为什么长这样，比记住它包含什么部件更重要。</p>
+<h4 id="sm-是怎么来的为什么要流式处理"><a class="header" href="#sm-是怎么来的为什么要流式处理">SM 是怎么来的：为什么要"流式"处理</a></h4>
+<p>CPU 的执行模型是<strong>指令流</strong>：一条指令执行完，才执行下一条（加上流水线，超标量等优化，本质还是顺序推进）。</p>
+<p>GPU 面对的工作负载（渲染像素、矩阵运算）和 CPU 完全不同：<strong>数百万个任务，彼此完全独立，结果互不影响</strong>。与其让一个复杂的处理器逐一处理，不如让 N 个简单的处理器<strong>同时处理 N 个任务</strong>。</p>
+<p>这就是 SM 名称里"Stream"（流）的含义：<strong>数据流进处理器，每个处理单元只管自己的那一段，处理完直接输出</strong>——而不是等上一级完成。</p>
+<p>用一个生活场景类比：<br> - CPU 像一条<strong>流水线工厂</strong>，每个工位做复杂装配，必须等上一个工位完成才能继续<br> - GPU 像<strong>酒店自助餐台</strong>，每个厨师同时做自己的菜，客人各取所需，不需要排队等一个人做完</p>
+<h4 id="sm-内部为什么这样设计"><a class="header" href="#sm-内部为什么这样设计">SM 内部为什么这样设计</a></h4>
+<p>SM 内部的所有组件，都是为了解决同一个问题：<strong>如何让海量简单计算并行执行，同时尽可能减少数据搬运的代价。</strong></p>
+<p><strong>为什么需要 Warp Scheduler？</strong> 当一个 Warp 在等内存数据（300 周期延迟），Warp Scheduler 立刻切换到另一个 Warp 执行，用计算掩盖等待。SM 上有 4 个 Warp Scheduler，意味着<strong>同一个 SM 可以在 4 个 Warp 之间交替发射指令</strong>，保持计算单元始终有活干。</p>
+<p><strong>为什么 CUDA Core 是 32 个？</strong> 一个 Warp = 32 个线程，SM 要在一个时钟周期内发射一条指令给这 32 个线程，所以需要 32 个执行单元来对应 32 个线程。这 32 个 CUDA Core 以 <strong>SIMD（单指令多数据）</strong> 的方式工作——同一条指令，同时作用在 32 个数据上。</p>
+<p><strong>Tensor Core 为什么只有 1 个？</strong> Tensor Core 的矩阵乘法运算是密集计算，单个 Tensor Core 的计算密度已经很高（每周期 512 FLOPs），增加数量会大幅增加功耗和面积。一个 SM 有一个 Tensor Core 已经是面积/性能/功耗的平衡结果。</p>
+<p><strong>SFU 为什么只有 4 个？</strong> 超越函数（sin、cos、log）在 GPU 代码里出现的频率远低于普通加减乘除，而且 SFU 每个周期只能处理一条指令——给太多是浪费，4 个是经验最优值。</p>
+<p>每个 SM 每时钟周期可以调度 <strong>4 个 Warp（共 128 个线程）</strong> 同时发射指令。</p>
+<blockquote>
+<p><strong>为什么要 binning？</strong> 一个 wafer 上的 die 质量不均匀，完美的 die → RTX 3090 Ti；轻微缺陷 → RTX 3090（屏蔽部分 SM）；缺陷更多 → RTX 3080。这是半导体商业化的核心策略，不是技术失败。</p>
+</blockquote>
+<blockquote>
+<p><strong>图 6：NVIDIA A2 Tensor Core GPU 产品照</strong>（来源：NVIDIA 官方 Ampere 架构页面）— Ampere 架构入门级数据中心 GPU，单槽被动散热；注意：GA102/RTX 3090 的内部 die shot 目前暂无官方图，此图仅作 Ampere 架构产品形态参考</p>
+</blockquote>
+<h2 id="四三类核心cuda-coretensor-corert-core"><a class="header" href="#四三类核心cuda-coretensor-corert-core">四、三类核心：CUDA Core、Tensor Core、RT Core</a></h2>
+<p>GA102 里有三类不同的运算核心，分工明确、各有所长。这是理解现代 GPU 架构最重要的一节。</p>
+<h3 id="41-cuda-coregpu-的基本步兵"><a class="header" href="#41-cuda-coregpu-的基本步兵">4.1 CUDA Core：GPU 的"基本步兵"</a></h3>
+<p>CUDA Core 本质上就是一个<strong>可以在一个时钟周期完成一次浮点乘加（FMA）操作的运算单元</strong>：</p>
+<pre><code>D = A × B + C
+</code></pre>
+<p>乘法和加法在硬件里是<strong>融合的</strong>——同一个周期内完成，不需要中间舍入，精度更高，这就是 FMA（Fused Multiply Add）名称的由来。</p>
+<p><strong>GA102 的 CUDA Core 分类：</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类型</th><th>数量/SM</th><th>总计（RTX 3090）</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td>FP32 Core</td><td>32</td><td>~2,624</td><td>32位浮点（游戏、图形）</td></tr>
+<tr><td>INT32 Core</td><td>32</td><td>~2,624</td><td>32位整数（地址计算、逻辑）</td></tr>
+<tr><td>FP64 Core</td><td>16</td><td>~1,344</td><td>64位浮点（科学计算）</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>有趣的是：FP32 和 INT32 共用执行单元（同一套硬件可配置为 FP32 或 INT32），而 FP64 是独立单元。这就是为什么 RTX 3090 的 FP32 性能恰好是 FP64 的两倍——不是因为硬件加倍，而是 FP64 单元数量只有 FP32 的一半。</p>
+</blockquote>
+<p><strong>算力计算：</strong></p>
+<p>每个 SM 还有 <strong>4 个 SFU</strong>（Special Function Units），专门处理除法、开方、三角函数等超越函数——但每个周期只能发射一条 SFU 指令，如果代码里大量调用 sin()/cos()，这里会成为瓶颈。</p>
+<h3 id="42-tensor-coreai-时代的加速器"><a class="header" href="#42-tensor-coreai-时代的加速器">4.2 Tensor Core：AI 时代的加速器</a></h3>
+<p>这是 GPU 能统治 AI 训练战场的核心武器。</p>
+<p>深度学习的主导运算是矩阵乘法。一个 Transformer 模型的 forward pass 中，约 80-90% 的时间花在 GEMM（通用矩阵乘法）上。</p>
+<p>用 CUDA Core 做矩阵乘法，每个输出元素需要 N 次乘 + N 次加 = 2N FLOPs。如果有 10000 个 CUDA Core，4096×4096×4096 矩阵乘的理论算力约为 1.37 TFLOPS。</p>
+<p>但 <strong>Tensor Core</strong> 直接把矩阵乘法做成了硬件指令：</p>
+<p><strong>Tensor Core 演进历程：</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>架构</th><th>年份</th><th>代表产品</th><th>关键创新</th></tr>
+</thead>
+<tbody>
+<tr><td>Volta</td><td>2017</td><td>V100</td><td>首次引入，4×4×4 矩阵乘法</td></tr>
+<tr><td>Turing</td><td>2018</td><td>T4</td><td>第二代，支持 INT8/4/1 推理加速</td></tr>
+<tr><td>Ampere</td><td>2020</td><td>A100</td><td>第三代，16×16×16，TF32/BF16/FP64</td></tr>
+<tr><td>Hopper</td><td>2022</td><td>H100</td><td>第四代，FP8 原生，Transformer Engine</td></tr>
+<tr><td>Blackwell</td><td>2024</td><td>GB200</td><td>第五代，FP4/FP6</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Ampere A100 Tensor Core 的矩阵尺寸（每 Tensor Core 每周期）：</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>精度</th><th>矩阵尺寸</th><th>FLOPs/周期</th></tr>
+</thead>
+<tbody>
+<tr><td>FP64</td><td>8×4×8</td><td>128</td></tr>
+<tr><td>TF32</td><td>8×8×16</td><td>256</td></tr>
+<tr><td>BF16/FP16</td><td>16×16×16</td><td>512</td></tr>
+<tr><td>INT8</td><td>32×16×32</td><td>1024</td></tr>
+<tr><td>INT4</td><td>64×16×64</td><td>2048</td></tr>
+</tbody>
+</table>
+</div>
+<p>精度越低，单位周期可处理的 FLOPs 越多——这就是**量化（Quantization）**能加速推理的硬件基础。</p>
+<p><strong>H100 的 FP8 和 Transformer Engine：</strong> Hopper 架构引入了 FP8 原生计算和专为 Transformer 结构优化的 <strong>Transformer Engine</strong>，可以动态选择最佳精度，在大模型训练场景下比 A100 提升最高 6 倍。</p>
+<h3 id="43-rt-core光线追踪的专用硬件"><a class="header" href="#43-rt-core光线追踪的专用硬件">4.3 RT Core：光线追踪的专用硬件</a></h3>
+<p>跑个题，既然GPU里有RT core，那就说下咱们游戏玩家在意的光线追踪吧(¬◡¬)✧，传统游戏渲染用<strong>光栅化（Rasterization）</strong>——快但不真实：每个物体单独渲染，无法正确处理光线反射、折射和阴影。</p>
+<p>真实世界的光线物理：光子从光源发出，经过若干次反射/折射，最终进入人眼。<strong>Ray Tracing（光线追踪）</strong> 正是模拟这个过程。</p>
+<blockquote>
+<p>每个像素可能需要追踪数十条光线，每条光线经过多次 bounce，总计算量极其庞大——但每条光线之间<strong>完全独立</strong>，非常适合 GPU 并行。</p>
+</blockquote>
+<p>RT Core 是<strong>专用的光线追踪硬件</strong>，专门加速两类核心运算：</p>
+<p><strong>1. Box Intersection（包围盒相交测试）</strong><br> 光线与场景物体求交的第一步：用 AABB（轴对齐包围盒）快速排除明显不相交的对象。软件做需要约 12 次比较，RT Core 硬件一次完成。</p>
+<p><strong>2. Triangle Intersection（三角形相交测试）</strong><br> 精确计算射线与三角形的交点——Möller–Trumbore 算法硬件实现。</p>
+<p>由于全光线追踪计算量太大（Cyberpunk 2077 开启路径追踪需要 RTX 4090 才能跑 60fps），业界采用<strong>混合渲染</strong>：</p>
+<ul>
+<li>
+<p><strong>光栅化</strong></p>
+<p>→ 处理不透明物体、几何细节</p>
+</li>
+<li>
+<p><strong>光线追踪</strong></p>
+<p>→ 只处理反射、阴影、环境光遮蔽（只对少量关键光线做 RT）</p>
+</li>
+<li>
+<p><strong>DLSS（Deep Learning Super Sampling）</strong></p>
+<p>→ AI 重建提升分辨率，弥补光线追踪的性能损失</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>图 11：光线追踪原理</strong>（来源：NVIDIA 官方 Ampere 架构页面）— 摄像机发出光线击中物体后以不同角度反射，第二代 RT Core 支持异步计算，可在光追和图形/AI 计算同时进行；注：此图为光线追踪概念示意图，非 RT Core 内部晶体管结构图</p>
+</blockquote>
+<h2 id="五simt-执行模型gpu-是-simd-的升级版"><a class="header" href="#五simt-执行模型gpu-是-simd-的升级版">五、SIMT 执行模型：GPU 是 SIMD 的"升级版"</a></h2>
+<p>要理解 SIMT，要从 SIMD 的局限说起——因为 SIMT 是 GPU 厂商在 SIMD 暴露了严重瓶颈之后，做出的设计升级。</p>
+<h3 id="simd-为什么会遇到瓶颈"><a class="header" href="#simd-为什么会遇到瓶颈">SIMD 为什么会遇到瓶颈？</a></h3>
+<p>CPU 的向量指令（Intel SSE/AVX、AMD SIMD）本质是：<strong>用一条指令，同时对多个数据执行同一个操作</strong>。</p>
+<p>这很优雅：一个时钟周期干了 8 个数的活。但问题在于：<strong>所有执行单元必须同时执行同一条指令</strong>。</p>
+<p>现实代码不是所有数据都走同一条路：</p>
+<p>在纯 SIMD 模式下（lockstep），硬件碰到分支时是这样处理的：</p>
+<pre><code>
+</code></pre>
+<p><strong>这就是 SIMD 处理分支的方式：所有分支都执行，然后用 mask 屏蔽不需要的 lane。</strong></p>
+<p>问题来了：</p>
+<ul>
+<li><strong>深度分支：3 层 if-else 嵌套 = 8 个分支全部执行一次</strong></li>
+<li><strong>短分支：大量短分支（边界检查、特殊值处理）会导致大量 mask 切换开销</strong></li>
+<li>**最致命的是：CPU SIMD 宽度有限（AVX-256 = 8 float），所以 8 个 lane 还好。但 GPU 的并行度是 thousands of threads，如果每个 Warp 的 32 个线程都走不同路径……**<strong>GPU 的并行规模让 SIMD 的问题彻底爆发</strong></li>
+</ul>
+<p>CPU 上，一个典型 SIMD 向量宽度是 256 位（8 float32），8 个 lane 之间的分支差异还在可接受范围内。</p>
+<p>GPU 面对的是完全不同的量级：</p>
+<ul>
+<li>一个 Warp = <strong>32 个线程</strong>，物理上每个线程有自己的寄存器、</li>
+<li>如果 GPU 也用 SIMD 的 lockstep 模式：32 个线程强制同步，一个线程等所有线程</li>
+<li>那当这 32 个线程里有哪怕 1 个线程走不同路径（边界检查失败、特殊值处理），剩下 31 个全得陪着空转</li>
+</ul>
+<p>这就是为什么 GPU 不能简单用 SIMD 的 lockstep 模式——<strong>GPU 的并行粒度是线程，不是 lane</strong>。</p>
+<h3 id="simt-的核心设计线程--自动-reconverge"><a class="header" href="#simt-的核心设计线程--自动-reconverge">SIMT 的核心设计：线程 + 自动 Reconverge</a></h3>
+<p>SIMT 的关键思想是：</p>
+<blockquote>
+<p><strong>通过栈（Stack）和活跃掩码（Mask），硬件可以在物理PC锁步的前提下，模拟出线程各自推进的效果。；但硬件会自动把执行路径相同的线程打包成 Warp，以 SIMD 的效率执行。</strong></p>
+</blockquote>
+<p>这听起来矛盾——线程独立 vs. SIMD 效率——但解决方案很精妙：</p>
+<p><strong>每个线程在编程角度上有独立的 PC：</strong></p>
+<p><strong>注：物理硬件层面，Warp 内的所有线程共享同一个物理 PC。上述逻辑 PC 的“跳转”实际是通过硬件切换 Active Mask（活跃掩码）串行执行不同路径的指令，而不是让物理 PC 分裂成 32 个。硬件层面，同一时刻发射的仍然是一条指令：</strong></p>
+<p><strong>这就是 Reconverge（重汇聚）：</strong> 当分支的线程各自走完后，硬件保证它们在同一个地址重新同步，继续一起执行。Reconverge 点由编译器在生成指令时插入（<code>BRA</code> 指令指向汇聚地址），硬件负责检测和调度。</p>
+<p>硬件层面的 Reconvergence Stack</p>
+<p>硬件具体怎么知道"分支完成后去哪里汇聚"？答案是 <strong>Reconvergence Stack</strong>（重汇聚栈），一个由编译器生成指令、硬件维护的栈结构：</p>
+<p>编译后生成的指令序列：</p>
+<pre><code>
+</code></pre>
+<p><strong>硬件怎么知道 0x20 是汇聚点？</strong></p>
+<p>编译器在每个分支的出口处插入 <strong>ReconvPoint</strong> 标记，硬件在执行分支指令时，把 Reconverge Point 的地址和活跃线程的"分裂状态"推入栈中。当某分支执行完毕，硬件 pop 栈，找到下一个 Reconverge Point，把该分支的线程重新归队。</p>
+<h3 id="simt-vs-simd-对比"><a class="header" href="#simt-vs-simd-对比">SIMT vs. SIMD 对比</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>SIMD</th><th>SIMT</th></tr>
+</thead>
+<tbody>
+<tr><td>执行单元</td><td>向量寄存器（128/256/512-bit）</td><td>一组独立线程（32个）</td></tr>
+<tr><td>分支处理</td><td>向量被打断，部分 lane 被屏蔽</td><td>线程级分支，自动 reconverge</td></tr>
+<tr><td>每个 lane 有独立 PC？</td><td>否（lockstep 同步）</td><td>是（但硬件尽量同步）</td></tr>
+<tr><td>代表</td><td>Intel SSE/AVX，AMD SIMD</td><td>所有现代 NVIDIA/AMD GPU</td></tr>
+<tr><td>灵活性</td><td>低</td><td>高</td></tr>
+<tr><td>线程规模</td><td>1 个线程内的向量操作</td><td>数千个并发线程</td></tr>
+<tr><td>分支代价</td><td>按 lane mask 屏蔽，lane 越多浪费越多</td><td>按 Warp 分裂，32 个线程为单位</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>一句话总结：</strong> SIMD 是一个线程用加宽的管道一次处理 N 个数据；SIMT 是 N 个线程各自执行，但硬件把执行路径相同的打包成 Warp，以 SIMD 的效率运行。SIMT = SIMD 的效率 + 线程的灵活性。</p>
+<h2 id="六显存gddr6x-和-hbm-的分叉路"><a class="header" href="#六显存gddr6x-和-hbm-的分叉路">六、显存：GDDR6X 和 HBM 的分叉路</a></h2>
+<p>GPU 的内存系统是决定性能的关键瓶颈之一。RTX 3090 用的是 GDDR6X，数据中心用的 A100/H100 则用 HBM——这两条技术路线，服务于完全不同的市场需求。</p>
+<h3 id="gddr6xpam-4-信号技术"><a class="header" href="#gddr6xpam-4-信号技术">GDDR6X：PAM-4 信号技术</a></h3>
+<p>GDDR6X 使用 <strong>PAM-4（4电平脉冲幅度调制）</strong>——不像传统内存只用两个电压表示 0/1，GDDR6X 用<strong>四个电压级别</strong>在每个时钟周期传输 2 bit：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>电压</th><th>逻辑值</th></tr>
+</thead>
+<tbody>
+<tr><td>高</td><td>11</td></tr>
+<tr><td>中高</td><td>10</td></tr>
+<tr><td>中低</td><td>01</td></tr>
+<tr><td>低</td><td>00</td></tr>
+</tbody>
+</table>
+</div>
+<p>这让 GDDR6X 在不提升频率的情况下实现双倍带宽：<br> - 频率：19.5 Gbps/pin（与 GDDR6 相同）<br> - 每引脚带宽：39 Gbps（GDDR6 的两倍，因为 GDDR6 用 NRZ 只传 1 bit/pin）<br> - 总带宽：384-bit × 19.5 Gbps / 8 ≈ <strong>936 GB/s</strong></p>
+<h3 id="hbmai-加速卡的标配"><a class="header" href="#hbmai-加速卡的标配">HBM：AI 加速卡的标配</a></h3>
+<p>HBM（High Bandwidth Memory）和 GDDR 的核心区别：<strong>HBM 是 3D 堆叠</strong>，DRAM 芯片垂直堆叠，通过 TSV（Through-Silicon Via，穿硅孔）连接。</p>
+<p><strong>HBM3E 规格（NVIDIA H100/A100）：</strong><br> - 1024-bit 物理接口（比 GDDR6X 宽 2.67 倍）<br> - 带宽：3.35 TB/s（H100 SXM5）<br> - 每个 AI 加速器最多 8 个 cube = <strong>192 GB</strong>，带宽约 27 TB/s</p>
+<p>这就是为什么训练 GPT-4 级别的模型需要 H100——不仅需要大内存容纳数百 GB 的模型权重，还需要超高带宽让 Tensor Core 持续"吃饱"数据。</p>
+<h3 id="带宽-vs-算力ai-训练的真实瓶颈"><a class="header" href="#带宽-vs-算力ai-训练的真实瓶颈">带宽 vs 算力：AI 训练的真实瓶颈</a></h3>
+<p>AI 训练的实际 FLOPs 利用率（MFU）通常只有 <strong>30-50%</strong>，瓶颈不在算力，而在<strong>内存带宽</strong>。这也是 Flash Attention、Gradient Checkpointing、混合精度训练等优化技术存在的意义——用计算换内存。</p>
+<h2 id="七gpu-与深度学习为什么-gpu-天生适合-ai"><a class="header" href="#七gpu-与深度学习为什么-gpu-天生适合-ai">七、GPU 与深度学习：为什么 GPU 天生适合 AI</a></h2>
+<p>深度学习和 GPU 的设计哲学高度契合，这不是巧合，而是历史必然。</p>
+<h3 id="深度学习的主导运算矩阵乘法"><a class="header" href="#深度学习的主导运算矩阵乘法">深度学习的主导运算：矩阵乘法</a></h3>
+<p>全连接层：y = Wx + b → 矩阵乘法<br> 卷积层：本质是多个小矩阵的滑动窗口乘法<br> 注意力机制：Q、K、V 三个矩阵的乘法（Transformer 核心）</p>
+<p>单个 Transformer Block 有 4-6 个大型矩阵乘法。BERT-Large 有 24 个 Block，GPT-3 有 96 个 Block——这就是为什么大模型训练需要如此海量的算力。</p>
+<h3 id="混合精度训练现代大模型训练的标配"><a class="header" href="#混合精度训练现代大模型训练的标配">混合精度训练：现代大模型训练的标配</a></h3>
+<p>现代深度学习训练几乎全部使用<strong>混合精度</strong>：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>精度</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td>FP32</td><td>主权重副本（模型权重存两份，防止误差累积）</td></tr>
+<tr><td>FP16/BF16</td><td>前向传播、反向传播计算（Tensor Core 加速）</td></tr>
+<tr><td>FP16</td><td>梯度存储和通信（减少通信带宽）</td></tr>
+<tr><td>FP32</td><td>优化器状态（Adam m/v 需要高精度统计）</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>为什么不用 FP16 全程？</strong> FP16 表示范围有限（65536 个均匀间隔的值），当梯度很小但权重大时，更新量会被吞掉（underflow）。解决方法是 <strong>Loss Scaling</strong>：将 loss 乘以一个系数让梯度落到 FP16 可表示范围。</p>
+<p><strong>BF16（Brain Float 16）</strong> 是 Google 为 TPU 设计的格式，和 FP32 有相同的 exponent 位宽（8-bit），表示范围和 FP32 一样大，精度稍低——这是目前大模型训练的新趋势（Llama 3、Mistral 等都用了 BF16）。</p>
+<h3 id="推理与训练性能瓶颈的本质区别"><a class="header" href="#推理与训练性能瓶颈的本质区别">推理与训练：性能瓶颈的本质区别</a></h3>
+<p><strong>训练</strong>：密集计算，前向+反向，大 batch，吞吐优先 → 算力瓶颈<br><strong>推理</strong>：KV Cache 显存巨大，延迟敏感 → 内存带宽/容量瓶颈</p>
+<p><strong>vLLM（PagedAttention）</strong> 的核心创新是：将 KV Cache 分页管理（类操作系统虚拟内存），不同请求共享权重但各自有独立的 KV Cache，将 GPU 利用率从 ~30% 提升到 ~80%。</p>
+<h3 id="分布式训练单卡之外的工程世界"><a class="header" href="#分布式训练单卡之外的工程世界">分布式训练：单卡之外的工程世界</a></h3>
+<p>单卡 A100 的算力已经很强，但 GPT-3 175B 需要数百张卡协同训练数月。</p>
+<ul>
+<li>
+<p><strong>Tensor Parallelism（张量并行）</strong></p>
+<p>：每个 GPU 只负责一个 layer 的一部分矩阵乘法（按列分片），需要 GPU 之间高带宽互联</p>
+</li>
+<li>
+<p><strong>NVLink vs PCIe</strong></p>
+<p>：PCIe Gen4 = 64 GB/s；NVLink 4.0 = 900 GB/s，是 PCIe 的 14 倍</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>图 10：多 GPU 服务器内部结构</strong>（来源：NVIDIA 官方 Ampere 架构页面）— 展示多块 GPU 在同一主板上的物理布局，GPU 之间通过 NVLink 互联（NVSwitch 芯片负责全互联交换）</p>
+</blockquote>
+<p>这就是为什么张量并行训练（如 Megatron-LM）需要 NVLink——否则 GPU 间通信会成为瓶颈。</p>
+<blockquote>
+<p><strong>图 13：Multi-Instance GPU（MIG）</strong>（来源：NVIDIA 官方 Ampere 架构页面）— A100/H100 支持 MIG，可将一个物理 GPU 切分为最多 7 个独立实例，每个实例拥有独立的 SM、内存和带宽，保证服务质量（QoS）</p>
+</blockquote>
+<h2 id="八roofline-模型如何判断-gpu-程序的瓶颈在哪里"><a class="header" href="#八roofline-模型如何判断-gpu-程序的瓶颈在哪里">八、Roofline 模型：如何判断 GPU 程序的瓶颈在哪里</a></h2>
+<p>Roofline 模型是 GPU 性能分析的经典工具，直观展示<strong>算力</strong>和<strong>带宽</strong>哪个是真正的瓶颈：</p>
+<p><strong>Roofline 计算：</strong></p>
+<p><strong>如何判断瓶颈：</strong><br> - OI 高 → <strong>Compute Bound（计算绑定）</strong>：kernel 太重，增加算力直接提速<br> - OI 低 → <strong>Memory Bound（带宽绑定）</strong>：kernel 太轻，升级内存带宽或优化数据复用</p>
+<p><strong>典型 AI 模型的 OI：</strong><br> - 训练（大批量）：OI ≈ 100–500 FLOPs/Byte → 通常 <strong>compute bound</strong><br> - 推理（小批量）：OI ≈ 1–10 FLOPs/Byte → <strong>memory bound</strong></p>
+<p>这就是为什么训练用 HBM 带宽要求很高，而推理服务（如 vLLM）更关心显存容量（KV Cache 大小）和延迟。</p>
+<blockquote>
+<p><strong>图 12：Ampere 结构化稀疏性（Structured Sparsity）</strong>（来源：NVIDIA 官方 Ampere 架构页面）— Ampere 支持 2:4 结构化稀疏，权重矩阵中每 4 个元素有 2 个为 0，Tensor Core 可直接跳过零值计算，理论上实现 2 倍加速</p>
+</blockquote>
+<h2 id="九gpu-技术演进时间线"><a class="header" href="#九gpu-技术演进时间线">九、GPU 技术演进时间线</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>年份</th><th>架构</th><th>代表产品</th><th>关键创新</th></tr>
+</thead>
+<tbody>
+<tr><td>2006</td><td>Tesla</td><td>—</td><td>CUDA 架构发布，GPU 通用计算时代开启</td></tr>
+<tr><td>2012</td><td>Kepler</td><td>GTX 680</td><td>效率优化，GPU Boost</td></tr>
+<tr><td>2014</td><td>Maxwell</td><td>GTX 980</td><td>SIMT 改进，效率大幅提升</td></tr>
+<tr><td>2016</td><td>Pascal</td><td>P100</td><td>HBM2 首次引入，NVLink</td></tr>
+<tr><td>2017</td><td>Volta</td><td>V100</td><td><strong>Tensor Core 首次引入</strong> ，FP16 加速</td></tr>
+<tr><td>2018</td><td>Turing</td><td>RTX 2080</td><td>RT Core 首次引入，INT8/4/1 推理加速</td></tr>
+<tr><td>2020</td><td>Ampere</td><td>A100/RTX 30</td><td>第三代 Tensor Core，RTX 光追普及</td></tr>
+<tr><td>2022</td><td>Hopper</td><td>H100</td><td>第四代 Tensor Core，FP8，Transformer Engine</td></tr>
+<tr><td>2024</td><td>Blackwell</td><td>GB200</td><td>FP4/FP6，第五代 Tensor Core</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="写在最后"><a class="header" href="#写在最后">写在最后</a></h2>
+<p>GPU 的发展史，是一部计算架构如何不断演进以匹配问题本质的历史。</p>
+<p>从 2006 年 CUDA 的诞生，到 2012 年 AlexNet 证明深度学习可行，再到 2022 年 H100 把大模型训练推向新的量级——每一次突破，都不是凭空出现的，而是在正确的架构上积累的结果。</p>
+<p>理解 GPU 架构，不是为了记住几个参数，而是为了理解：<strong>为什么深度学习非 GPU 不可？为什么 AI 算力需求增长得如此之快？为什么 HBM 带宽成了大模型训练的关键瓶颈？</strong></p>
+<p>当你理解了这三个"为什么"，你就会发现，GPU 的架构设计里，藏着现代 AI 工业背后最深层的逻辑。</p>
+<p><em>本文基于 Branch Education 视频内容扩展，结合 CUDA 编程模型、Tensor Core 演进、深度学习训练/推理实践等系统性知识编写。</em></p>
+<p><em>视频链接：https://youtu.be/h9Z4oGN89MU?si=Glbqd9x1scCpAzb5</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter03/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter03/万字入门ai-infra深入理解大模型中的数学与infra优化.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter03/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter03/万字入门ai-infra深入理解大模型中的数学与infra优化.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

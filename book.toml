@@ -1,0 +1,29 @@
+[book]
+title = "AI 技术全景：从 Transformer 到 Agent 工程"
+authors = ["Atituiset"]
+description = "一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书"
+language = "zh"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+smart-punctuation = false
+mathjax-support = false
+additional-css = ["src/assets/katex.css"]
+additional-js = ["src/assets/katex.min.js", "src/assets/katex-auto-render.min.js", "src/assets/katex-init.js"]
+git-repository-url = "https://github.com/Atituiset/ai-collect"
+edit-url-template = "https://github.com/Atituiset/ai-collect/edit/main/{path}"
+
+[output.html.fold]
+enable = true
+level = 0
+
+[output.html.search]
+enable = true
+limit-results = 20
+teaser-word-count = 30

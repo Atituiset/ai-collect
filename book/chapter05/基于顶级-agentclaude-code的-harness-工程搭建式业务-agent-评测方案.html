@@ -1,0 +1,635 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>基于顶级 Agent（Claude Code）的 Harness 工程搭建式业务 Agent 评测方案 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter05/基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案"><a class="header" href="#基于顶级-agentclaude-code的-harness-工程搭建式业务-agent-评测方案">基于顶级 Agent（Claude Code）的 Harness 工程搭建式业务 Agent 评测方案</a></h1>
+<p>阿里妹导读</p>
+<p>用一个强 Agent 构建评测 Harness，系统性评测一群业务 Agent（文章内容基于作者个人技术实践与独立思考，旨在分享经验，仅代表个人观点。）</p>
+<p>一、背景与问题</p>
+<p><strong>1.1 业务场景</strong></p>
+<p>某业务系统的内容生成链路由多个子 Agent 协作完成，每个 Agent 负责不同的任务（图片理解、内容审核、文案生成、风格匹配等）。这些 Agent 的 prompt 方案频繁迭代，每次变更后需要快速验证效果。</p>
+<p>核心矛盾：业务 Agent 迭代快（天级），但传统评测工程搭建慢（周级）。</p>
+<p><strong>1.2 传统评测的痛点</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>痛点</td><td>表现</td></tr>
+<tr><td>启动成本高</td><td>搭建评测工程、写脚本、部署服务，还没开始评就花了一周</td></tr>
+<tr><td>人力密集</td><td>标注数据集、写分析脚本、出报告，每个环节都需人工介入</td></tr>
+<tr><td>迭代慢</td><td>prompt 改了一行，想看效果要等半天重新跑</td></tr>
+<tr><td>可复现性差</td><td>评测逻辑散落在各种脚本和 Notebook 里</td></tr>
+<tr><td>指标不统一</td><td>不同 Agent 各搞一套，无法横向对比</td></tr>
+<tr><td>工程化沉重</td><td>每换一个 Agent 就要新写一套评测代码</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>1.3 我们的解法：Harness 工程搭建式评测</strong></p>
+<p>核心思路：用一个顶级 Agent（Claude Code）作为 Harness 工程的搭建者和运行者，系统性地对业务 Agent 进行评测。</p>
+<h2 id="什么是-harness-工程搭建式"><a class="header" href="#什么是-harness-工程搭建式">什么是 "Harness 工程搭建式"？</a></h2>
+<p>传统做法：人写评测代码 → 跑脚本 → 看结果 → 改代码 → 再跑</p>
+<p>Harness 式做法：顶级 Agent 搭建完整的评测骨架（harness），包括评测方案、数据集、评测逻辑（以 Agent 提示词形式表达）、分析流程。人只需提供被测对象和做关键决策。</p>
+<h2 id="为什么-claude-code-是合适的-harness-搭建者"><a class="header" href="#为什么-claude-code-是合适的-harness-搭建者">为什么 Claude Code 是合适的 Harness 搭建者？</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>能力</td><td>在 Harness 中的作用</td></tr>
+<tr><td>深度理解 prompt</td><td>分析被测 Agent 的逻辑，设计针对性评测维度</td></tr>
+<tr><td>代码生成</td><td>数据获取/处理脚本，评测辅助工具</td></tr>
+<tr><td>结构化输出</td><td>评测方案文档、评测 Agent 提示词、评测报告</td></tr>
+<tr><td>多轮协作</td><td>跨版本持续迭代（v1→v2→v3），保持上下文连贯</td></tr>
+<tr><td>数据分析</td><td>对跑批结果做统计、归因、对比</td></tr>
+</tbody>
+</table>
+</div>
+<p>关键洞察：评测 Harness 的本质是一套结构化的评估规则 + 执行流程。传统做法把它编码为 Python 脚本，而我们把它编码为 Agent 提示词——更灵活、更可读、更易迭代。</p>
+<p>二、Harness 工程整体架构</p>
+<p><strong>2.1 三层架构</strong></p>
+<p><strong>2.2 Harness 搭建五步法</strong></p>
+<p><strong>2.3 与传统评测工程的类比</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>传统评测工程</td><td>Harness 式评测</td><td>变化</td></tr>
+<tr><td><code>test_config.yaml</code></td><td>评测方案 .md</td><td>规则从配置文件变为自然语言文档</td></tr>
+<tr><td><code>test_data.json</code></td><td>评测集 Excel（system.question）</td><td>数据格式统一，人可直接看懂</td></tr>
+<tr><td><code>test_runner.py</code>（数百行）</td><td>评测 Agent 提示词（数千字）</td><td>执行逻辑从代码变为 Prompt</td></tr>
+<tr><td><code>conftest.py</code> + fixtures</td><td>GT 标注 + ground_truth 字段</td><td>预期结果内嵌在数据中</td></tr>
+<tr><td><code>report_generator.py</code></td><td>CC 实时分析</td><td>报告生成从脚本变为交互</td></tr>
+<tr><td><code>requirements.txt</code> + CI</td><td>评测平台一键跑批</td><td>零部署成本</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>2.4 职责分工</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>角色</td><td>职责</td><td>不做什么</td></tr>
+<tr><td>人</td><td>GT 标注、方案审核、最终决策</td><td>不写评测脚本、不手动计算指标</td></tr>
+<tr><td>Claude Code</td><td>Harness 全链路搭建 + 结果分析</td><td>不做批量推理主循环（交给平台）</td></tr>
+<tr><td>评测平台</td><td>批量执行引擎（逐行调用）</td><td>不做方案设计和指标汇总</td></tr>
+</tbody>
+</table>
+</div>
+<p>三、统一评测指标框架</p>
+<p><strong>3.1 三层指标体系</strong></p>
+<p>在评测 6 个不同类型的 Agent 后，我们沉淀了一套通用的三层指标框架：</p>
+<p>L1：通用基础指标（所有 Agent 必报）</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>指标</td><td>含义</td><td>为什么重要</td></tr>
+<tr><td>输出格式合规率</td><td>JSON 可成功解析的比例</td><td>下游消费方直接报错</td></tr>
+<tr><td>字段完整率</td><td>必要字段均存在的比例</td><td>缺字段 = 功能不可用</td></tr>
+</tbody>
+</table>
+</div>
+<p>L2：按能力类型选用（从菜单中按需勾选）</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>能力类型</td><td>指标</td><td>适用场景</td></tr>
+<tr><td>分类判断</td><td>分类准确率</td><td>枚举值选择（如类型判断）</td></tr>
+<tr><td>二元决策</td><td>召回率 / 精确率</td><td>过滤 / 准入决策</td></tr>
+<tr><td>数值提取</td><td>精确匹配率</td><td>离散数值的精确提取</td></tr>
+<tr><td>连续评分</td><td>MAE + 分档一致率</td><td>内容质量打分</td></tr>
+<tr><td>文本生成</td><td>LLM-as-Judge 1-5 分</td><td>文案、描述等开放式输出</td></tr>
+</tbody>
+</table>
+</div>
+<p>L3：Agent 专属指标（按需自定义）</p>
+<p>每个 Agent 可在 L1+L2 基础上追加专有指标。例如：</p>
+<p>●文案生成 Agent：违禁词清洁率、关键信息保留率</p>
+<p>●风格匹配 Agent：不适用风格过滤合规率</p>
+<p><strong>3.2 新 Agent 接入时的指标选型流程</strong></p>
+<pre><code>确定 Agent 涉及的能力类型↓从 L2 菜单勾选对应指标↓按需追加 L3 专属指标↓设定每个指标的目标阈值
+</code></pre>
+<p>四、Harness 各层的搭建方法</p>
+<p><strong>4.1 规则层：<br>评测方案设计（CC 角色：方案架构师）</strong></p>
+<p>输入：被测 Agent 的 prompt 文件 + 业务上下文描述</p>
+<p>CC 输出：</p>
+<p>●完整的评测方案文档（含维度、指标、阈值、数据集要求、错误分类体系）</p>
+<p>●边界用例建议（CC 分析 prompt 逻辑后主动提出应覆盖的场景）</p>
+<p>实际效果：从一个 prompt 文件到一份完整评测方案，大约 10 分钟的交互。</p>
+<p>示例对话：</p>
+<pre><code>人：这是新的内容审核 Agent 的 prompt，帮我设计评测方案CC：[分析 prompt] 我建议从以下维度评测：1. 格式合规（JSON可解析 + 字段完整）2. 过滤决策（召回率/精确率）3. 评分准确性（MAE + 分档一致率）需要覆盖的边界：少量输入/全过滤/极端分数...目标阈值建议：过滤精确率≥90%，MAE≤3...人：某个维度容易低估，阈值放宽到 MAE≤5CC：好的，已更新。[输出完整方案文档]
+</code></pre>
+<p><strong>4.2 数据层：<br>黄金评测集构建（CC 角色：数据工程师）</strong></p>
+<p>CC 做的事：</p>
+<p>1.数据获取：编写脚本调用业务接口，批量拉取候选数据</p>
+<p>2.数据处理：格式化为评测所需的 JSON 结构</p>
+<p>3.GT 辅助标注：对分类型指标，CC 先给建议标注，人工复核</p>
+<p>4.评测集打包：生成评测平台可直接消费的 Excel（含 system.question 列）</p>
+<p>关键设计：system.question 列</p>
+<p>每行数据都有一个system.question列，格式为 JSON，包含：</p>
+<p>●被测 Agent 所需的全部输入字段</p>
+<p>●ground_truth（人工标注的黄金答案）</p>
+<p>评测 Agent 读取这一列即可获得输入和预期输出，无需额外配置。</p>
+<pre><code>{  "sample_id": 243,  "title": "XX品牌零食合集...",  "content": "最近发现了...",  "items": [...],  "ground_truth": {    "should_filter": false,    "total_score": 64,    "dimension_a": 22,    "dimension_b": 22,    "dimension_c": 20  }}
+</code></pre>
+<p><strong>4.3 执行逻辑层：评测 Agent 提示词</strong></p>
+<p><strong>（CC 角色：Harness 工程师）</strong></p>
+<p>这是整套方案最核心的创新：把传统的评测脚本（Python/Java）替换为一份评测 Agent 提示词。评测逻辑从"代码"变为"自然语言指令"，一个 Agent 来评测另一个 Agent。</p>
+<p>评测 Agent 的工作流程：</p>
+<pre><code>读取 system.question（一行数据）       ↓调用被测 Agent（获取实际输出）       ↓解析输出 → 硬规则自动检查 → LLM 打分       ↓输出结构化 JSON（所有指标的计算结果）
+</code></pre>
+<p>评测 Agent 提示词的结构模板：</p>
+<pre><code>##角色定义你是一个严谨的 AI 评测专家，负责对「XXX」Agent 进行单条样本评测。##工具声明-{agentId}：调用被测 Agent，传入 XXX，返回原始输出##约束1.必须先调用工具获取 Agent 输出，再评测2.最终只输出一个合法 JSON3.数值统计必须精确计算，不可估算##工作流程1.解析输入（提取 post_id、输入数据、ground_truth）2.调用被测 Agent3.解析输出为 JSON4.硬规则自动检查（格式/字段/枚举/字数/...）5.LLM-as-Judge 打分（对比 ground_truth 或按评分标准）6.错误归因（FORMAT_ERROR / WRONG_CHOICE / ...）7.输出最终 JSON##输出 Schema{完整的 JSON schema 定义}
+</code></pre>
+<h2 id="为什么要这样设计"><a class="header" href="#为什么要这样设计">为什么要这样设计？</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>优势</td><td>说明</td></tr>
+<tr><td>逻辑可读</td><td>评测逻辑以自然语言写在提示词里，无需读代码</td></tr>
+<tr><td>快速迭代</td><td>发现评测逻辑有误，改一段文字就行，不用改代码重部署</td></tr>
+<tr><td>统一执行</td><td>所有 Agent 的评测逻辑结构一致，只改内容不改框架</td></tr>
+<tr><td>评测即文档</td><td>提示词本身就是评测标准的完整说明</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>4.4 输出层：<br>结果分析与报告（CC 角色：数据分析师）</strong></p>
+<p>典型流程：</p>
+<pre><code>人：跑批完了，结果在 XXX.xlsx，帮我出报告CC：[读取 Excel]- 总量 50 条，API 成功 46 条- 格式合规率 92%- 过滤 Recall 100% / Precision 18.2% ❌- 核心问题：模型将评分维度误用为过滤条件- 建议：修复 prompt 中过滤逻辑的边界定义[输出完整报告 Markdown]
+</code></pre>
+<p>CC 在分析中的增值：</p>
+<p>1.自动识别 pattern：不只报数字，还归因（"18 条误过滤中，12 条都是把某评分维度&lt;60 当过滤条件"）</p>
+<p>2.跨批次对比：和上一版结果对比，明确哪些指标进步/退步</p>
+<p>3.给出可操作建议：不只是"分数低"，而是"建议在 prompt 第三段加入明确的过滤条件边界"</p>
+<p>五、关键实践经验</p>
+<p><strong>5.1 评测集设计原则</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>原则</td><td>说明</td><td>反例</td></tr>
+<tr><td>小而精</td><td>20-55 条足够，覆盖所有边界场景</td><td>200+ 条但都是简单 case</td></tr>
+<tr><td>分布均衡</td><td>正/负例比例合理，边界场景必须有</td><td>全是正例，评不出问题</td></tr>
+<tr><td>GT 可复核</td><td>每条 GT 标注有据可查</td><td>GT 靠感觉打分</td></tr>
+<tr><td>版本化管理</td><td>评测集跟随被测 prompt 版本变更</td><td>用 v1 评测集评 v3 prompt</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>5.2 评测 Agent 提示词的迭代策略</strong></p>
+<p>我们发现评测 Agent 本身也需要迭代（评测系统 bug ≠ 被测 Agent bug）：</p>
+<p>常见评测系统 bug：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>问题</td><td>表现</td><td>修复方式</td></tr>
+<tr><td>匹配逻辑过严</td><td>语义等价的判定原因被判错</td><td>GT⊆AI 超集匹配</td></tr>
+<tr><td>硬编码规则误报</td><td>排除列表不全导致误判</td><td>改为动态语义比对</td></tr>
+<tr><td>Token 截断</td><td>输出超长被评测平台截断</td><td>正则容错提取关键字段</td></tr>
+<tr><td>GT 覆盖缺口</td><td>新增选项未在 GT 中体现</td><td>更新 GT 标注</td></tr>
+</tbody>
+</table>
+</div>
+<p>迭代节奏：</p>
+<p>●v1：基本逻辑跑通（调试模式，带推导过程）</p>
+<p>●v2：切换为跑批模式（纯 JSON 输出），修复首批发现的评测逻辑 bug</p>
+<p>●v3+：基于实际结果持续调优（指标定义、匹配方式、容错逻辑）</p>
+<p><strong>5.3 LLM-as-Judge 的使用心得</strong></p>
+<p>对文本生成类 Agent（无法精确匹配 GT），我们用 LLM 做评委：</p>
+<p>做法：在评测 Agent 提示词中嵌入评分标准（1-5 分 rubric），评测 Agent 同时扮演"执行者"和"评委"。</p>
+<p>有效的 rubric 设计：</p>
+<pre><code>5 分：改写自然，传达原文单一核心意图，一次读完即懂4 分：基本达标，有轻微瑕疵但整体可读3 分：勉强可接受，但存在轻度问题2 分：明显问题：信息压缩过度或照抄原文1 分：严重错误：与输入无关或完全无法理解
+</code></pre>
+<p>注意事项：</p>
+<p>●每个分值必须有具体、可区分的判定标准</p>
+<p>●避免"好/较好/一般"这类主观描述</p>
+<p>●分值之间的差异应该一个正常人也能判断</p>
+<p><strong>5.4 "评测 Agent 调被测 Agent" 的技巧</strong></p>
+<pre><code>评测平台→ 调用评测 Agent（一个 LLM 实例）→ 评测 Agent 通过工具调用被测 Agent（另一个 LLM 实例）→ 获得被测 Agent 的原始输出→ 评测 Agent 对输出进行多维度评分→ 返回结构化评测 JSON
+</code></pre>
+<p>实际踩坑：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>坑</td><td>解法</td></tr>
+<tr><td>评测 Agent 忘记调用工具</td><td>在 Constraints 中强调"必须先调用工具"</td></tr>
+<tr><td>工具参数传递失败</td><td>在提示词中显式写明参数构造逻辑</td></tr>
+<tr><td>评测 Agent 重试耗尽 token</td><td>添加"禁止重试"约束</td></tr>
+<tr><td>输出截断</td><td>减少推导过程，只输出最终 JSON</td></tr>
+</tbody>
+</table>
+</div>
+<p>六、效率对比</p>
+<p><strong>6.1 时间投入</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>阶段</td><td>传统方式</td><td>CC 协助</td><td>加速比</td></tr>
+<tr><td>评测方案设计</td><td>1-2 天</td><td>10-30 分钟</td><td>~10x</td></tr>
+<tr><td>评测集构建</td><td>2-3 天</td><td>半天（含人工标注）</td><td>~5x</td></tr>
+<tr><td>评测脚本/Agent 开发</td><td>2-3 天</td><td>1-2 小时</td><td>~10x</td></tr>
+<tr><td>跑批执行</td><td>同（平台执行）</td><td>同</td><td>1x</td></tr>
+<tr><td>结果分析 + 报告</td><td>半天-1天</td><td>10-20 分钟</td><td>~5x</td></tr>
+<tr><td>单 Agent 全流程</td><td>~1.5 周</td><td>~1-2 天</td><td>~5x</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>6.2 质量保障</strong></p>
+<p>CC 方案不仅更快，分析质量往往更高：</p>
+<p>●覆盖性：CC 不会遗漏任何数据行（人工数 50 行 Excel 容易看漏）</p>
+<p>●一致性：同样的评测标准，CC 不会因为疲劳而评分漂移</p>
+<p>●溯源性：每条评测结果都可追溯到 prompt 中的具体逻辑</p>
+<p>●可复现：同一份评测 Agent 提示词 + 同一份评测集 = 结果可复现</p>
+<p>七、适用场景与局限</p>
+<p><strong>7.1 适用场景</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>场景</td><td>适合度</td><td>原因</td></tr>
+<tr><td>Prompt 迭代验证</td><td>⭐⭐⭐⭐⭐</td><td>改 prompt → 跑批 → 看报告，闭环最快</td></tr>
+<tr><td>多 Agent 横向对比</td><td>⭐⭐⭐⭐⭐</td><td>统一指标框架 + 相同评测流程</td></tr>
+<tr><td>新 Agent 上线前验收</td><td>⭐⭐⭐⭐</td><td>系统性覆盖，不依赖人工抽检</td></tr>
+<tr><td>线上问题复盘</td><td>⭐⭐⭐</td><td>可快速构造问题用例验证</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>7.2 局限与建议</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>局限</td><td>建议</td></tr>
+<tr><td>LLM-as-Judge 本身有偏差</td><td>对关键决策用人工抽检兜底</td></tr>
+<tr><td>评测集规模受限（人工 GT）</td><td>小而精优于大而糙，20-55 条覆盖边界即可</td></tr>
+<tr><td>依赖评测平台稳定性</td><td>token 截断、API 超时需做容错</td></tr>
+<tr><td>首次搭建有学习成本</td><td>第二个 Agent 起复用率很高</td></tr>
+</tbody>
+</table>
+</div>
+<p>八、可复用资产</p>
+<p>经过 6 个 Agent 的实战，已沉淀的可复用资产：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>资产</td><td>说明</td><td>复用方式</td></tr>
+<tr><td>三层指标框架模板</td><td>L1/L2/L3</td><td>新 Agent 对照选用</td></tr>
+<tr><td>评测方案文档模板</td><td>目标+维度+数据集+流程+错误分类</td><td>填空式生成</td></tr>
+<tr><td>评测 Agent 提示词模板</td><td>角色+工具+约束+工作流+输出 schema</td><td>替换业务逻辑即可</td></tr>
+<tr><td>评测集 Excel 格式</td><td>system.question 列规范</td><td>标准化接入评测平台</td></tr>
+<tr><td>评测报告模板</td><td>执行情况+指标汇总+问题分析+建议</td><td>CC 自动填充</td></tr>
+<tr><td>错误分类体系</td><td>FORMAT_ERROR/WRONG_CHOICE/...</td><td>按需扩展</td></tr>
+<tr><td>Agent 平台调用经验</td><td>接口格式/参数/踩坑记录</td><td>减少试错</td></tr>
+</tbody>
+</table>
+</div>
+<p>九、快速上手指南</p>
+<p>想要复用这套方案的同学，按以下步骤操作：</p>
+<p>●准备好被测 Agent 的 prompt 文件</p>
+<p>●确认被测 Agent 的接口信息和调用方式</p>
+<p>●在 Claude Code 中打开项目目录</p>
+<h2 id="step-2设计评测方案10-30-分钟"><a class="header" href="#step-2设计评测方案10-30-分钟">Step 2：设计评测方案（10-30 分钟）</a></h2>
+<pre><code>告诉 CC：这是被测 Agent 的 prompt [粘贴/路径]，帮我设计评测方案。CC 会输出：维度、指标、阈值、数据集要求、错误分类。你来审核和调整。
+</code></pre>
+<h2 id="step-3构建评测集半天含人工标注"><a class="header" href="#step-3构建评测集半天含人工标注">Step 3：构建评测集（半天，含人工标注）</a></h2>
+<pre><code>告诉 CC：帮我从 XXX 接口拉取候选数据，格式化为评测集。CC 输出：候选数据 Excel。你来做 GT 标注（CC 可以先给 AI 建议，你复核）。CC 打包为带 system.question 列的最终评测集。
+</code></pre>
+<h2 id="step-4编写评测-agent-提示词1-2-小时"><a class="header" href="#step-4编写评测-agent-提示词1-2-小时">Step 4：编写评测 Agent 提示词（1-2 小时）</a></h2>
+<pre><code>告诉 CC：基于评测方案，帮我写评测 Agent 的提示词。CC 输出：完整的评测 Agent System Prompt。上传到评测平台，用 1-2 条数据调试。根据调试结果让 CC 修改（通常需要 2-3 轮）。
+</code></pre>
+<h2 id="step-5跑批--出报告30-分钟"><a class="header" href="#step-5跑批--出报告30-分钟">Step 5：跑批 + 出报告（30 分钟）</a></h2>
+<pre><code>上传评测集到平台 → 等待跑批完成。下载结果 Excel → 告诉 CC：帮我分析这份结果。CC 输出：完整评测报告 + 优化建议。
+</code></pre>
+<p>十、总结</p>
+<p><strong>10.1 核心理念</strong></p>
+<p>一句话：用一个强 Agent（Claude Code）搭建评测 Harness 工程，将评测逻辑从"代码"升级为"Prompt"，实现业务 Agent 的系统性快速评测。</p>
+<p>范式转变：</p>
+<pre><code>传统：人写评测代码 → 跑脚本 → 人看结果 → 人改代码 → 再跑（周级启动，天级迭代）Harness式：CC搭建Harness → 平台跑批 → CC分析 → CC调整Harness → 再跑（天级启动，小时级迭代）
+</code></pre>
+<p><strong>10.2 核心收益</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>收益</td><td>具体表现</td></tr>
+<tr><td>从周到天</td><td>单 Agent 评测全流程从 ~1.5 周压缩到 1-2 天</td></tr>
+<tr><td>一人成军</td><td>一个人 + Claude Code 完成原来需要测试开发 + 数据标注 + 分析师的工作</td></tr>
+<tr><td>可持续迭代</td><td>每次 prompt 变更后的验证成本极低（改提示词 → 重跑 → 看报告）</td></tr>
+<tr><td>零部署</td><td>评测逻辑是 Prompt 而非代码，无需 CI/CD，改完即生效</td></tr>
+<tr><td>方法论沉淀</td><td>指标框架 + Agent 提示词模板 + 错误分类体系，可迁移复用到任何 Agent</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>10.3 适用场景</strong></p>
+<p>●任何有 Agent/LLM 应用、需要系统性评测能力的业务组</p>
+<p>●Prompt 迭代频繁（天级/周级），需要快速验证效果</p>
+<p>●多 Agent 协作系统，需要分模块独立评测</p>
+<p><strong>10.4 开放讨论</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th></th></tr>
+</thead>
+<tbody>
+<tr><td>问题</td><td>思考</td></tr>
+<tr><td>评测 Agent 自身的准确性如何保证？</td><td>调试期用 2-3 条数据人工核对；正式跑前先小批次验证</td></tr>
+<tr><td>能否替代人工测试？</td><td>不能完全替代，但可以覆盖 80%+ 的重复劳动</td></tr>
+<tr><td>与 Evals 框架（OpenAI）的关系？</td><td>理念类似，但我们的 Harness 更轻量、更灵活、无需工程部署</td></tr>
+<tr><td>能否跨团队复用？</td><td>可以——三层指标框架 + 评测 Agent 模板 + 工作流模板，换被测对象即可</td></tr>
+</tbody>
+</table>
+</div>
+<p>十一、最后</p>
+<p>感谢对营销消费清单 AI 项目评测专项给予大力支持和鼓励的各位老师：</p>
+<p>团队战友：岑坚、茉书、沈芃、飘飘、鲜佳伟等同学</p>
+<p>协作兄弟：危素、朱八、墨謧、临汀、图兔、书屹、深空等同学</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter05/又一个神级-claude-code-插件开源了.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter06/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter05/又一个神级-claude-code-插件开源了.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter06/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "python3 build.py && node scripts/format.js",
+    "build": ".venv/bin/python3 build_mdbook.py",
+    "build:legacy": "python3 build.py && node scripts/format.js",
     "format": "node scripts/format.js",
+    "serve": "mdbook serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

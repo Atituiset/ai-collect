@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>9大Harness的记忆能力对比 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter04/9大harness的记忆能力对比.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="9大harness的记忆能力对比"><a class="header" href="#9大harness的记忆能力对比">9大Harness的记忆能力对比</a></h1>
+<p>导读</p>
+<p>这篇文章有意思的地方，不在于又讲了一遍“AI Agent 需要记忆”。这事大家都知道。真正麻烦的是，当 Agent 开始真的写代码、调工具、跨会话工作以后，记忆到底放在哪、谁来检索、什么时候过期、怎么防止串用户。</p>
+<p>Mem0 这篇 X Article 把 Claude Code、Codex、OpenClaw、Hermes、Copilot、Devin、Windsurf、AWS AgentCore 等几个常见 Agent Harness 拉到一张桌上对比。它当然带有 Mem0 自己的产品视角，但里面对“记忆为什么正在从功能变成基础设施”的判断，值得开发者认真看一眼。</p>
+<p>Agent Harness，可以理解为 AI 软件真正跑起来的“运行壳”。Claude Code、Codex、Cursor 这类环境，不只是把模型接进来聊天，它们还负责上下文管理、工具编排、多 Agent 协作，以及越来越关键的记忆管理。</p>
+<p>问题就在这，真正交付软件的东西，越来越不只是模型，而是这个 Harness。</p>
+<p>记忆正是 Harness 设计里最难的地方。它应该放在哪里？一次会话结束后，什么东西应该留下？窗口被塞满以后，哪些信息应该被压缩、保留或丢掉？这些问题还没有统一答案，所以每个主流 Harness 都在用自己的方式试。</p>
+<h2 id="agent-记忆到底是什么"><a class="header" href="#agent-记忆到底是什么">Agent 记忆到底是什么</a></h2>
+<p>很多系统都说自己有 memory，但这里至少有三类完全不同的东西。混在一起讲，很容易把问题讲糊。</p>
+<ul>
+<li><strong>工作记忆（Working memory）</strong>：会话期间留在上下文窗口里的内容。会话结束通常就没了。上下文压缩，也就是窗口满了以后什么能活下来，属于这一层的问题。</li>
+<li><strong>外部记忆（External memory）</strong>：存在模型权重之外的内容，比如向量数据库、知识图谱、文件。它能跨会话保留，但模型权重本身不变。到 2026 年，生产环境里的记忆基本都在这一层。</li>
+<li><strong>参数记忆（Parametric memory）</strong>：通过梯度下降写进模型权重里的知识。它不是检索例子，而是把规则泛化出来。但原文判断，2026 年还没有真正的生产部署。</li>
+</ul>
+<p>认知科学里常说的语义记忆、情景记忆、程序性记忆，描述的是“存什么”。上面这三层讲的是“存在哪里”。这两个维度别混。</p>
+<p>文章引用了论文《Contextual Agentic Memory is a Memo, Not True Memory》里面有一个很锋利的结论：如果想让检索式记忆达到参数记忆的效果，可能需要 Ω(k²) 规模的存储样本，而参数记忆只需要 O(d) 的权重更新。下面这些系统，基本都还活在这个天花板下面。</p>
+<h2 id="主流-harness-都交付了什么"><a class="header" href="#主流-harness-都交付了什么">主流 Harness 都交付了什么</a></h2>
+<p>九个 Harness 的记忆能力对比</p>
+<h3 id="1-claude-code"><a class="header" href="#1-claude-code">1. Claude Code</a></h3>
+<p>Claude Code 走了两条线。</p>
+<p><code>CLAUDE.md</code> 是人写的配置，通常放项目约定、指令和开发偏好，会在会话开始时读取。<code>Auto-memory</code> 则是 Claude 通过后台提取 Agent 写出来的笔记，存放在 <code>~/.claude/projects/&lt;repo&gt;/memory/</code> 下，围绕一个 <code>MEMORY.md</code> 索引组织。这个索引有上限，200 行或 25KB，内容分成 user、feedback、project、reference 四类。</p>
+<p>限制主要来自检索方式。每一轮里，Claude Code 会把文件名和描述交给一个更小的模型，由它决定加载哪些文件。没有 embedding，最多加载 5 个文件，超过上限还可能静默截断。也就是说，一个名字看起来相关的文件，可能打败真正相关的文件。</p>
+<p><img src="../images/149512ec_541b5738c598.webp" alt="Claude Code 记忆相关原文图"></p>
+<p>Claude Code 记忆架构</p>
+<p><strong>短板</strong>：它按文件名选择，不是语义搜索。团队共享能力藏在 <code>TEAMMEM</code> 标志后面，但底层仍然是本地、仓库级 Markdown，没有语义索引。</p>
+<h3 id="2-anthropic-managed-agents"><a class="header" href="#2-anthropic-managed-agents">2. Anthropic Managed Agents</a></h3>
+<p>Managed Agents 是 Anthropic 的托管 Agent 运行时，不是 Claude Code 那种本地产品。它的会话是一个只追加不修改的事件日志，所以回滚和审计是架构内生的，不是后面补的。</p>
+<p>记忆存储以文件系统形式挂载到 <code>/mnt/memory/</code>，每个 workspace 最多 8 个 store，每个大约 100KB。每次写入都是不可变版本，多个 Agent 可以共享同一个 store，并留下可审计历史。</p>
+<p><strong>短板</strong>：它更适合 workspace 级别的多 Agent 协调，而不是长期个人记忆。100KB 上限和 workspace 作用域意味着，跨会话个人上下文还得在上层再搭一套模式。</p>
+<h3 id="3-openai-codex"><a class="header" href="#3-openai-codex">3. OpenAI Codex</a></h3>
+<p>Codex 的记忆是一组 Markdown 目录，位置在 <code>~/.codex/memories/</code>，没有 SQLite，也没有 embeddings。<code>memory_summary.md</code> 会先读，<code>MEMORY.md</code> 按需用 <code>grep</code> 查，旁边还有 <code>raw_memories.md</code>、<code>skills/</code>、<code>rollout_summaries/</code>。功能默认关闭，需要 <code>features.memories</code> 开关。</p>
+<p>它的写入路径分两段。</p>
+<p>第一段是每个 rollout 自己做。会话空闲 6 小时后，Codex 按严格 schema 抽取记忆、脱敏密钥，然后写到本地状态数据库，还不是写进记忆目录。</p>
+<p>第二段是全局合并。系统拿锁后启动一个 consolidation 子 Agent，决定合并、打补丁或丢弃，再把 diff 写进去。这个流程有边界，最多 256 个 rollouts，会按 30 天剪枝，也会考虑限流。</p>
+<p>读取路径则不是语义检索。summary 会被截到固定 5,000 token 预算，其他内容靠 <code>grep</code> 从 <code>MEMORY.md</code> 里找。</p>
+<p><img src="../images/149512ec_819b98a6767d.webp" alt="Codex 记忆相关原文图"></p>
+<p>Codex 记忆架构</p>
+<p><strong>短板</strong>：5,000 token summary 会静默截断；<code>grep</code> 只能匹配子串，改写过的事实可能完全找不到；6 小时空闲门槛让连续会话很难及时合并；状态是本地的；发布初期 EEA、英国和瑞士不可用。</p>
+<h3 id="4-github-copilot"><a class="header" href="#4-github-copilot">4. GitHub Copilot</a></h3>
+<p>Copilot 最有辨识度的动作，是 <strong>即时引用校验（just-in-time citation verification）</strong>。</p>
+<p>它的记忆项不是一段泛泛文本，而是结构化对象：subject、事实内容、文件与行号引用、reasoning。使用之前，Agent 会拿当前分支校验引用。如果代码已经和记忆冲突，它会重写这条记忆。记忆还会在 28 天后自动过期。</p>
+<p>这也是少数公开了真实生产效果的数据：A/B 测试里，开启记忆后 PR 合并率从 83% 提升到 90%，代码审查 precision 提升 3%，recall 提升 4%。在编码 Agent 记忆这块，这个 7 个百分点的提升是少见的真实世界指标，其他系统更多还停在 benchmark。</p>
+<p><strong>短板</strong>：这种引用 schema 很难容纳没有明确代码锚点的偏好事实，比如“偏好少抽象”。另外，它严格限定在 repo 作用域里。</p>
+<h3 id="5-openclaw"><a class="header" href="#5-openclaw">5. OpenClaw</a></h3>
+<p>OpenClaw 的原生记忆比看起来更强。它在 <code>~/.openclaw/workspace</code> 里存 Markdown，包括维护过的 <code>MEMORY.md</code> 和按日期记录的 daily logs。底层还有每个 Agent 独立的 SQLite 索引，带 embeddings 和混合检索，70% 向量、30% BM25。所以它原生就有语义搜索。</p>
+<p><img src="../images/149512ec_b73b1f026b89.webp" alt="OpenClaw 记忆相关原文图"></p>
+<p>OpenClaw 记忆架构</p>
+<p>麻烦在于什么东西能留下。当窗口满了，OpenClaw 会触发一次“静默内部回合”，让模型在清空前把重要内容写到磁盘。写进去什么，取决于模型那一轮的判断。长期记忆因此会选择性强、稳定性不一致。</p>
+<p>Mem0 插件 <code>@mem0/openclaw-mem0</code> 想解决的就是这个依赖。<code>Auto-Recall</code> 在每轮前注入相关记忆，<code>Auto-Capture</code> 在每轮后持久化交流内容，新事实会存起来，旧事实会更新，重复内容会合并，并通过 session <code>run_id</code> 和长期 <code>userId</code> 管作用域。</p>
+<p>文章认为，OpenClaw 24.7 万 star 的采用，很大一部分就是被这个缺口推动的。</p>
+<h3 id="6-hermes-agent"><a class="header" href="#6-hermes-agent">6. Hermes Agent</a></h3>
+<p>Hermes 有 13.5 万 star、200 多个模型，内置三层记忆，又支持 8 个可插拔 provider。</p>
+<p>第一层是工作记忆：<code>MEMORY.md</code> 约 2,200 字符，<code>USER.md</code> 约 1,375 字符，加起来约 1,300 token。内容用 <code>§</code> 分隔，有利用率指示，并在容量到 80% 时做 consolidation。写入会落盘，但系统 prompt 会拿到一个冻结快照直到下一次会话，以保住 prefix cache。</p>
+<p>第二层是 skills：5 次以上工具调用任务后写成程序性文档，并按计划维护。</p>
+<p>第三层是 session search：用 SQLite FTS5 对所有会话做全文检索，并按需总结。</p>
+<p><img src="../images/149512ec_03fcb4f49cda.webp" alt="Hermes Agent 记忆相关原文图"></p>
+<p>Hermes Agent 记忆架构</p>
+<p><strong>短板</strong>：持久记忆上限很小，约 800 token。FTS5 是关键词检索，“429 errors” 不会匹配 “rate limiting”。状态也是本地的。正因为如此，Hermes 留了 provider 插槽。接 Mem0 后，上限、语义检索、服务端抽取和 <code>MEM0_USER_ID</code> 作用域都可以由外部系统接管；即使服务挂了，还有 circuit breaker 让内置层继续工作。</p>
+<h3 id="7-aws-bedrock-agentcore"><a class="header" href="#7-aws-bedrock-agentcore">7. AWS Bedrock AgentCore</a></h3>
+<p>AgentCore 是 AWS 的托管 Agent 平台。它的 <code>Runtime</code> 是 Harness 层，可以类比 Anthropic Managed Agents；<code>Memory</code> 是托管记忆服务。</p>
+<p>Memory 有三种异步抽取策略：语义事实、偏好、叙事总结。抽取大约 20 到 40 秒，检索约 200ms。发生变化的事实不会直接删除，而是标记为 <code>INVALID</code>，这样可以保留 lineage。</p>
+<p>公开指标包括 LoCoMo 70.58、PrefEval 79、PolyBench-QA 83.02。</p>
+<p><strong>短板</strong>：它是 AWS 特定生态，有锁定问题；公开的 LoCoMo 分数也低于领先的记忆系统。</p>
+<h3 id="8-windsurf"><a class="header" href="#8-windsurf">8. Windsurf</a></h3>
+<p>Windsurf 的记忆由 Cascade 引擎自动生成和管理，开发者没有太多工作流可控。记忆以本地、workspace 级文件形式存放在 <code>~/.codeium/windsurf/memories/</code>，主要捕捉代码库模式和约定。</p>
+<p><strong>短板</strong>：捕捉什么由 Cascade 决定，不是开发者决定。记忆限定在 workspace 里，跨项目不可见，也没有跨设备或团队共享。</p>
+<h3 id="9-cognition-devin"><a class="header" href="#9-cognition-devin">9. Cognition Devin</a></h3>
+<p>Devin 把记忆分成两块。</p>
+<p><code>Knowledge</code> 是人工维护的 trigger-content 事实，不自动捕获。<code>DeepWiki</code> 是参考文档，上限是 30 页、100 条 notes，每条 10,000 字符。Devin 会在会话后建议新增 Knowledge，但必须人类批准后才会存进去。</p>
+<p><strong>短板</strong>：人工审批能保证质量，但也带来摩擦。团队如果不审核，就什么都沉淀不下来。限制也不算高，而且 Knowledge 是给 Devin 用的，不会迁移到其他工具。</p>
+<h2 id="记忆-benchmark-本身也很薄"><a class="header" href="#记忆-benchmark-本身也很薄">记忆 Benchmark 本身也很薄</a></h2>
+<p>文章对现有 benchmark 的批评很直接：多数测试还停留在“能不能从过去对话里回忆事实”。它们接近饱和，而且高分不一定代表 Agent 会做出更好决策。</p>
+<p>LoCoMo 被点名批评得最重。它只有 10 段对话，比较不稳定；不少问题不需要真正记忆，一个简单 <code>grep</code> baseline 也能到约 74%；对抗问题还常常和目标有表面相似性，模型可能靠 pattern matching 过关。</p>
+<p>LongMemEval 相对还算能用。它有 500 个 curated questions，覆盖信息抽取、多会话推理、时间推理、知识更新和拒答，规模扩到约 150 万 token。但它仍然偏 recall。</p>
+<p>更深的问题是，很多 benchmark 根本不测“记忆是否能指导行动”。MemoryArena（arXiv:2602.16313）就显示，一些在 LoCoMo 和 LongMemEval 接近饱和的系统，到了行动场景会失败。Anatomy of Agentic Memory（arXiv:2602.19320）也把这个批评形式化了：这些榜单测的是相似度，不是任务效用。</p>
+<p>还有生产规模。标准 benchmark 多数卡在 150 万 token 左右，但生产 Agent 很快会累积到 1,000 万 token 以上。BEAM（ICLR 2026）是少数为这个范围设计的 benchmark。比较诚实的结论是，记忆领域还需要新的 benchmark，现有 leaderboard 要谨慎看，下面这些分数也一样。</p>
+<h2 id="研究显示还有哪些没解决"><a class="header" href="#研究显示还有哪些没解决">研究显示还有哪些没解决</a></h2>
+<p><strong>稳定性与可塑性困境只是换了地方。</strong> 把记忆挪到外部，并没有结束灾难性遗忘。《When Continual Learning Moves to Memory》显示，新旧记忆会争夺检索槽位，就像以前争夺权重一样。来自简单任务的原始轨迹，甚至会伤害更难任务，forward transfer 为 -9.5%。</p>
+<p><strong>选择性遗忘还没解决。</strong> MemoryAgentBench（arXiv:2507.05257）定义了四种能力。系统能处理检索，但还很难做到选择性遗忘，也就是忘掉一个过期事实，同时保留围绕它的结构。</p>
+<p><strong>记忆也是攻击面。</strong> 《No Attacker Needed》（arXiv:2604.01350）测到正常使用下 57% 到 71% 的跨用户污染。记忆投毒攻击成功率则在 6% 到 38% 之间（arXiv:2601.05504）。</p>
+<h2 id="短板里反复出现的模式"><a class="header" href="#短板里反复出现的模式">短板里反复出现的模式</a></h2>
+<p>这些系统的短板其实很像。</p>
+<p>存储常常是<strong>有上限且本地化</strong>的，比如 Claude Code 25KB、Hermes 2,200 字符、Codex 5,000 token 加载预算。</p>
+<p>检索大多还是<strong>关键词式</strong>的，比如 Claude Code 按文件名，Codex 用 <code>grep</code>，Hermes 用 FTS5。少数有语义搜索的系统，要么仍受本地和压缩限制，比如 OpenClaw；要么锁在云服务生态里，比如 AgentCore。</p>
+<p>记忆还普遍是 <strong>Harness 作用域</strong>。Claude Code 的记忆，对 Codex 来说没有意义。<strong>过期处理</strong>很弱，除了 Copilot 之外很少有系统认真处理 stale memory。<strong>隔离</strong>也经常是事后才想起来，所以才会出现前面提到的污染数字。</p>
+<p>这就是 Harness 边界的限制。</p>
+<h2 id="mem0-的位置"><a class="header" href="#mem0-的位置">Mem0 的位置</a></h2>
+<p>Mem0 针对的就是这个边界之外的问题。它的架构是混合式的：向量存储负责语义检索，知识图谱负责关系推理，key-value 负责快速元数据。</p>
+<p>v3 算法在 2026 年 4 月改成了单次 ADD-only 抽取、多信号检索，也就是语义、BM25、实体链接一轮完成，并把实体链接放进向量存储里，移除了 v2 的外部图数据库。</p>
+<p><img src="../images/149512ec_4383f1ac8470.webp" alt="Mem0 记忆算法原文图"></p>
+<p>Mem0 记忆算法</p>
+<p>文章给出的数据是，Mem0 每次查询约 6,900 token、1.44 秒；full-context retrieval 则约 26,000 token、17.12 秒。</p>
+<p>对应前面那些短板，Mem0 的卖点是：没有固定上限的外部 store；多信号检索，能找回上个月关于 auth endpoint 的讨论，即使说法已经变了；按身份隔离的 memory namespace，避免一个用户的记忆泄漏到另一个用户那里。</p>
+<p>它也不只是理论。文章提到 Mem0 已经覆盖上面这些 Harness，包括 Claude Code 插件、Codex MCP server、Hermes 和 OpenClaw provider、AWS Strands 原生集成，以及 21 个 framework 和 20 个 vector store。</p>
+<p>换句话说，记忆正在从每个 Harness 里的小功能，变成一层基础设施。</p>
+<h2 id="现在走到哪了"><a class="header" href="#现在走到哪了">现在走到哪了</a></h2>
+<p>记忆已经变成基础设施。主流 Harness 都开始交付它，因为一个 Agent 如果只在单次会话里聪明，跨会话就失忆，那它的能力边界会非常明显。</p>
+<p>这些 Harness 原生实现已经有进步，但它们常常在同一条边界上断掉：本地且有上限的存储、关键词检索、Harness 作用域、薄弱的 stale memory 处理，以及隔离缺口。</p>
+<p>用来衡量它们的 benchmark 本身也不够强。真正接近生产规模的 BEAM，恰恰是很多系统还没报告的。</p>
+<p>整体看，Mem0 想补的是一层可移植、语义可检索、跨 Agent、能扛住生产 token 规模的记忆基础设施。</p>
+<p>Mem0 是一个面向 LLM 和 AI Agent 的开源智能记忆层，目标是提供长期、个性化、具备上下文感知的跨会话交互。</p>
+<ul>
+<li>开源仓库：github.com/mem0ai/mem0</li>
+</ul>
+<p>原文：https://x.com/mem0ai/status/2061822612398014782?s=20</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter04/从零搭建-harness-engineering-架构ruleskillsub-agent-完整落地路径.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter04/rust-正在接管-ai-agent-的基础设施层.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter04/从零搭建-harness-engineering-架构ruleskillsub-agent-完整落地路径.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter04/rust-正在接管-ai-agent-的基础设施层.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

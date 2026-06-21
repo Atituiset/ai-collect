@@ -1,8 +1,19 @@
+# Dependencies
 node_modules/
-dist/
-.env
-.DS_Store
-*.pyc
+
+# Python
+.venv/
 __pycache__/
+*.pyc
+
+# Raw source (large)
 collects/
-build.py
+
+# OS
+.DS_Store
+
+# Secrets
+.env
+
+# Misc
+dist/

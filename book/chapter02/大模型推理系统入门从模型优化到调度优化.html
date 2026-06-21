@@ -1,0 +1,548 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>大模型推理系统入门：从模型优化到调度优化 - AI 技术全景：从 Transformer 到 Agent 工程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="一本关于 AI 基础架构、推理优化与 Agent 工程的开源电子书">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../src/assets/katex-505d5f82.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e32a6e44.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-5a78458d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">AI 技术全景：从 Transformer 到 Agent 工程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Atituiset/ai-collect/edit/main/src/chapter02/大模型推理系统入门从模型优化到调度优化.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="大模型推理系统入门从模型优化到调度优化"><a class="header" href="#大模型推理系统入门从模型优化到调度优化">大模型推理系统入门：从模型优化到调度优化</a></h1>
+<p>目前主流开源推理框架里，<code>vLLM</code> 与 <code>SGLang</code> 都很值得学习。考虑到 vLLM 社区活跃、资料丰富、工程实现公开透明，这篇文章会以 vLLM 所代表的技术路线为主线。</p>
+<p>本文目标不是讲源码细节，而是帮你建立一张“推理系统技术地图”：</p>
+<ul>
+<li>近几年最核心的推理优化技术是什么</li>
+<li>每项技术是为了解决什么问题</li>
+<li>这些技术在系统里是如何落地的</li>
+</ul>
+<p>文章会尽量不陷入过深的算子细节，但每个部分都会给出可继续深入的资料。</p>
+<p>其他推荐的系统性资料：</p>
+<ul>
+<li><code>ai-infra-learning</code>：系统介绍大模型工程基础与实践</li>
+<li>项目地址：https://github.com/cr7258/ai-infra-learning</li>
+</ul>
+<h2 id="2-什么是大模型推理"><a class="header" href="#2-什么是大模型推理">2. 什么是大模型推理</a></h2>
+<h2 id="21-大模型是什么"><a class="header" href="#21-大模型是什么">2.1 大模型是什么</a></h2>
+<p>从架构演进看，Transformer（出自 Attention Is All You Need）是现代大模型的基础。常见结构可以粗分为三类：</p>
+<ul>
+<li><code>Encoder-only</code></li>
+<li><code>Decoder-only</code></li>
+<li><code>Encoder-Decoder</code></li>
+</ul>
+<p>当前主流生成式大模型主要采用 <code>Decoder-only</code>。核心原因是它更适合自回归生成：每次基于已有上下文预测下一个 token。</p>
+<p>推荐阅读：</p>
+<ul>
+<li>论文：Attention Is All You Need<br>https://arxiv.org/abs/1706.03762</li>
+</ul>
+<h2 id="22-大模型推理是什么"><a class="header" href="#22-大模型推理是什么">2.2 大模型推理是什么</a></h2>
+<p>推理（Inference）可以理解为：模型在参数固定的前提下，接收输入并生成输出。</p>
+<p>和训练相比，推理有几个关键差异：</p>
+<ul>
+<li>训练要反向传播并更新参数；推理只做前向计算</li>
+<li>训练关注收敛和总吞吐；推理更关注用户体验与服务稳定性</li>
+<li>推理请求长度、到达时间、输出长度高度不确定，调度难度更高</li>
+</ul>
+<p>对生成式模型来说，推理通常分两阶段：</p>
+<ul>
+<li><code>Prefill</code>（输入阶段，先处理完整 prompt 并建立KV缓存）</li>
+<li><code>Decode</code>（生成阶段，逐 token 输出答案）</li>
+</ul>
+<p>这两个阶段的计算特征并不一样：<code>prefill</code> 更像“把整段输入一次性处理完”，通常更适合大块计算；<code>decode</code> 更像“每次只往前走一小步，但要重复很多轮”，所以虽然单步更轻，却对交互体验更敏感。</p>
+<p>对应的核心指标：</p>
+<ul>
+<li><code>TTFT (Time To First Token)</code>：首 token 延迟</li>
+<li><code>TPOT (Time Per Output Token)</code>：每个输出 token 的平均延迟</li>
+<li><code>Throughput</code>：单位时间处理 token 或请求数</li>
+<li><code>Tail Latency (P95/P99)</code>：最慢那批请求的延迟表现。比如 <code>P95 = 2秒</code>，表示 95% 的请求能在 2 秒内完成，剩下 5% 会更慢。这个指标越高，说明系统越容易出现“少数用户等很久”的情况。</li>
+<li><code>Memory Efficiency</code>：显存利用率（尤其 KV Cache）</li>
+</ul>
+<p>一句话总结：推理系统优化，本质是在“延迟-吞吐-显存-公平性”之间做工程权衡。</p>
+<p>推荐阅读：</p>
+<ul>
+<li>博客：Inside vLLM: Anatomy of a High-Throughput LLM Inference System<br>https://vllm.ai/blog/anatomy-of-vllm</li>
+<li>论文：Orca: A Distributed Serving System for Transformer-Based Generative Models<br>https://www.usenix.org/conference/osdi22/presentation/yu</li>
+</ul>
+<h2 id="3-模型推理如何优化"><a class="header" href="#3-模型推理如何优化">3. 模型推理如何优化</a></h2>
+<p>这一部分按两条线展开：</p>
+<ul>
+<li><code>Model-side</code>：模型结构与算子相关优化</li>
+<li><code>System-side</code>：服务系统与调度相关优化</li>
+</ul>
+<h2 id="31-model-side如何服务好一个模型"><a class="header" href="#31-model-side如何服务好一个模型">3.1 Model-side：如何服务好一个模型</a></h2>
+<p>参数规模极大的 Transformer 中，最关键的计算热点通常在：</p>
+<ul>
+<li>Attention</li>
+<li>MLP</li>
+<li>KV Cache（跨 token 持续占用显存的历史状态缓存）</li>
+</ul>
+<p>这里有一个很容易被忽略、但非常重要的前提：在自回归生成里，模型每生成一个新  token，都要依赖前面所有 token 的历史信息。如果每次都从头重算，代价会非常高，所以系统会把这些历史计算结果缓存下来，这就是 KV  Cache。也正因为如此，KV Cache 会直接成为推理系统里的核心资源。</p>
+<p>为什么模型侧优化主要集中在这三块？</p>
+<ul>
+<li>Attention 会随着上下文变长而越来越重，尤其容易带来中间结果和访存压力</li>
+<li>MLP 在很多模型里占据了大量计算量，往往是纯算力热点</li>
+<li>KV Cache 会随着“上下文长度 x 并发请求数”一起增长，直接影响显存上限</li>
+</ul>
+<p>当上下文变长时，这三个问题往往会同时变严重：Attention 计算更重，KV Cache 膨胀更快，系统可承载并发也更容易下降。所以很多推理系统问题，在长上下文场景下会被进一步放大。</p>
+<p>换句话说，模型侧优化主要是在解决两件事：一是“算得更快”，二是“占得更省”。</p>
+<h3 id="311-如何管理-kv-cache"><a class="header" href="#311-如何管理-kv-cache">3.1.1 如何管理 KV Cache</a></h3>
+<p><code>PagedAttention</code> 借鉴了操作系统分页思想，把 KV Cache 按固定大小的小块来管理，减少显存碎片。</p>
+<p>如何实现（简述）：</p>
+<ul>
+<li>不再要求一条请求的整段 KV 缓存连续放在一大片显存里</li>
+<li>而是把它拆成很多固定大小的小块，需要多少就分配多少</li>
+<li>系统额外维护一张映射表，记录“这一段内容现在放在哪些小块里”</li>
+<li>请求结束后，这些小块可以单独回收，也更容易复用给别的请求</li>
+</ul>
+<p>工程意义：它把“很难管理的一整段大缓存”变成了“很多可灵活调度的小块缓存”，所以更省显存，也更适合高并发场景。</p>
+<p>推荐阅读：</p>
+<ul>
+<li>论文：Efficient Memory Management for Large Language Model Serving with PagedAttention<br>https://arxiv.org/abs/2309.06180</li>
+<li>博客：Inside vLLM: Anatomy of a High-Throughput LLM Inference System<br>https://vllm.ai/blog/anatomy-of-vllm</li>
+</ul>
+<h3 id="312-attention-机制优化"><a class="header" href="#312-attention-机制优化">3.1.2 Attention 机制优化</a></h3>
+<p>自回归生成时，序列越长，Attention 的中间结果就越大。很多时候真正拖慢速度的，不是公式本身，而是这些中间结果需要反复写入显存、再从显存读回来。<code>FlashAttention</code> 的关键价值就在这里：它主要优化的是“数据搬运”，而不是改掉 Attention 的数学定义。</p>
+<p>如何实现（简述）：</p>
+<ul>
+<li>不一次性处理完整的 attention 矩阵，而是拆成很多小块分批计算</li>
+<li>每算完一小块，就尽量立刻在 GPU 更快的片上缓存里继续完成后续步骤</li>
+<li>不再把那张很大的中间分数矩阵完整地写回显存</li>
+<li>这样就少了很多“写到显存再读回来”的动作</li>
+</ul>
+<p>工程意义：<code>FlashAttention</code> 的提升主要来自“少搬中间结果”，因此通常既能提速，也能降低显存压力。</p>
+<p>推荐阅读：</p>
+<ul>
+<li>论文：FLASHATTENTION: Fast and Memory-Efficient Exact Attention with IO-Awareness<br>https://arxiv.org/abs/2205.14135</li>
+<li>论文：FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning<br>https://arxiv.org/abs/2307.08691</li>
+</ul>
+<h3 id="313-mlp-优化以-moe-为例"><a class="header" href="#313-mlp-优化以-moe-为例">3.1.3 MLP 优化（以 MoE 为例）</a></h3>
+<p>在很多模型里，MLP 同样是主要算力开销来源。<code>MoE (Mixture of Experts)</code> 的核心是“稀疏激活”：不是每次都让全部参数参与计算，而是只让少数几个“专家”处理当前 token。</p>
+<p>如何实现（简述）：</p>
+<ul>
+<li>先增加一个很小的路由模块，判断当前 token 更适合交给哪些专家处理</li>
+<li>每个 token 只会被分配给少数几个专家，而不是所有专家</li>
+<li>系统把去往同一专家的 token 聚在一起计算，再把结果拼回原顺序</li>
+<li>为了避免某几个专家总是过载，训练和服务时通常还要做负载均衡</li>
+</ul>
+<p>工程挑战：</p>
+<ul>
+<li>token 在专家之间分发和回收结果，会带来额外通信与重排开销</li>
+<li>如果很多 token 总是挤到少数专家上，就会出现热点和长尾延迟问题</li>
+</ul>
+<p>参考：</p>
+<ul>
+<li>HuggingFace（中文）：https://huggingface.co/blog/zh/moe</li>
+<li>论文：Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity<br>https://arxiv.org/abs/2101.03961</li>
+<li>DeepSpeed MoE Inference Tutorial：https://www.deepspeed.ai/tutorials/mixture-of-experts-inference/</li>
+</ul>
+<h2 id="32-分布式中如何加速计算"><a class="header" href="#32-分布式中如何加速计算">3.2 分布式中如何加速计算</a></h2>
+<p>当模型或服务规模继续变大时，单卡通常会先遇到三类问题：</p>
+<ul>
+<li>模型参数太大，一张卡放不下</li>
+<li>KV Cache 太大，并发一上来显存就吃紧</li>
+<li>即使能放下，单卡吞吐也不够，扛不住线上流量</li>
+</ul>
+<p>这时就需要并行化。可以把不同并行方式理解成：它们都在“把大任务拆开”，但拆分角度不一样。</p>
+<p>常见并行方式：</p>
+<ul>
+<li><code>Tensor Parallelism (TP)</code>：按张量维度切分算子</li>
+<li><code>Pipeline Parallelism (PP)</code>：按层切分模型并流水执行</li>
+<li><code>Data Parallelism (DP)</code>：多副本并行处理不同请求</li>
+<li><code>Expert Parallelism (EP)</code>：主要用于 <code>MoE</code>，把不同专家分布到不同设备上</li>
+</ul>
+<p>如何实现（简述）：</p>
+<ul>
+<li><code>TP</code> 的思路是把同一层的计算拆到多张卡上，算完后再把结果合起来</li>
+<li><code>PP</code> 的思路是把不同层放到不同设备上，让多个请求像流水线一样依次经过这些层</li>
+<li><code>DP</code> 的思路是直接复制出多个完整模型副本，让不同请求去不同副本上执行</li>
+<li><code>EP</code> 的思路是把不同专家放到不同设备上，让每张卡只负责部分专家，而不是容纳整套专家参数</li>
+</ul>
+<p>需要注意：</p>
+<ul>
+<li><code>TP</code> 更适合解决“单层太大，一张卡算不下”的问题</li>
+<li><code>PP</code> 更适合解决“模型层数太多，整模型放不下”的问题</li>
+<li><code>DP</code> 更适合解决“模型能放下，但流量太大，需要复制副本扩吞吐”的问题</li>
+<li><code>EP</code> 更适合解决“MoE 专家太多，单卡放不下全部专家”的问题</li>
+</ul>
+<p>对于普通稠密模型，通常重点关注 <code>TP / PP / DP</code>。对于 <code>MoE</code> 模型，<code>EP</code> 也很关键，因为它直接决定专家如何分布以及 token 如何在专家之间流动。这些并行策略主要解决“算力与容量扩展”，在线体验（TTFT、P99）仍高度依赖上层调度。</p>
+<p>参考资料：</p>
+<ul>
+<li>Megatron Core Parallelism Guide：https://docs.nvidia.com/megatron-core/developer-guide/0.17.0/user-guide/parallelism-guide.html</li>
+<li>DeepSpeed MoE Inference Tutorial：https://www.deepspeed.ai/tutorials/mixture-of-experts-inference/</li>
+<li>Megatron Core MoE 文档：https://docs.nvidia.com/megatron-core/developer-guide/0.15.0/api-guide/moe.html</li>
+</ul>
+<h2 id="33-system-side推理系统如何优化输入与执行"><a class="header" href="#33-system-side推理系统如何优化输入与执行">3.3 System-side：推理系统如何优化输入与执行</a></h2>
+<p>如果把一个请求放到真实推理系统里看，它大致会经历这样一条生命周期：</p>
+<ul>
+<li>请求先进入等待队列</li>
+<li>调度器决定它什么时候进入 batch</li>
+<li>先执行 <code>prefill</code>，把输入 prompt 处理完并建立 KV Cache</li>
+<li>再进入 <code>decode</code> 循环，逐 token 生成输出</li>
+<li>请求结束后，系统再回收它占用的 KV Cache 和调度状态</li>
+</ul>
+<p>这样看就比较容易理解：<code>batching</code> 决定“哪些请求一起跑”，<code>scheduling</code> 决定“谁先跑、跑多久”，<code>prefix caching</code> 决定“哪些计算可以不必重做”。</p>
+<h3 id="331-batching-策略"><a class="header" href="#331-batching-策略">3.3.1 Batching 策略</a></h3>
+<p>为什么推理系统几乎一定会做 batching？</p>
+<ul>
+<li>因为单个请求往往喂不满 GPU，如果每次只跑一个请求，很多算力会被浪费</li>
+<li>但 batching 也不是越大越好；batch 越大，吞吐通常越高，但等待拼批的时间也可能越长</li>
+<li>所以 batching 的核心问题不是“要不要拼”，而是“怎么拼，拼到什么程度”</li>
+</ul>
+<p>可以把常见 batching 方式理解成一条逐步演进的路线：</p>
+<ul>
+<li><code>Static Batching</code>：先攒够固定数量的请求，再一起执行。实现最简单，但对线上波动流量不友好；请求来得快时可能还行，请求来得慢时就容易出现“为了等人上车而空耗时间”的情况。</li>
+<li><code>Dynamic Batching</code>：不再死等固定批大小，而是在一个时间窗内尽量多收集请求，再一起执行。它比 static 更灵活，但本质上仍然是在“先等一会，再开一批”。</li>
+<li><code>Continuous Batching</code>：这是现在最重要的一类做法。系统不会等当前 batch 全部结束后再装下一批，而是让已经在生成中的请求继续跑，同时把新请求持续插入进来。这样 GPU 更不容易空转，也更适合生成式模型这种“每个请求长度都不一样”的场景。</li>
+<li><code>Selective Batching</code>：当请求差异很大时，系统还会进一步按请求特征分桶，比如把长度相近、阶段相近的请求更倾向于放在一起，减少彼此干扰。</li>
+</ul>
+<p>如何实现（简述）：</p>
+<ul>
+<li>最简单的实现是：设一个 batch 大小，攒满再执行</li>
+<li>再往前一步，就是允许系统在一个很短的等待窗口里动态拼批</li>
+<li>到 continuous batching 时，调度器会持续观察等待队列，只要 GPU 还有空余，就把合适的新请求塞进当前运行中的 batch</li>
+<li>对生成式模型来说，这样做特别重要，因为不同请求的输出长度不同；如果非要整批一起进、一起出，短请求就会被长请求拖住</li>
+</ul>
+<p>如果只记一个结论，这一节最值得记住的是：<code>continuous batching</code> 之所以重要，不是因为它名字新，而是因为它更符合 LLM 推理“请求到达时间不同、输出长度不同、decode 过程持续很久”这几个现实特点。</p>
+<p>参考资料：</p>
+<ul>
+<li>Orca（continuous batching 的经典早期系统）：https://www.usenix.org/conference/osdi22/presentation/yu</li>
+<li>Inside vLLM：https://vllm.ai/blog/anatomy-of-vllm</li>
+<li>NVIDIA TensorRT-LLM In-Flight Batching  Blog：https://developer.nvidia.com/blog/nvidia-tensorrt-llm-now-accelerates-encoder-decoder-models-with-in-flight-batching/</li>
+</ul>
+<h3 id="332-调度核心prefill-与-decode"><a class="header" href="#332-调度核心prefill-与-decode">3.3.2 调度核心：Prefill 与 Decode</a></h3>
+<p>推理调度最核心的矛盾之一：</p>
+<ul>
+<li><code>Prefill</code> 计算密集、单次开销大</li>
+<li><code>Decode</code> 单步短但次数多，对交互体验高度敏感</li>
+</ul>
+<p>这背后其实对应着一个更普遍的系统矛盾：吞吐和延迟经常天然冲突。</p>
+<ul>
+<li>如果想把吞吐做高，系统往往会倾向于多攒一些请求再一起跑</li>
+<li>如果想把延迟做低，系统又会倾向于尽快响应眼前的请求</li>
+<li><code>Decode</code> 之所以更敏感，是因为它直接决定用户是否能持续看到输出；哪怕单步只慢一点，累积起来体感也会很明显</li>
+</ul>
+<p>如何实现（简述）：</p>
+<ul>
+<li>把很重的 prefill 拆成更小的片段，避免它一次占住 GPU 太久</li>
+<li>调度器通常会优先保证 decode 有稳定的执行机会，因为它更直接影响用户体感</li>
+<li>在更复杂的系统里，还会把 prefill 和 decode 放到不同实例上，减少互相干扰</li>
+</ul>
+<p>这类策略本质上是在控制“谁先占 GPU、占多久、何时让出”。</p>
+<p>这里有两个特别有代表性的方向：</p>
+<p><code>Chunked Prefill</code>：</p>
+<ul>
+<li>它的核心思路不是让 prefill 变少，而是让 prefill 不要一次占用 GPU 太久</li>
+<li>做法是把一个很长的输入拆成多个较小片段，分几轮完成</li>
+<li>这样 decode 请求就有机会在这些片段之间穿插执行，减少“首字出来了，后面却突然卡住”的情况</li>
+</ul>
+<p><code>Disaggregated Prefill/Decode</code>：</p>
+<ul>
+<li>如果同一套资源里同时做 prefill 和 decode，二者还是会相互干扰</li>
+<li>更进一步的系统会把它们放到不同资源池，甚至不同实例上</li>
+<li>这样做的好处是：prefill 可以追求更高吞吐，decode 可以单独追求更稳的交互延迟</li>
+<li>代价是系统架构会更复杂，请求和缓存的流转也更难管理</li>
+</ul>
+<p>参考资料：</p>
+<ul>
+<li>Sarathi-Serve：https://arxiv.org/abs/2403.02310</li>
+<li>DistServe：https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin</li>
+<li>P/D-Serve：https://arxiv.org/abs/2408.08147</li>
+</ul>
+<h3 id="333-prefix-caching-与-cache-aware-scheduling"><a class="header" href="#333-prefix-caching-与-cache-aware-scheduling">3.3.3 Prefix Caching 与 Cache-aware Scheduling</a></h3>
+<p><code>Prefix Caching</code>：</p>
+<ul>
+<li>核心思路：复用共享前缀的 KV，跳过重复 prefill</li>
+<li>很多请求的开头部分其实是一样的，比如系统提示词或公共上下文</li>
+<li>系统会识别这些“已经算过的前缀”，把对应缓存记下来</li>
+<li>下次再遇到相同前缀时，直接复用已有结果，而不是从头再算一遍</li>
+</ul>
+<p>它不只是“省一点算力”，还会改变调度逻辑。因为当两个请求都在排队时，那个能直接命中前缀缓存的请求，往往可以更快完成，所以系统有时会显式利用这种缓存命中信息来做调度或路由。</p>
+<p>这也引出了另一个很有代表性的方向：<code>Cache-aware Scheduling / Routing</code>。</p>
+<ul>
+<li>传统调度更像只看队列长度、优先级、显存是否够</li>
+<li>cache-aware 调度会进一步看“这个请求能不能复用已有缓存”</li>
+<li>如果某个请求命中前缀缓存，它的实际成本就更低，系统可能会优先把它放到能命中缓存的实例上</li>
+<li>所以在更先进的系统里，缓存不只是局部优化手段，还会成为调度决策的一部分</li>
+</ul>
+<p>参考资料：</p>
+<ul>
+<li>vLLM Prefix Caching 设计文档：https://docs.vllm.ai/en/stable/design/prefix_caching.html</li>
+<li>Preble：https://arxiv.org/abs/2407.00023</li>
+</ul>
+<h3 id="334-speculative-decoding"><a class="header" href="#334-speculative-decoding">3.3.4 Speculative Decoding</a></h3>
+<p><code>Speculative Decoding</code>：</p>
+<ul>
+<li>核心思路：先由小模型（draft）生成多个候选 token</li>
+<li>再由大模型一次性检查这些候选 token 是否合理</li>
+<li>如果大模型认可，就一次接收多个 token；如果不认可，再退回到分歧点继续正常生成</li>
+</ul>
+<p>它和 prefix caching 的区别在于：prefix caching 是“不要重复做已经做过的计算”，speculative decoding 是“先用便宜路径猜一部分，再让大模型批量确认”，两者思路不同，但目标都是减少无效等待。</p>
+<p>参考资料：</p>
+<ul>
+<li>Speculative Sampling：https://arxiv.org/abs/2302.01318</li>
+<li>Draft &amp; Verify：https://arxiv.org/abs/2309.08168</li>
+</ul>
+<h3 id="335-admission-control-与-fairness"><a class="header" href="#335-admission-control-与-fairness">3.3.5 Admission Control 与 Fairness</a></h3>
+<p>线上服务不只追求平均性能，还要考虑稳定性与多租户体验。</p>
+<p>如何实现（简述）：</p>
+<ul>
+<li>Admission Control：当队列太长或资源太紧时，不让新请求无限制涌入，而是限流、排队或降级</li>
+<li>Fairness：避免某些大请求或高频用户长期占住资源，让其他请求一直等不到机会</li>
+<li>Tail 控制：对特别长、特别重的请求做隔离或限额，避免它们把整体延迟拖坏</li>
+</ul>
+<p>因此，推理系统优化最终是一个服务治理问题，而不仅是算子问题。</p>
+<p>参考资料：</p>
+<ul>
+<li>Fairness in Serving Large Language Models：https://arxiv.org/abs/2401.00588</li>
+<li>Llumnix：https://arxiv.org/abs/2406.03243</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../chapter02/llm推理优化核心技术.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../chapter02/vllm-如何管理-kv-cache从-vllm-本地-block-管理到跨实例缓存池.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../chapter02/llm推理优化核心技术.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../chapter02/vllm-如何管理-kv-cache从-vllm-本地-block-管理到跨实例缓存池.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../src/assets/katex-dc84b296.min.js"></script>
+        <script src="../src/assets/katex-auto-render-9cb8dacf.min.js"></script>
+        <script src="../src/assets/katex-init-b51da8cd.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
