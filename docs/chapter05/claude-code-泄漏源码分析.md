@@ -9,7 +9,31 @@
 Claude Code 的 Agent Loop 可以概括为：
 
 ```
-main.tsx 启动 Claude Code↓完成运行时装配包括配置读取、环境初始化、Context 准备、Tool / Command / Skills 注册、MCP / LSP / 权限策略初始化↓CLI / REPL / Remote Session 接收用户输入↓QueryEngine 接收请求并整理消息历史↓QueryEngine 组织 Prompt / Context / Message / Tool 定义↓调用模型进行推理↓模型产生普通回答或 tool_use 工具调用请求↓如果产生 tool_use，QueryEngine 将其分发给 Tool Runtime↓Tool Runtime 完成参数校验、权限判断和工具执行↓工具执行结果回流 QueryEngine↓QueryEngine 将工具结果加入消息历史和上下文↓进入下一轮模型推理↓循环执行，直到任务完成并输出最终结果
+main.tsx 启动 Claude Code
+↓
+完成运行时装配包括配置读取、环境初始化、Context 准备、Tool / Command / Skills 注册、MCP / LSP / 权限策略初始化
+↓
+CLI / REPL / Remote Session 接收用户输入
+↓
+QueryEngine 接收请求并整理消息历史
+↓
+QueryEngine 组织 Prompt / Context / Message / Tool 定义
+↓
+调用模型进行推理
+↓
+模型产生普通回答或 tool_use 工具调用请求
+↓
+如果产生 tool_use，QueryEngine 将其分发给 Tool Runtime
+↓
+Tool Runtime 完成参数校验、权限判断和工具执行
+↓
+工具执行结果回流 QueryEngine
+↓
+QueryEngine 将工具结果加入消息历史和上下文
+↓
+进入下一轮模型推理
+↓
+循环执行，直到任务完成并输出最终结果
 ```
 
 其中，`main.tsx` 是启动入口，为了**快速启动**：采用“轻量装配 + 按需加载”的方式，
@@ -69,7 +93,31 @@ main.tsx  ↓启动装配层：初始化运行环境、加载配置、注册�
 ## 3.2 启动阶段的典型流程
 
 ```
-程序启动  ↓读取 CLI 参数、环境变量、运行模式  ↓初始化配置、认证、工作目录、运行环境  ↓初始化上下文系统：getSystemContext / getUserContext  ↓初始化工具系统：getTools / getAllBaseTools  ↓初始化命令系统：getCommands / filterCommandsForRemoteMode  ↓初始化 LSP Server Manager  ↓初始化内置插件 initBuiltinPlugins  ↓初始化内置 Skills initBundledSkills  ↓初始化 MCP 相关能力  ↓创建或更新 AppStateStore  ↓根据模式选择：REPL / 非交互 / 远程桥接  ↓进入 QueryEngine 主循环
+程序启动
+↓
+读取 CLI 参数、环境变量、运行模式
+↓
+初始化配置、认证、工作目录、运行环境
+↓
+初始化上下文系统：getSystemContext / getUserContext
+↓
+初始化工具系统：getTools / getAllBaseTools
+↓
+初始化命令系统：getCommands / filterCommandsForRemoteMode
+↓
+初始化 LSP Server Manager
+↓
+初始化内置插件 initBuiltinPlugins
+↓
+初始化内置 Skills initBundledSkills
+↓
+初始化 MCP 相关能力
+↓
+创建或更新 AppStateStore
+↓
+根据模式选择：REPL / 非交互 / 远程桥接
+↓
+进入 QueryEngine 主循环
 ```
 
 ## 3.3 main.tsx 为什么对 Agent 架构很关键
@@ -104,7 +152,45 @@ main.tsx  ↓启动装配层：初始化运行环境、加载配置、注册�
 **QueryEngine 一轮 Agent Loop 的调用顺序**来理解。
 
 ```
-用户输入 / 交互层请求  ↓1. QueryEngine 接收请求  ↓2. 读取并维护 Message History   - 用户输入   - 历史 assistant 回复   - 历史 tool_use   - 历史 tool_result  ↓3. 读取 Memory / 持久规则   - CLAUDE.md   - 用户偏好   - 项目规则   - 历史摘要  ↓4. 收集 Context / 当前环境   - 当前工作目录   - Git 状态   - 项目结构   - 当前任务状态   - 已有工具执行结果  ↓5. 判断是否需要上下文压缩   - token 是否接近上限   - 历史消息是否需要摘要化   - 保留关键任务状态  ↓6. 加载可用 Tool 定义   - 工具名称   - 工具描述   - 参数 schema   - 权限规则   - 可用范围  ↓7. 组装 Prompt   - System Prompt   - 主 Agent 行为规则   - Context   - Memory   - Message History   - Tool Definitions   - 用户当前请求  ↓8. 调用模型进行推理   - 接收流式输出   - 解析普通文本   - 识别 tool_use  ↓9. 判断模型输出类型   ├─ 普通回答   │   ↓   │  写入消息历史   │   ↓   │  判断任务是否完成   │   └─ tool_use       ↓10. QueryEngine 分发 tool_use 给 Tool Runtime       ↓11. Tool Runtime 执行前处理    - 参数校验    - 权限判断    - 危险操作确认    - 执行环境检查       ↓12. 执行具体 Tool    - 文件读写    - Bash    - 搜索    - Web    - MCP    - LSP    - Skills    - 子 Agent / Task       ↓13. 收集 Tool Result    - 成功结果    - 错误信息    - 权限拒绝    - 中断状态       ↓14. 工具结果回流 QueryEngine       ↓15. QueryEngine 写回 Message History / Context       ↓16. 进入下一轮模型调用       ↓循环执行，直到任务完成
+用户输入 / 交互层请求
+↓
+1. QueryEngine 接收请求
+↓
+2. 读取并维护 Message History   - 用户输入   - 历史 assistant 回复   - 历史 tool_use   - 历史 tool_result
+↓
+3. 读取 Memory / 持久规则   - CLAUDE.md   - 用户偏好   - 项目规则   - 历史摘要
+↓
+4. 收集 Context / 当前环境   - 当前工作目录   - Git 状态   - 项目结构   - 当前任务状态   - 已有工具执行结果
+↓
+5. 判断是否需要上下文压缩   - token 是否接近上限   - 历史消息是否需要摘要化   - 保留关键任务状态
+↓
+6. 加载可用 Tool 定义   - 工具名称   - 工具描述   - 参数 schema   - 权限规则   - 可用范围
+↓
+7. 组装 Prompt   - System Prompt   - 主 Agent 行为规则   - Context   - Memory   - Message History   - Tool Definitions   - 用户当前请求
+↓
+8. 调用模型进行推理   - 接收流式输出   - 解析普通文本   - 识别 tool_use
+↓
+9. 判断模型输出类型   ├─ 普通回答   │
+↓
+│  写入消息历史   │
+↓
+│  判断任务是否完成   │   └─ tool_use
+↓
+10. QueryEngine 分发 tool_use 给 Tool Runtime
+↓
+11. Tool Runtime 执行前处理    - 参数校验    - 权限判断    - 危险操作确认    - 执行环境检查
+↓
+12. 执行具体 Tool    - 文件读写    - Bash    - 搜索    - Web    - MCP    - LSP    - Skills    - 子 Agent / Task
+↓
+13. 收集 Tool Result    - 成功结果    - 错误信息    - 权限拒绝    - 中断状态
+↓
+14. 工具结果回流 QueryEngine
+↓
+15. QueryEngine 写回 Message History / Context
+↓
+16. 进入下一轮模型调用
+↓
+循环执行，直到任务完成
 ```
 
 更适合面试中说的版本：
@@ -343,13 +429,49 @@ namedescriptionallowedTools
 Claude codeMemory机制
 
 ```
-1. 会话记忆   当前消息历史，包括用户输入、模型回复、tool_use、tool_result、错误信息和权限拒绝结果。   主要存储在当前会话的 Message History 中，用来保证对话连续性。2. 任务工作记忆   当前任务的临时状态，包括 Todo、执行计划、已读文件、搜索结果、工具结果、子 Agent 返回。   主要存在运行时状态、工具结果和当前上下文中，用来支撑复杂任务持续推进。3. 项目记忆   项目级长期规则，主要来自 CLAUDE.md、项目说明、代码规范、目录约定、构建/测试命令。   通常存储在项目文件或项目配置中，用来让 Agent 理解当前仓库的工程规则。4. 用户/全局记忆   跨会话偏好和配置，包括语言偏好、输出风格、用户设置、常用技术栈、全局规则。   通常存储在用户级配置或全局记忆中，用来实现跨会话的个性化。5. 压缩摘要记忆   长会话压缩后的关键摘要，包括任务目标、重要约束、已完成内容、未完成事项和下一步计划。   通常由 /compact 或自动压缩生成，用来在上下文有限的情况下继续推进任务。
+1. 会话记忆
+当前消息历史，包括用户输入、模型回复、tool_use、tool_result、错误信息和权限拒绝结果。
+主要存储在当前会话的 Message History 中，用来保证对话连续性。
+
+2. 任务工作记忆
+当前任务的临时状态，包括 Todo、执行计划、已读文件、搜索结果、工具结果、子 Agent 返回。
+主要存在运行时状态、工具结果和当前上下文中，用来支撑复杂任务持续推进。
+
+3. 项目记忆
+项目级长期规则，主要来自 CLAUDE.md、项目说明、代码规范、目录约定、构建/测试命令。
+通常存储在项目文件或项目配置中，用来让 Agent 理解当前仓库的工程规则。
+
+4. 用户/全局记忆
+跨会话偏好和配置，包括语言偏好、输出风格、用户设置、常用技术栈、全局规则。
+通常存储在用户级配置或全局记忆中，用来实现跨会话的个性化。
+
+5. 压缩摘要记忆
+长会话压缩后的关键摘要，包括任务目标、重要约束、已完成内容、未完成事项和下一步计划。
+通常由 /compact 或自动压缩生成，用来在上下文有限的情况下继续推进任务。
 ```
 
 对这样理解更贴近 ToC 网页 Agent 的实际实现。可以总结成下面这版：
 
 ```
-1. 当前任务上下文   直接放在大模型上下文里。   因为现在大模型上下文窗口已经很长，当前一次任务里的用户输入、最近对话、工具结果、约束条件等，可以优先通过 Prompt 上下文承载。   作用：支撑当前任务推理，不一定马上持久化。2. 短期任务记忆   存 Redis / 内存数据库。   包括当前任务状态、Todo、当前步骤、临时工具结果、生成进度、任务锁、子任务状态等。   作用：保证当前任务可继续、可暂停、可恢复，适合短生命周期状态。3. 历史对话展示   存关系型数据库。   包括会话列表、会话标题、消息记录、摘要、创建时间、更新时间、用户可见的历史内容。   作用：用于前端展示“历史记录”“最近对话”，方便用户回看。4. 用户画像 / 用户记忆   存关系型数据库。   包括语言偏好、回答风格、常用场景、职业方向、长期目标、技术栈、个性化规则等。   作用：实现跨会话个性化。
+1. 当前任务上下文
+直接放在大模型上下文里。
+因为现在大模型上下文窗口已经很长，当前一次任务里的用户输入、最近对话、工具结果、约束条件等，可以优先通过 Prompt 上下文承载。
+作用：支撑当前任务推理，不一定马上持久化。
+
+2. 短期任务记忆
+存 Redis / 内存数据库。
+包括当前任务状态、Todo、当前步骤、临时工具结果、生成进度、任务锁、子任务状态等。
+作用：保证当前任务可继续、可暂停、可恢复，适合短生命周期状态。
+
+3. 历史对话展示
+存关系型数据库。
+包括会话列表、会话标题、消息记录、摘要、创建时间、更新时间、用户可见的历史内容。
+作用：用于前端展示“历史记录”“最近对话”，方便用户回看。
+
+4. 用户画像 / 用户记忆
+存关系型数据库。
+包括语言偏好、回答风格、常用场景、职业方向、长期目标、技术栈、个性化规则等。
+作用：实现跨会话个性化。
 ```
 
 再补一句 RAG 的定位：

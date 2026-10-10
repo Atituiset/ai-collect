@@ -2,7 +2,13 @@
 
 本文围绕 Scheduler 调度器到模型 forward 之间最关键的三个 Batch 数据结构展开：
 
-**``` 1ScheduleBatch 2  -> ModelWorkerBatch 3  -> ForwardBatch ```**
+
+```text
+ScheduleBatch
+  -> ModelWorkerBatch
+  -> ForwardBatch
+```
+
 
 上一篇调度器ScheduleBatch重点解释 Scheduler 如何决定“下一轮跑 prefill 还是 decode”。本文继续往后走，解释这个决定出来的 ScheduleBatch 如何一步步变成模型真正执行时消费的 ForwardBatch然后模型开始使用input\_ids开始做module forward一系列工作。
 
@@ -10,19 +16,107 @@
 
 **这三个对象不是重复封装，而是服务于三个不同层级：**
 
-**``` 1ScheduleBatch: 2Scheduler 视角。 3关心请求生命周期、调度状态、req 列表、prefix cache、KV cache 分配、采样参数。 4 5ModelWorkerBatch: 6Scheduler -> worker 的传输视角。 7把 ScheduleBatch 中 forward 需要的字段打包出来，减少 worker 侧直接依赖调度器内部状态。 8 9ForwardBatch: 10ModelRunner / attention backend / model.forward 的执行视角。 11  在 ModelWorkerBatch 基础上补齐 positions、attention metadata、KV pool、DP padding、LoRA、MROPE 等运行时信息。 ```**
+
+```text
+ScheduleBatch:
+Scheduler 视角。
+关心请求生命周期、调度状态、req 列表、prefix cache、KV cache 分配、采样参数。
+
+ModelWorkerBatch:
+Scheduler -> worker 的传输视角。
+把 ScheduleBatch 中 forward 需要的字段打包出来，减少 worker 侧直接依赖调度器内部状态。
+
+ForwardBatch:
+ModelRunner / attention backend / model.forward 的执行视角。
+  在 ModelWorkerBatch 基础上补齐 positions、attention metadata、KV pool、DP padding、LoRA、MROPE 等运行时信息。
+```
+
 
 核心数据流如下：
 
-**``` 1┌─────────────────────────────────────────────┐ 2│ Scheduler.get_next_batch_to_run              │ 3│ 产物：ScheduleBatch                          │ 4│                                             │ 5│ 包含：Req 列表、forward_mode、input_ids、     │ 6│ seq_lens、out_cache_loc、sampling_info       │ 7└──────────────────────┬──────────────────────┘ 8                       │ 9                       │ ScheduleBatch.get_model_worker_batch() 10                       v 11┌─────────────────────────────────────────────┐ 12│ Scheduler.run_batch / TPWorker               │ 13│ 产物：ModelWorkerBatch                       │ 14│                                             │ 15│ 包含：worker forward 必需字段，外加 logprob、 │ 16│ DP attention、multimodal、LoRA、spec 信息     │ 17└──────────────────────┬──────────────────────┘ 18                       │ 19                       │ ForwardBatch.init_new(...) 20                       v 21┌─────────────────────────────────────────────┐ 22│ TPWorker.forward_batch_generation            │ 23│ ModelRunner.forward                          │ 24│ 产物：ForwardBatch                           │ 25│                                             │ 26│ 包含：positions、extend_start_loc、KV pool、  │ 27│ attn_backend、MROPE、LoRA runtime metadata    │ 28└──────────────────────┬──────────────────────┘ 29                       │ 30                       v 31┌─────────────────────────────────────────────┐ 32│ model.forward(input_ids, positions, batch)   │ 33│                                             │ 34│ input_ids -> embed_tokens -> hidden_states   │ 35│ hidden_states + forward_batch -> layers      │ 36│ logits processor / sampler                   │ 37└─────────────────────────────────────────────┘ ```**
+
+```text
+┌─────────────────────────────────────────────┐
+│ Scheduler.get_next_batch_to_run              │
+│ 产物：ScheduleBatch                          │
+│                                             │
+│ 包含：Req 列表、forward_mode、input_ids、     │
+│ seq_lens、out_cache_loc、sampling_info       │
+└──────────────────────┬──────────────────────┘
+                       │
+                       │ ScheduleBatch.get_model_worker_batch()
+                       v
+┌─────────────────────────────────────────────┐
+│ Scheduler.run_batch / TPWorker               │
+│ 产物：ModelWorkerBatch                       │
+│                                             │
+│ 包含：worker forward 必需字段，外加 logprob、 │
+│ DP attention、multimodal、LoRA、spec 信息     │
+└──────────────────────┬──────────────────────┘
+                       │
+                       │ ForwardBatch.init_new(...)
+                       v
+┌─────────────────────────────────────────────┐
+│ TPWorker.forward_batch_generation            │
+│ ModelRunner.forward                          │
+│ 产物：ForwardBatch                           │
+│                                             │
+│ 包含：positions、extend_start_loc、KV pool、  │
+│ attn_backend、MROPE、LoRA runtime metadata    │
+└──────────────────────┬──────────────────────┘
+                       │
+                       v
+┌─────────────────────────────────────────────┐
+│ model.forward(input_ids, positions, batch)   │
+│                                             │
+│ input_ids -> embed_tokens -> hidden_states   │
+│ hidden_states + forward_batch -> layers      │
+│ logits processor / sampler                   │
+└─────────────────────────────────────────────┘
+```
+
 
 可以用一句话记：
 
-**``` 1ScheduleBatch 管调度， 2ModelWorkerBatch 管跨层传递， 3ForwardBatch 管模型执行。 ```**
+
+```text
+ScheduleBatch 管调度，
+ModelWorkerBatch 管跨层传递，
+ForwardBatch 管模型执行。
+```
+
 
 **关键代码位置**
 
-**主要涉及以下文件：   - python/sglang/srt/managers/schedule\_batch.py  - ScheduleBatch - ScheduleBatch.prepare\_for\_extend - ScheduleBatch.prepare\_for\_decode - ScheduleBatch.get\_model\_worker\_batch - ModelWorkerBatch  - python/sglang/srt/managers/scheduler.py  - Scheduler.run\_batch - Scheduler.record\_batch\_in\_overlap  - python/sglang/srt/managers/tp\_worker.py  - TpModelWorker.forward\_batch\_generation  - python/sglang/srt/model\_executor/forward\_batch\_info.py  - ForwardBatch - ForwardBatch.init\_new - ForwardBatch.prepare\_mlp\_sync\_batch  - python/sglang/srt/model\_executor/model\_runner.py  - ModelRunner.forward - ModelRunner.forward\_decode - ModelRunner.forward\_extend - ModelRunner.sample  - python/sglang/srt/layers/attention/\*\_backend.py  - init\_forward\_metadata - attention forward  - python/sglang/srt/layers/logits\_processor.py  - LogitsProcessor  - python/sglang/srt/layers/sampler.py  - Sampler**
+**主要涉及以下文件：**
+
+- python/sglang/srt/managers/schedule\_batch.py
+- ScheduleBatch
+- ScheduleBatch.prepare\_for\_extend
+- ScheduleBatch.prepare\_for\_decode
+- ScheduleBatch.get\_model\_worker\_batch
+- ModelWorkerBatch
+- python/sglang/srt/managers/scheduler.py
+- Scheduler.run\_batch
+- Scheduler.record\_batch\_in\_overlap
+- python/sglang/srt/managers/tp\_worker.py
+- TpModelWorker.forward\_batch\_generation
+- python/sglang/srt/model\_executor/forward\_batch\_info.py
+- ForwardBatch
+- ForwardBatch.init\_new
+- ForwardBatch.prepare\_mlp\_sync\_batch
+- python/sglang/srt/model\_executor/model\_runner.py
+- ModelRunner.forward
+- ModelRunner.forward\_decode
+- ModelRunner.forward\_extend
+- ModelRunner.sample
+- python/sglang/srt/layers/attention/\*\_backend.py
+- init\_forward\_metadata
+- attention forward
+- python/sglang/srt/layers/logits\_processor.py
+- LogitsProcessor
+- python/sglang/srt/layers/sampler.py
+- Sampler
 
 **三个对象先拆开看**
 
@@ -30,7 +124,44 @@
 
 **ScheduleBatch 是 Scheduler 的核心状态对象。它知道“这一组请求为什么能跑、应该怎么跑、跑完之后怎么回到调度生命周期”。  它的典型字段可以分成 5 类：**
 
-**``` 11. 请求和资源 2   reqs 3   req_to_token_pool 4   token_to_kv_pool_allocator 5   tree_cache 6 72. 调度模式 8   forward_mode 9   batch_is_full 10   chunked_req 11   is_prefill_only 12 133. forward 输入张量 14   input_ids 15   req_pool_indices 16   seq_lens 17   seq_lens_cpu 18   orig_seq_lens 19   out_cache_loc 20   output_ids 21 224. extend / decode 专用信息 23   prefix_lens 24   extend_lens 25   extend_num_tokens 26   extend_logprob_start_lens 27   decoding_reqs 28 295. 后处理和特殊能力 30   sampling_info 31   return_logprob 32   multimodal_inputs 33   spec_info 34   hicache_consumer_index ```**
+
+```text
+1. 请求和资源
+   reqs
+   req_to_token_pool
+   token_to_kv_pool_allocator
+   tree_cache
+
+2. 调度模式
+   forward_mode
+   batch_is_full
+   chunked_req
+   is_prefill_only
+
+3. forward 输入张量
+   input_ids
+   req_pool_indices
+   seq_lens
+   seq_lens_cpu
+   orig_seq_lens
+   out_cache_loc
+   output_ids
+
+4. extend / decode 专用信息
+   prefix_lens
+   extend_lens
+   extend_num_tokens
+   extend_logprob_start_lens
+   decoding_reqs
+
+5. 后处理和特殊能力
+   sampling_info
+   return_logprob
+   multimodal_inputs
+   spec_info
+   hicache_consumer_index
+```
+
 
 这些字段可以用下面这张表来直观理解：
 
@@ -67,11 +198,23 @@
 
 ScheduleBatch 的关键点是：它仍然保留 Req 对象列表。
 
-**``` 1batch.reqs = [R1, R2, R3] ```**
+
+```text
+batch.reqs = [R1, R2, R3]
+```
+
 
 这意味着它不仅能跑 forward，还能在 forward 后把结果写回每个请求：
 
-**``` 1req.output_ids 2req.finished_reason 3req.input_token_logprobs 4req.hidden_states 5req.time_stats ```**
+
+```text
+req.output_ids
+req.finished_reason
+req.input_token_logprobs
+req.hidden_states
+req.time_stats
+```
+
 
 所以 ScheduleBatch 是“调度生命周期对象”，不是单纯的模型输入。
 
@@ -79,13 +222,31 @@ ScheduleBatch 的关键点是：它仍然保留 Req 对象列表。
 
 **ModelWorkerBatch 在 schedule\_batch.py 中定义，它由：**
 
-**``` 1ScheduleBatch.get_model_worker_batch() ```**
+
+```text
+ScheduleBatch.get_model_worker_batch()
+```
+
 
 创建。
 
 它的作用是把 ScheduleBatch 中 worker forward 需要的字段打包出来：
 
-**``` 1forward_mode 2input_ids 3req_pool_indices 4seq_lens 5out_cache_loc 6sampling_info 7multimodal_inputs 8lora_ids 9spec_info 10extend_* 字段 11DP attention 字段 ```**
+
+```text
+forward_mode
+input_ids
+req_pool_indices
+seq_lens
+out_cache_loc
+sampling_info
+multimodal_inputs
+lora_ids
+spec_info
+extend_* 字段
+DP attention 字段
+```
+
 
 可以把 ModelWorkerBatch 字段理解成“worker 执行 forward 所需的一张快照”：
 
@@ -118,17 +279,32 @@ ScheduleBatch 的关键点是：它仍然保留 Req 对象列表。
 
 和 ScheduleBatch 相比，ModelWorkerBatch 有几个特点：
 
-**``` 11. 它更接近 worker 输入，不负责调度 admission。 22. 它保留 reqs，主要是为了 grammar、rids、部分后处理和调试。 33. 它还没有 positions，也没有 attn_backend 的 runtime metadata。 44. 它不直接持有 token_to_kv_pool，KV pool 由 model_runner 注入到 ForwardBatch。 ```**
+
+```text
+1. 它更接近 worker 输入，不负责调度 admission。
+2. 它保留 reqs，主要是为了 grammar、rids、部分后处理和调试。
+3. 它还没有 positions，也没有 attn_backend 的 runtime metadata。
+4. 它不直接持有 token_to_kv_pool，KV pool 由 model_runner 注入到 ForwardBatch。
+```
+
 
 可以把它理解成：
 
-**``` 1ScheduleBatch 的 forward 投影。 ```**
+
+```text
+ScheduleBatch 的 forward 投影。
+```
+
 
 **ForwardBatch：模型真正消费的 Batch**
 
 **ForwardBatch 在 model\_executor/forward\_batch\_info.py 中定义，由：**
 
-**``` 1ForwardBatch.init_new(model_worker_batch, model_runner) ```**
+
+```text
+ForwardBatch.init_new(model_worker_batch, model_runner)
+```
+
 
 创建。
 
@@ -136,7 +312,34 @@ ScheduleBatch 的关键点是：它仍然保留 Req 对象列表。
 
 和 ModelWorkerBatch 相比，ForwardBatch 会补齐运行时信息：
 
-**``` 1positions: 2decode 时通常是 seq_lens - 1。 3extend 时由 prefix_lens / seq_lens 计算每个 token 的位置。 4 5extend_start_loc: 6extend batch 中每个请求在拼平 input_ids 里的起始位置。 7 8req_to_token_pool / token_to_kv_pool: 9model_runner 注入的内存池对象，attention 写 KV 时需要。 10 11attn_backend: 12当前模型 runner 绑定的 attention backend。 13 14global_num_tokens_gpu: 15DP attention / MLP sync 场景下的全局 token 数。 16 17out_cache_loc_swa: 18hybrid SWA cache 场景下的 SWA KV 写入位置。 19 20mrope_positions: 21Qwen2-VL / MROPE 模型的位置编码。 22 23LoRA runtime metadata: 24  prepare_lora_batch 后供 LoRA 层使用。 ```**
+
+```text
+positions:
+decode 时通常是 seq_lens - 1。
+extend 时由 prefix_lens / seq_lens 计算每个 token 的位置。
+
+extend_start_loc:
+extend batch 中每个请求在拼平 input_ids 里的起始位置。
+
+req_to_token_pool / token_to_kv_pool:
+model_runner 注入的内存池对象，attention 写 KV 时需要。
+
+attn_backend:
+当前模型 runner 绑定的 attention backend。
+
+global_num_tokens_gpu:
+DP attention / MLP sync 场景下的全局 token 数。
+
+out_cache_loc_swa:
+hybrid SWA cache 场景下的 SWA KV 写入位置。
+
+mrope_positions:
+Qwen2-VL / MROPE 模型的位置编码。
+
+LoRA runtime metadata:
+  prepare_lora_batch 后供 LoRA 层使用。
+```
+
 
 ForwardBatch 字段可以理解成“模型执行现场的工具箱”：
 
@@ -184,7 +387,24 @@ ForwardBatch 字段可以理解成“模型执行现场的工具箱”：
 
 **下面用 3 个请求模拟一次 prefill 和一次 decode。  假设：**
 
-**``` 1page_size = 1 2不开启 DP attention 3不开启 speculative decoding 4不开启 LoRA 5不开启 multimodal 6不开启 overlap 7prefix cache 中 R2 命中 1 个 token，R3 命中 3 个 token 8token_to_kv_pool 中已经存在的 prefix cache 位置： 9R2 token 21 -> kv slot 80 10R3 token 31 -> kv slot 90 11R3 token 32 -> kv slot 91 12R3 token 33 -> kv slot 92 13 14本轮 EXTEND 新分配的 KV cache 位置从 100 开始 ```**
+
+```text
+page_size = 1
+不开启 DP attention
+不开启 speculative decoding
+不开启 LoRA
+不开启 multimodal
+不开启 overlap
+prefix cache 中 R2 命中 1 个 token，R3 命中 3 个 token
+token_to_kv_pool 中已经存在的 prefix cache 位置：
+R2 token 21 -> kv slot 80
+R3 token 31 -> kv slot 90
+R3 token 32 -> kv slot 91
+R3 token 33 -> kv slot 92
+
+本轮 EXTEND 新分配的 KV cache 位置从 100 开始
+```
+
 
 请求如下：
 
@@ -196,37 +416,109 @@ ForwardBatch 字段可以理解成“模型执行现场的工具箱”：
 
 进入 prefill 前：
 
-**``` 1R1.output_ids = [] 2R2.output_ids = [] 3R3.output_ids = [] ```**
+
+```text
+R1.output_ids = []
+R2.output_ids = []
+R3.output_ids = []
+```
+
 
 **第 1 步：Req 进入 ScheduleBatch**
 
 **Scheduler 在 get\_new\_batch\_prefill 中先对每个请求调用：**
 
-**``` 1req.init_next_round_input(tree_cache) ```**
+
+```text
+req.init_next_round_input(tree_cache)
+```
+
 
 得到：
 
-**``` 1R1: 2fill_ids = [11,12,13,14] 3prefix_indices = [] 4extend_input_len = 4 5 6R2: 7fill_ids = [21,22,23] 8prefix_indices = [80] 9extend_input_len = 2 10 11R3: 12fill_ids = [31,32,33,34,35,36] 13prefix_indices = [90,91,92] 14  extend_input_len = 3 ```**
+
+```text
+R1:
+fill_ids = [11,12,13,14]
+prefix_indices = []
+extend_input_len = 4
+
+R2:
+fill_ids = [21,22,23]
+prefix_indices = [80]
+extend_input_len = 2
+
+R3:
+fill_ids = [31,32,33,34,35,36]
+prefix_indices = [90,91,92]
+  extend_input_len = 3
+```
+
 
 然后创建：
 
-**``` 1new_batch = ScheduleBatch.init_new([R1, R2, R3], ...) 2new_batch.prepare_for_extend() ```**
+
+```text
+new_batch = ScheduleBatch.init_new([R1, R2, R3], ...)
+new_batch.prepare_for_extend()
+```
+
 
 prepare\_for\_extend 会把请求变成 EXTEND batch：
 
-**``` 1ScheduleBatch.forward_mode = EXTEND 2ScheduleBatch.reqs = [R1, R2, R3] 3 4ScheduleBatch.input_ids = 5  [11,12,13,14, 22,23, 34,35,36] 6 7ScheduleBatch.prefix_lens = [0, 1, 3] 8ScheduleBatch.extend_lens = [4, 2, 3] 9ScheduleBatch.extend_num_tokens = 9 10ScheduleBatch.seq_lens = [4, 3, 6] 11ScheduleBatch.seq_lens_sum = 13 ```**
+
+```text
+ScheduleBatch.forward_mode = EXTEND
+ScheduleBatch.reqs = [R1, R2, R3] 3 4ScheduleBatch.input_ids = 5  [11,12,13,14, 22,23,
+4,35,36] 6 7ScheduleBatch.prefix_lens = [0, 1, 3] 8ScheduleBatch.extend_lens = [4, 2, 3] 9ScheduleBatch.extend_num_tokens = 9 10ScheduleBatch.seq_lens = [4, 3, 6] 11ScheduleBatch.seq_lens_sum = 13
+```
+
 
 可视化：
 
-**``` 1ScheduleBatch / EXTEND 2 3R1: [11][12][13][14] 4     └──── input_ids ────┘ 5 6R2: [21][22][23] 7     hit └ input ┘ 8 9R3: [31][32][33][34][35][36] 10     └── hit ──┘ └─ input ─┘ 11 12拼平后: 13input_ids = [11,12,13,14,22,23,34,35,36] ```**
+
+```text
+ScheduleBatch / EXTEND
+
+R1: [11][12][13][14]
+     └──── input_ids ────┘
+
+R2: [21][22][23]
+     hit └ input ┘
+
+R3: [31][32][33][34][35][36]
+     └── hit ──┘ └─ input ─┘
+
+拼平后:
+input_ids = [11,12,13,14,22,23,34,35,36]
+```
+
 
 这里 ScheduleBatch 还会完成内存分配：
 
-**``` 1req_pool_indices: 2  R1 -> 0 3  R2 -> 1 4  R3 -> 2 5 6out_cache_loc: 7  为 9 个 extend token 分配 KV 写入位置： 8  [100,101,102,103,104,105,106,107,108] ```**
+
+```text
+req_pool_indices:
+  R1 -> 0
+  R2 -> 1
+  R3 -> 2
+
+out_cache_loc:
+  为 9 个 extend token 分配 KV 写入位置：
+  [100,101,102,103,104,105,106,107,108]
+```
+
 
 这里 out\_cache\_loc 的长度等于本轮实际 forward 的 token 数，也就是：
 
-**``` 1R1 4 个 extend token 2R2 2 个 extend token 3R3 3 个 extend token 4总计 9 个 token ```**
+
+```text
+R1 4 个 extend token
+R2 2 个 extend token
+R3 3 个 extend token
+总计 9 个 token
+```
+
 
 它不包含已经命中 prefix cache 的 token。R2 的 21 已经在 kv slot 80，R3 的 31/32/33 已经在 kv slot 90/91/92，本轮只需要给新算的 11/12/13/14/22/23/34/35/36 分配新的 KV 写入位置。
 
@@ -234,61 +526,173 @@ prepare\_for\_extend 会把请求变成 EXTEND batch：
 
 **Scheduler 在 run\_batch 中执行：**
 
-**``` 1model_worker_batch = batch.get_model_worker_batch() ```**
+
+```text
+model_worker_batch = batch.get_model_worker_batch()
+```
+
 
 对 EXTEND batch 来说，get\_model\_worker\_batch 会保留 extend 专用字段：
 
-**``` 1ModelWorkerBatch.forward_mode = EXTEND 2ModelWorkerBatch.input_ids = [11,12,13,14,22,23,34,35,36] 3ModelWorkerBatch.req_pool_indices = [0,1,2] 4ModelWorkerBatch.seq_lens = [4,3,6] 5ModelWorkerBatch.out_cache_loc = [100,101,102,103,104,105,106,107,108] 6 7ModelWorkerBatch.extend_num_tokens = 9 8ModelWorkerBatch.extend_seq_lens = [4,2,3] 9ModelWorkerBatch.extend_prefix_lens = [0,1,3] 10ModelWorkerBatch.extend_logprob_start_lens = [...] ```**
+
+```text
+ModelWorkerBatch.forward_mode = EXTEND
+ModelWorkerBatch.input_ids = [11,12,13,14,22,23,34,35,36]
+ModelWorkerBatch.req_pool_indices = [0,1,2]
+ModelWorkerBatch.seq_lens = [4,3,6]
+ModelWorkerBatch.out_cache_loc = [100,101,102,103,104,105,106,107,108]
+
+ModelWorkerBatch.extend_num_tokens = 9
+ModelWorkerBatch.extend_seq_lens = [4,2,3]
+ModelWorkerBatch.extend_prefix_lens = [0,1,3]
+ModelWorkerBatch.extend_logprob_start_lens = [...]
+```
+
 
 这一步有一个重要分支：
 
-**``` 1if self.forward_mode.is_decode_or_idle(): 2    extend_seq_lens = None 3    extend_prefix_lens = None 4else: 5    extend_seq_lens = self.extend_lens 6    extend_prefix_lens = self.prefix_lens ```**
+
+```python
+if self.forward_mode.is_decode_or_idle():
+    extend_seq_lens = None
+    extend_prefix_lens = None
+else:
+    extend_seq_lens = self.extend_lens
+    extend_prefix_lens = self.prefix_lens
+```
+
 
 也就是说：
 
-**``` 1EXTEND / MIXED: 2  ModelWorkerBatch 携带 extend_* 信息。 3 4DECODE / IDLE: 5  extend_* 信息置 None。 ```**
+
+```text
+EXTEND / MIXED:
+  ModelWorkerBatch 携带 extend_* 信息。
+
+DECODE / IDLE:
+  extend_* 信息置 None。
+```
+
 
 这里有一个命名容易混淆的点：
 
-**``` 1ModelWorkerBatch.extend_seq_lens 2  来自 ScheduleBatch.extend_lens。 3  表示每个请求本轮实际 extend 的 token 数。 4 5ModelWorkerBatch.seq_lens 6  来自 ScheduleBatch.seq_lens。 7  表示每个请求 forward 后的完整序列长度。 ```**
+
+```text
+ModelWorkerBatch.extend_seq_lens
+  来自 ScheduleBatch.extend_lens。
+  表示每个请求本轮实际 extend 的 token 数。
+
+ModelWorkerBatch.seq_lens
+  来自 ScheduleBatch.seq_lens。
+  表示每个请求 forward 后的完整序列长度。
+```
+
 
 为什么需要 ModelWorkerBatch 这一层？
 
-**``` 1ScheduleBatch 太重： 2  它包含调度器内部状态、tree cache、allocator、batch merge/filter 方法。 3 4worker forward 不需要全部调度状态： 5  它只需要 forward 张量、采样参数和特殊功能 metadata。 6 7overlap schedule 需要稳定快照： 8  overlap 模式会 record_batch_in_overlap(model_worker_batch)，避免 ScheduleBatch 后续被调度器修改时影响 forward stream。 ```**
+
+```text
+ScheduleBatch 太重：
+  它包含调度器内部状态、tree cache、allocator、batch merge/filter 方法。
+
+worker forward 不需要全部调度状态：
+  它只需要 forward 张量、采样参数和特殊功能 metadata。
+
+overlap schedule 需要稳定快照：
+  overlap 模式会 record_batch_in_overlap(model_worker_batch)，避免 ScheduleBatch 后续被调度器修改时影响 forward stream。
+```
+
 
 **第 3 步：ModelWorkerBatch 转成 ForwardBatch**
 
 **TP worker 收到 ModelWorkerBatch 后，在：**
 
-**``` 1TPWorker.forward_batch_generation(...) ```**
+
+```text
+TPWorker.forward_batch_generation(...)
+```
+
 
 中执行：
 
-**``` 1forward_batch = ForwardBatch.init_new(model_worker_batch, self.model_runner) ```**
+
+```python
+forward_batch = ForwardBatch.init_new(model_worker_batch, self.model_runner)
+```
+
 
 这一步会先复制基础字段：
 
-**``` 1ForwardBatch.forward_mode = EXTEND 2ForwardBatch.batch_size = len(seq_lens) = 3 3ForwardBatch.input_ids = [11,12,13,14,22,23,34,35,36] 4ForwardBatch.req_pool_indices = [0,1,2] 5ForwardBatch.seq_lens = [4,3,6] 6ForwardBatch.out_cache_loc = [100,101,102,103,104,105,106,107,108] 7ForwardBatch.sampling_info = ModelWorkerBatch.sampling_info ```**
+
+```text
+ForwardBatch.forward_mode = EXTEND
+ForwardBatch.batch_size = len(seq_lens) = 3
+ForwardBatch.input_ids = [11,12,13,14,22,23,34,35,36]
+ForwardBatch.req_pool_indices = [0,1,2]
+ForwardBatch.seq_lens = [4,3,6]
+ForwardBatch.out_cache_loc = [100,101,102,103,104,105,106,107,108]
+ForwardBatch.sampling_info = ModelWorkerBatch.sampling_info
+```
+
 
 然后补齐 model runner 运行时对象：
 
-**``` 1ForwardBatch.req_to_token_pool = model_runner.req_to_token_pool 2ForwardBatch.token_to_kv_pool = model_runner.token_to_kv_pool 3ForwardBatch.attn_backend = model_runner.attn_backend ```**
+
+```text
+ForwardBatch.req_to_token_pool = model_runner.req_to_token_pool
+ForwardBatch.token_to_kv_pool = model_runner.token_to_kv_pool
+ForwardBatch.attn_backend = model_runner.attn_backend
+```
+
 
 接着计算 EXTEND 位置相关字段：
 
-**``` 1extend_prefix_lens = [0,1,3] 2extend_seq_lens = [4,2,3] 3extend_num_tokens = 9 ```**
+
+```text
+extend_prefix_lens = [0,1,3]
+extend_seq_lens = [4,2,3]
+extend_num_tokens = 9
+```
+
 
 计算结果可以理解为：
 
-**``` 1R1 positions: 0,1,2,3 2R2 positions: 1,2 3R3 positions: 3,4,5 ```**
+
+```text
+R1 positions: 0,1,2,3
+R2 positions: 1,2
+R3 positions: 3,4,5
+```
+
 
 拼平后：
 
-**``` 1ForwardBatch.positions = 2  [0,1,2,3, 1,2, 3,4,5] 3 4ForwardBatch.extend_start_loc = 5  [0,4,6] ```**
+
+```text
+ForwardBatch.positions =
+  [0,1,2,3, 1,2,
+,4,5] 3
+ForwardBatch.extend_start_loc =
+  [0,4,6]
+```
+
 
 可视化：
 
-**``` 1ForwardBatch / EXTEND 2 3input_ids:  [11,12,13,14, 22,23, 34,35,36] 4positions:  [ 0, 1, 2, 3,  1, 2,  3, 4, 5] 5             └── R1 ────┘ └R2┘ └── R3 ───┘ 6 7extend_start_loc: 8  R1 starts at input_ids[0] 9  R2 starts at input_ids[4] 10  R3 starts at input_ids[6] ```**
+
+```text
+ForwardBatch / EXTEND 2 3input_ids:  [11,12,13,14,
+2,23,
+4,35,36]
+positions:  [ 0, 1, 2, 3,  1, 2,  3, 4,
+] 5             └── R1 ────┘ └R2┘ └── R3 ───┘
+
+extend_start_loc:
+  R1 starts at input_ids[0]
+  R2 starts at input_ids[4]
+  R3 starts at input_ids[6]
+```
+
 
 注意：positions 不是在 ScheduleBatch 中生成的，而是在 ForwardBatch.init\_new 中根据 forward mode 和 extend 信息生成的。
 
@@ -296,159 +700,555 @@ prepare\_for\_extend 会把请求变成 EXTEND batch：
 
 **ForwardBatch 创建后进入：**
 
-**``` 1ModelRunner.forward(forward_batch) ```**
+
+```text
+ModelRunner.forward(forward_batch)
+```
+
 
 普通生成模型会继续进入：
 
-**``` 1ModelRunner._forward_raw 2  -> forward_extend 或 forward_decode ```**
+
+```text
+ModelRunner._forward_raw
+  -> forward_extend 或 forward_decode
+```
+
 
 EXTEND 路径中：
 
-**``` 1self.attn_backend.init_forward_metadata(forward_batch) 2 3self.model.forward( 4    forward_batch.input_ids, 5    forward_batch.positions, 6    forward_batch, 7    ... 8) ```**
+
+```python
+self.attn_backend.init_forward_metadata(forward_batch)
+
+self.model.forward(
+    forward_batch.input_ids,
+    forward_batch.positions,
+    forward_batch,
+    ...
+)
+```
+
 
 这说明 ForwardBatch 有三类消费者：
 
-**``` 11. attention backend: 2   用 seq_lens / out_cache_loc / extend_* / positions 初始化 attention metadata。 3 42. model.forward: 5   直接消费 input_ids、positions、forward_batch。 6   各层 attention / MoE / Mamba / multimodal 逻辑会从 forward_batch 读取运行时信息。 7 83. logits processor / sampler: 9   用 forward_mode、seq_lens、positions、sampling_info、return_logprob 决定取哪些 logits 和如何采样。 ```**
+
+```text
+1. attention backend:
+   用 seq_lens / out_cache_loc / extend_* / positions 初始化 attention metadata。
+
+2. model.forward:
+   直接消费 input_ids、positions、forward_batch。
+   各层 attention / MoE / Mamba / multimodal 逻辑会从 forward_batch 读取运行时信息。
+
+3. logits processor / sampler:
+   用 forward_mode、seq_lens、positions、sampling_info、return_logprob 决定取哪些 logits 和如何采样。
+```
+
 
 模型 forward 后，ModelRunner.sample 会使用同一个 ForwardBatch：
 
-**``` 1next_token_ids = self.sampler( 2    logits_output, 3    forward_batch.sampling_info, 4    forward_batch.return_logprob, 5    forward_batch.top_logprobs_nums, 6    forward_batch.token_ids_logprobs, 7    forward_batch.positions if decode else forward_batch.seq_lens - 1, 8) ```**
+
+```python
+next_token_ids = self.sampler(
+    logits_output,
+    forward_batch.sampling_info,
+    forward_batch.return_logprob,
+    forward_batch.top_logprobs_nums,
+    forward_batch.token_ids_logprobs,
+    forward_batch.positions if decode else forward_batch.seq_lens - 1,
+)
+```
+
 
 所以 ForwardBatch 不只是 attention 输入，它也贯穿 logits 和 sampling。
 
 继续沿用 R1/R2/R3 的模拟数据，此时进入 ModelRunner.forward 的 EXTEND ForwardBatch 是：
 
-**``` 1forward_mode = EXTEND 2batch_size = 3 3 4input_ids: 5[11,12,13,14, 22,23, 34,35,36] 6 7positions: 8[ 0, 1, 2, 3,  1, 2,  3, 4, 5] 9 10seq_lens: 11[4,3,6] 12 13extend_prefix_lens: 14[0,1,3] 15 16extend_seq_lens: 17[4,2,3] 18 19extend_start_loc: 20[0,4,6] 21 22req_pool_indices: 23  [0,1,2] ```**
+
+```text
+forward_mode = EXTEND
+batch_size = 3 3 4input_ids: 5[11,12,13,14, 22,23,
+4,35,36] 6 7positions: 8[ 0, 1, 2, 3,  1, 2,  3,
+,
+] 9 10seq_lens: 11[4,3,6] 12 13extend_prefix_lens: 14[0,1,3] 15 16extend_seq_lens: 17[4,2,3] 18 19extend_start_loc: 20[0,4,6] 21 22req_pool_indices: 23  [0,1,2]
+```
+
 
 这时 attention backend 会基于这些信息准备 metadata。可以粗略理解为：
 
-**``` 1R1: 2本轮 token 范围 input_ids[0:4] 3写 KV 到 out_cache_loc[0:4] = [100,101,102,103] 4完整 seq_len = 4 5 6R2: 7prefix cache 已有 1 个 token 8本轮 token 范围 input_ids[4:6] 9写 KV 到 out_cache_loc[4:6] = [104,105] 10完整 seq_len = 3 11 12R3: 13prefix cache 已有 3 个 token 14本轮 token 范围 input_ids[6:9] 15写 KV 到 out_cache_loc[6:9] = [106,107,108] 16  完整 seq_len = 6 ```**
+
+```text
+R1:
+本轮 token 范围 input_ids[0:4]
+写 KV 到 out_cache_loc[0:4] = [100,101,102,103]
+完整 seq_len = 4
+
+R2:
+prefix cache 已有 1 个 token
+本轮 token 范围 input_ids[4:6]
+写 KV 到 out_cache_loc[4:6] = [104,105]
+完整 seq_len = 3
+
+R3:
+prefix cache 已有 3 个 token
+本轮 token 范围 input_ids[6:9]
+写 KV 到 out_cache_loc[6:9] = [106,107,108]
+  完整 seq_len = 6
+```
+
 
 图示：
 
-**``` 1ForwardBatch token layout 2 3flat idx:    0   1   2   3    4   5    6   7   8 4input_ids:  11  12  13  14   22  23   34  35  36 5positions:   0   1   2   3    1   2    3   4   5 6kv slot:    100 101 102 103  104 105  106 107 108 7request:    └──── R1 ────┘   └ R2 ┘   └── R3 ──┘ 8 9R1 last token flat idx = 3 10R2 last token flat idx = 5 11R3 last token flat idx = 8 ```**
+
+```text
+ForwardBatch token layout 2 3flat idx:    0   1   2   3    4   5    6   7   8 4input_ids:  11  12  13  14
+2  23
+4  35  36 5positions:   0   1   2   3    1   2    3
+
+
+kv slot:    100 101 102 103  104 105  106 107 108
+request:    └──── R1 ────┘   └ R2 ┘   └── R3 ──┘
+
+R1 last token flat idx = 3
+R2 last token flat idx = 5
+R3 last token flat idx = 8
+```
+
 
 把 prefix cache 和本轮新写入位置合起来看，请求的完整 KV 索引大致是：
 
-**``` 1R1: 2tokens  [11, 12, 13, 14] 3kv slot [100,101,102,103] 4 5R2: 6tokens  [21, 22, 23] 7kv slot [ 80,104,105] 8 9R3: 10tokens  [31, 32, 33, 34, 35, 36] 11  kv slot [ 90, 91, 92,106,107,108] ```**
+
+```text
+R1:
+tokens  [11, 12, 13, 14]
+kv slot [100,101,102,103]
+
+R2:
+tokens  [21, 22, 23]
+kv slot [
+0,104,105] 8
+R3:
+tokens  [31, 32, 33, 34, 35, 36]
+  kv slot [ 90, 91, 92,106,107,108]
+```
+
 
 这里要特别区分两个概念：
 
-**``` 1out_cache_loc: 2  本轮新 token 的 KV 写入位置。 3  它的长度等于本轮实际 forward token 数。 4 5req_to_token_pool.req_to_token: 6  每个请求完整上下文 token -> KV slot 的映射表。 7  attention 读取历史 KV 时主要依赖这张表。 ```**
+
+```text
+out_cache_loc:
+  本轮新 token 的 KV 写入位置。
+  它的长度等于本轮实际 forward token 数。
+
+req_to_token_pool.req_to_token:
+  每个请求完整上下文 token -> KV slot 的映射表。
+  attention 读取历史 KV 时主要依赖这张表。
+```
+
 
 也就是说，out\_cache\_loc 不是“读取历史 KV 的完整索引”。它更像是本轮新 KV 的写地址。历史 KV 的读取通常通过 req\_pool\_indices + seq\_lens 定位到 req\_to\_token\_pool.req\_to\_token，再从 token\_to\_kv\_pool 中读取对应 slot 的 K/V。
 
 以 R2 为例：
 
-**``` 1R2 完整上下文: 2  tokens  [21, 22, 23] 3  kv slot [80,104,105] 4 5其中： 6  21 是 prefix cache 命中的历史 token，KV 已经在 slot 80。 7  22/23 是本轮 EXTEND 新算的 token，KV 写到 out_cache_loc[4:6] = [104,105]。 ```**
+
+```text
+R2 完整上下文:
+  tokens  [21, 22, 23]
+  kv slot [80,104,105]
+
+其中：
+  21 是 prefix cache 命中的历史 token，KV 已经在 slot 80。
+  22/23 是本轮 EXTEND 新算的 token，KV 写到 out_cache_loc[4:6] = [104,105]。
+```
+
 
 attention 计算时可以这样理解：
 
-**``` 11. 当前 hidden_states 计算出 22/23 的新 K/V。 22. 通过 out_cache_loc=[104,105] 把新 K/V 写入 token_to_kv_pool。 33. 当前 token 做 attention 时需要完整上下文 [21,22,23]。 44. 通过 req_to_token_pool.req_to_token 找到 [80,104,105]。 55. 从 token_to_kv_pool 读取这些 slot 的 K/V 参与 attention。 ```**
+
+```text
+1. 当前 hidden_states 计算出
+2/23 的新 K/V。 22. 通过 out_cache_loc=[104,105] 把新 K/V 写入 token_to_kv_pool。
+3. 当前 token 做 attention 时需要完整上下文 [21,22,23]。
+4. 通过 req_to_token_pool.req_to_token 找到 [80,104,105]。
+5. 从 token_to_kv_pool 读取这些 slot 的 K/V 参与 attention。
+```
+
 
 因此：
 
-**``` 1写新 KV: 2  out_cache_loc -> token_to_kv_pool.set_kv_buffer(...) 3 4读上下文 KV: 5  req_to_token_pool.req_to_token + seq_lens -> token_to_kv_pool.get_*_buffer(...) ```**
+
+```text
+写新 KV:
+  out_cache_loc -> token_to_kv_pool.set_kv_buffer(...)
+
+读上下文 KV:
+  req_to_token_pool.req_to_token + seq_lens -> token_to_kv_pool.get_*_buffer(...)
+```
+
 
 **第 5 步：ForwardBatch 怎么进入模型文件**
 
 **模型文件里并不会直接接收 ScheduleBatch 或 ModelWorkerBatch。它接收的是：**
 
-**``` 1self.model.forward( 2    forward_batch.input_ids, 3    forward_batch.positions, 4    forward_batch, 5    ... 6) ```**
+
+```python
+self.model.forward(
+    forward_batch.input_ids,
+    forward_batch.positions,
+    forward_batch,
+    ...
+)
+```
+
 
 也就是说，模型文件入口通常是三个核心参数：
 
-**``` 1input_ids: 2本轮要执行的 token ids。 3EXTEND 时是未缓存 prompt token 拼平。 4DECODE 时是每个请求上一步采样出的 token。 5 6positions: 7每个 input token 在原序列里的位置。 8由 ForwardBatch.init_new 生成。 9 10forward_batch: 11  携带 attention/KV/cache/logprob/sampling/LoRA/DP 等运行时信息。 ```**
+
+```text
+input_ids:
+本轮要执行的 token ids。
+EXTEND 时是未缓存 prompt token 拼平。
+DECODE 时是每个请求上一步采样出的 token。
+
+positions:
+每个 input token 在原序列里的位置。
+由 ForwardBatch.init_new 生成。
+
+forward_batch:
+  携带 attention/KV/cache/logprob/sampling/LoRA/DP 等运行时信息。
+```
+
 
 以 python/sglang/srt/models/llama.py 为例，调用链可以简化成：
 
-**``` 1ModelRunner.forward 2  -> ModelRunner.forward_extend / forward_decode 3  -> LlamaForCausalLM.forward(input_ids, positions, forward_batch) 4  -> LlamaModel.forward(input_ids, positions, forward_batch) 5  -> embed_tokens(input_ids) 得到 hidden_states 6  -> 每层 LlamaDecoderLayer.forward(positions, hidden_states, forward_batch, ...) 7  -> norm 8  -> logits_processor(input_ids, hidden_states, lm_head, forward_batch) ```**
+
+```text
+ModelRunner.forward
+  -> ModelRunner.forward_extend / forward_decode
+  -> LlamaForCausalLM.forward(input_ids, positions, forward_batch)
+  -> LlamaModel.forward(input_ids, positions, forward_batch)
+  -> embed_tokens(input_ids) 得到 hidden_states
+  -> 每层 LlamaDecoderLayer.forward(positions, hidden_states, forward_batch, ...)
+  -> norm
+  -> logits_processor(input_ids, hidden_states, lm_head, forward_batch)
+```
+
 
 对应代码结构是：
 
-**``` 1LlamaForCausalLM.forward: 2hidden_states = self.model( 3      input_ids, 4      positions, 5      forward_batch, 6      input_embeds, 7      pp_proxy_tensors=pp_proxy_tensors, 8) 9 10return self.logits_processor( 11      input_ids, 12      hidden_states, 13      self.lm_head, 14      forward_batch, 15      aux_hidden_states, 16  ) ```**
+
+```python
+LlamaForCausalLM.forward:
+hidden_states = self.model(
+      input_ids,
+      positions,
+      forward_batch,
+      input_embeds,
+      pp_proxy_tensors=pp_proxy_tensors,
+)
+
+return self.logits_processor(
+      input_ids,
+      hidden_states,
+      self.lm_head,
+      forward_batch,
+      aux_hidden_states,
+  )
+```
+
 
 再进入 LlamaModel.forward：
 
-**``` 1if first PP rank: 2if input_embeds is None: 3      hidden_states = self.embed_tokens(input_ids) 4else: 5      hidden_states = input_embeds 6residual = None 7else: 8hidden_states = pp_proxy_tensors["hidden_states"] 9residual = pp_proxy_tensors["residual"] 10 11for layer in layers: 12hidden_states, residual = layer( 13      positions, 14      hidden_states, 15      forward_batch, 16      residual, 17) 18 19hidden_states = norm(hidden_states, residual) 20return hidden_states ```**
+
+```python
+if first PP rank:
+if input_embeds is None:
+      hidden_states = self.embed_tokens(input_ids)
+else:
+      hidden_states = input_embeds
+residual = None
+else:
+hidden_states = pp_proxy_tensors["hidden_states"]
+residual = pp_proxy_tensors["residual"]
+
+for layer in layers:
+hidden_states, residual = layer(
+      positions,
+      hidden_states,
+      forward_batch,
+      residual,
+)
+
+hidden_states = norm(hidden_states, residual)
+return hidden_states
+```
+
 
 这就是 ForwardBatch 到模型文件，再到第一份 hidden\_states 的关键转换：
 
-**``` 1ForwardBatch.input_ids 2  -> model.embed_tokens(input_ids) 3  -> hidden_states ```**
+
+```text
+ForwardBatch.input_ids
+  -> model.embed_tokens(input_ids)
+  -> hidden_states
+```
+
 
 如果 ForwardBatch.input\_embeds 不为空，比如 multimodal、embedding override、某些 speculative / MTP 路径，则模型会跳过或替换普通 token embedding：
 
-**``` 1forward_batch.input_embeds 2  -> kwargs["input_embeds"] 3  -> hidden_states = input_embeds ```**
+
+```text
+forward_batch.input_embeds
+  -> kwargs["input_embeds"]
+  -> hidden_states = input_embeds
+```
+
 
 可视化：
 
-**``` 1ForwardBatch / EXTEND 2 3input_ids:  [11,12,13,14,22,23,34,35,36] 4positions:  [ 0, 1, 2, 3, 1, 2, 3, 4, 5] 5                 │ 6                 v 7model.embed_tokens(input_ids) 8                 │ 9                 v 10hidden_states: 11shape = [num_tokens, hidden_size] 12        = [9, hidden_size] 13                 │ 14                 v 15Transformer layers: 16  layer(positions, hidden_states, forward_batch, residual) ```**
+
+```text
+ForwardBatch / EXTEND 2 3input_ids:  [11,12,13,14,22,23,34,35,36] 4positions:  [ 0, 1,
+,
+, 1, 2, 3,
+,
+] 5                 │
+                 v
+model.embed_tokens(input_ids)
+                 │
+                 v
+hidden_states:
+shape = [num_tokens, hidden_size]
+        = [9, hidden_size]
+                 │
+                 v
+Transformer layers:
+  layer(positions, hidden_states, forward_batch, residual)
+```
+
 
 把这 9 行 hidden\_states 展开看：
 
-**``` 1hidden_states[0] = embed(11), position 0, belongs to R1 2hidden_states[1] = embed(12), position 1, belongs to R1 3hidden_states[2] = embed(13), position 2, belongs to R1 4hidden_states[3] = embed(14), position 3, belongs to R1 5 6hidden_states[4] = embed(22), position 1, belongs to R2 7hidden_states[5] = embed(23), position 2, belongs to R2 8 9hidden_states[6] = embed(34), position 3, belongs to R3 10hidden_states[7] = embed(35), position 4, belongs to R3 11hidden_states[8] = embed(36), position 5, belongs to R3 ```**
+
+```text
+hidden_states[0] = embed(11), position 0, belongs to R1
+hidden_states[1] = embed(12), position 1, belongs to R1
+hidden_states[2] = embed(13), position 2, belongs to R1
+hidden_states[3] = embed(14), position 3, belongs to R1
+
+hidden_states[4] = embed(22), position 1, belongs to R2
+hidden_states[5] = embed(23), position 2, belongs to R2
+
+hidden_states[6] = embed(34), position 3, belongs to R3
+hidden_states[7] = embed(35), position 4, belongs to R3
+hidden_states[8] = embed(36), position 5, belongs to R3
+```
+
 
 注意 R2/R3 的 position 不是从 0 开始，因为它们前面有 prefix cache 命中：
 
-**``` 1R2 prefix_len = 1: 2  本轮只算 [22,23] 3  positions = [1,2] 4 5R3 prefix_len = 3: 6  本轮只算 [34,35,36] 7  positions = [3,4,5] ```**
+
+```text
+R2 prefix_len = 1:
+  本轮只算 [22,23]
+  positions = [1,2]
+
+R3 prefix_len = 3:
+  本轮只算 [34,35,36]
+  positions = [3,4,5]
+```
+
 
 也就是说，hidden\_states 的行数等于本轮实际 forward token 数，而不是原始 prompt token 数：
 
-**``` 1R1 4 行 + R2 2 行 + R3 3 行 = 9 行 ```**
+
+```text
+R1 4 行 + R2
+ 行 + R3
+ 行 = 9 行
+```
+
 
 Decode 时同理：
 
-**``` 1ForwardBatch / DECODE 2 3input_ids:  [101,201,301] 4positions:  [  4,  3,  6] 5                 │ 6                 v 7model.embed_tokens(input_ids) 8                 │ 9                 v 10hidden_states: 11  shape = [batch_size, hidden_size] 12        = [3, hidden_size] ```**
+
+```text
+ForwardBatch / DECODE
+
+input_ids:  [101,201,301]
+positions:  [  4,  3,  6]
+                 │
+                 v
+model.embed_tokens(input_ids)
+                 │
+                 v
+hidden_states:
+  shape = [batch_size, hidden_size]
+        = [3, hidden_size]
+```
+
 
 **第 6 步：hidden\_states 如何继续使用 ForwardBatch**
 
 **得到 hidden\_states 后，模型层仍然会持续使用 forward\_batch。  典型 layer 调用是：**
 
-**``` 1hidden_states, residual = layer( 2    positions, 3    hidden_states, 4    forward_batch, 5    residual, 6) ```**
+
+```text
+hidden_states, residual = layer(
+    positions,
+    hidden_states,
+    forward_batch,
+    residual,
+)
+```
+
 
 在 layer 内部，attention 会依赖 forward\_batch 中的运行时信息：
 
-**``` 1seq_lens: 2当前每个请求的序列长度。 3 4out_cache_loc: 5本轮新 KV 写入 token_to_kv_pool 的位置。 6它主要是写地址，不是完整历史 KV 的读取地址。 7 8req_pool_indices: 9请求在 req_to_token_pool 中的行号。 10attention 会结合 req_pool_indices、seq_lens 和 req_to_token_pool.req_to_token 找到完整上下文的 KV slot。 11 12extend_prefix_lens / extend_seq_lens / extend_start_loc: 13prefill attention 需要知道每个请求的 prefix 和本轮 token 区间。 14 15positions / mrope_positions: 16rotary embedding 或 MROPE 位置编码使用。 17 18attn_backend metadata: 19  init_forward_metadata(forward_batch) 已经根据 batch 形状准备好 backend 所需索引。 ```**
+
+```text
+seq_lens:
+当前每个请求的序列长度。
+
+out_cache_loc:
+本轮新 KV 写入 token_to_kv_pool 的位置。
+它主要是写地址，不是完整历史 KV 的读取地址。
+
+req_pool_indices:
+请求在 req_to_token_pool 中的行号。
+attention 会结合 req_pool_indices、seq_lens 和 req_to_token_pool.req_to_token 找到完整上下文的 KV slot。
+
+extend_prefix_lens / extend_seq_lens / extend_start_loc:
+prefill attention 需要知道每个请求的 prefix 和本轮 token 区间。
+
+positions / mrope_positions:
+rotary embedding 或 MROPE 位置编码使用。
+
+attn_backend metadata:
+  init_forward_metadata(forward_batch) 已经根据 batch 形状准备好 backend 所需索引。
+```
+
 
 所以 hidden\_states 的计算不是只靠 input\_ids，而是：
 
-**``` 1input_ids -> embedding -> hidden_states 2positions -> positional / rotary information 3forward_batch -> attention/KV/cache/runtime metadata ```**
+
+```text
+input_ids -> embedding -> hidden_states
+positions -> positional / rotary information
+forward_batch -> attention/KV/cache/runtime metadata
+```
+
 
 最终最后一层输出的 hidden\_states 会进入 logits processor：
 
-**``` 1logits_processor( 2  input_ids, 3  hidden_states, 4  lm_head, 5  forward_batch, 6) ```**
+
+```text
+logits_processor(
+  input_ids,
+  hidden_states,
+  lm_head,
+  forward_batch,
+)
+```
+
 
 logits processor 会根据 forward\_batch.forward\_mode 决定取哪些位置的 logits：
 
-**``` 1DECODE: 2  每个请求都有一个 decode token，通常取每行对应 logits。 3 4EXTEND: 5  通常只取每个请求最后一个 token 的 logits 用于下一 token 采样。 6  如果 return_logprob，还会额外处理 prompt token logprobs。 7 8PREFILL-ONLY: 9  可能只计算 logprob / embedding，不采样 next token。 ```**
+
+```text
+DECODE:
+  每个请求都有一个 decode token，通常取每行对应 logits。
+
+EXTEND:
+  通常只取每个请求最后一个 token 的 logits 用于下一 token 采样。
+  如果 return_logprob，还会额外处理 prompt token logprobs。
+
+PREFILL-ONLY:
+  可能只计算 logprob / embedding，不采样 next token。
+```
+
 
 然后 ModelRunner.sample 使用同一个 forward\_batch.sampling\_info 采样：
 
-**``` 1LogitsProcessorOutput 2  -> Sampler(..., forward_batch.sampling_info, ...) 3  -> next_token_ids 4  -> GenerationBatchResult 5  -> Scheduler.process_batch_result 6  -> Req.output_ids 更新 ```**
+
+```text
+LogitsProcessorOutput
+  -> Sampler(..., forward_batch.sampling_info, ...)
+  -> next_token_ids
+  -> GenerationBatchResult
+  -> Scheduler.process_batch_result
+  -> Req.output_ids 更新
+```
+
 
 继续使用 R1/R2/R3 的 EXTEND 示例，最后一层输出仍然是：
 
-**``` 1final_hidden_states.shape = [9, hidden_size] ```**
+
+```text
+final_hidden_states.shape = [9, hidden_size]
+```
+
 
 但 prefill 生成下一个 token 时，不需要 9 个位置都采样。通常只需要每个请求最后一个 token 的 logits：
 
-**``` 1R1: 2最后一个本轮 token = 14 3flat idx = 3 4用 final_hidden_states[3] 计算 next-token logits 5 6R2: 7最后一个本轮 token = 23 8flat idx = 5 9用 final_hidden_states[5] 计算 next-token logits 10 11R3: 12最后一个本轮 token = 36 13flat idx = 8 14  用 final_hidden_states[8] 计算 next-token logits ```**
+
+```text
+R1:
+最后一个本轮 token = 14
+flat idx = 3
+用 final_hidden_states[3] 计算 next-token logits
+
+R2:
+最后一个本轮 token = 23
+flat idx = 5
+用 final_hidden_states[5] 计算 next-token logits
+
+R3:
+最后一个本轮 token = 36
+flat idx = 8
+  用 final_hidden_states[8] 计算 next-token logits
+```
+
 
 可视化：
 
-**``` 1final_hidden_states rows 2 3idx:        0    1    2    3     4    5     6    7    8 4token:     11   12   13   14    22   23    34   35   36 5request:   └──── R1 ─────┘     └ R2 ┘     └── R3 ───┘ 6sample:                   ^          ^              ^ 7                         R1         R2             R3 ```**
+
+```text
+final_hidden_states rows 2 3idx:        0    1    2    3     4    5     6    7    8 4token:     11   12   13   14    22
+3    34
+5   36 5request:   └──── R1 ─────┘     └ R2 ┘     └── R3 ───┘ 6sample:                   ^          ^              ^ 7                         R1         R2             R3
+```
+
 
 假设 sampler 得到：
 
-**``` 1next_token_ids = [101, 201, 301] ```**
+
+```text
+next_token_ids = [101,
+01,
+01]
+```
+
 
 那么 GenerationBatchResult 会把它带回 Scheduler：
 
-**``` 1GenerationBatchResult.next_token_ids = [101,201,301] ```**
+
+```text
+GenerationBatchResult.next_token_ids = [101,201,301]
+```
+
 
 随后 Scheduler.process\_batch\_result 会更新请求状态：
 
-**``` 1R1.output_ids = [101] 2R2.output_ids = [201] 3R3.output_ids = [301] ```**
+
+```text
+R1.output_ids = [101]
+R2.output_ids = [201]
+R3.output_ids = [301]
+```
+
 
 这三个请求下一轮合入 running\_batch 后，就进入 decode 生命周期。也就是后面 Decode 阶段使用的模拟数据来源。
 
@@ -456,55 +1256,165 @@ logits processor 会根据 forward\_batch.forward\_mode 决定取哪些位置�
 
 **假设上面 prefill 后采样出：**
 
-**``` 1R1.output_ids = [101] 2R2.output_ids = [201] 3R3.output_ids = [301] ```**
+
+```text
+R1.output_ids = [101]
+R2.output_ids = [201]
+R3.output_ids = [301]
+```
+
 
 下一轮没有新 prefill，Scheduler 会调用：
 
-**``` 1running_batch = update_running_batch(running_batch) ```**
+
+```text
+running_batch = update_running_batch(running_batch)
+```
+
 
 其中：
 
-**``` 1batch.prepare_for_decode() ```**
+
+```text
+batch.prepare_for_decode()
+```
+
 
 会把 ScheduleBatch 改成 DECODE：
 
-**``` 1ScheduleBatch.forward_mode = DECODE 2ScheduleBatch.input_ids = [101,201,301] 3ScheduleBatch.seq_lens = [5,4,7] 4ScheduleBatch.out_cache_loc = [109,110,111] ```**
+
+```text
+ScheduleBatch.forward_mode = DECODE
+ScheduleBatch.input_ids = [101,201,301]
+ScheduleBatch.seq_lens = [5,4,7]
+ScheduleBatch.out_cache_loc = [109,110,111]
+```
+
 
 这里假设 allocator 继续从 EXTEND 已经使用过的 100..108 后面分配，所以 3 个 decode token 分别写到：
 
-**``` 1R1 decode token 101 -> kv slot 109 2R2 decode token 201 -> kv slot 110 3R3 decode token 301 -> kv slot 111 ```**
+
+```text
+R1 decode token 101 -> kv slot 109
+R2 decode token 201 -> kv slot 110
+R3 decode token 301 -> kv slot 111
+```
+
 
 这里的 input\_ids 含义已经变了：
 
-**``` 1EXTEND input_ids: 2  prompt 中没有命中 prefix cache 的 token，数量可以远大于 batch_size。 3 4DECODE input_ids: 5  每个请求一个 last output token，数量通常等于 batch_size。 ```**
+
+```text
+EXTEND input_ids:
+  prompt 中没有命中 prefix cache 的 token，数量可以远大于 batch_size。
+
+DECODE input_ids:
+  每个请求一个 last output token，数量通常等于 batch_size。
+```
+
 
 Decode 的 ModelWorkerBatch：
 
-**``` 1ModelWorkerBatch.forward_mode = DECODE 2ModelWorkerBatch.input_ids = [101,201,301] 3ModelWorkerBatch.req_pool_indices = [0,1,2] 4ModelWorkerBatch.seq_lens = [5,4,7] 5ModelWorkerBatch.out_cache_loc = [109,110,111] 6 7ModelWorkerBatch.extend_seq_lens = None 8ModelWorkerBatch.extend_prefix_lens = None 9ModelWorkerBatch.extend_num_tokens = 普通 decode 路径不使用 ```**
+
+```text
+ModelWorkerBatch.forward_mode = DECODE
+ModelWorkerBatch.input_ids = [101,201,301]
+ModelWorkerBatch.req_pool_indices = [0,1,2]
+ModelWorkerBatch.seq_lens = [5,4,7]
+ModelWorkerBatch.out_cache_loc = [109,110,111]
+
+ModelWorkerBatch.extend_seq_lens = None
+ModelWorkerBatch.extend_prefix_lens = None
+ModelWorkerBatch.extend_num_tokens = 普通 decode 路径不使用
+```
+
 
 Decode 的 ForwardBatch.init\_new 会走另一条位置逻辑：
 
-**``` 1if forward_mode.is_decode(): 2  positions = clamp_position(seq_lens) ```**
+
+```text
+if forward_mode.is_decode():
+  positions = clamp_position(seq_lens)
+```
+
 
 可以理解为：
 
-**``` 1R1 seq_len = 5 -> position = 4 2R2 seq_len = 4 -> position = 3 3R3 seq_len = 7 -> position = 6 ```**
+
+```text
+R1 seq_len = 5 -> position = 4
+R2 seq_len = 4 -> position = 3
+R3 seq_len = 7 -> position = 6
+```
+
 
 因此：
 
-**``` 1ForwardBatch / DECODE 2 3input_ids: [101,201,301] 4positions: [4,3,6] 5seq_lens:  [5,4,7] 6out_cache_loc: [109,110,111] ```**
+
+```text
+ForwardBatch / DECODE
+
+input_ids: [101,201,301]
+positions: [4,3,6]
+seq_lens:  [5,4,7]
+out_cache_loc: [109,110,111]
+```
+
 
 可视化：
 
-**``` 1R1: [11][12][13][14][101] 2                         ^ 3                         decode position 4 4                         kv slot 109 5 6R2: [21][22][23][201] 7                    ^ 8                    decode position 3 9                    kv slot 110 10 11R3: [31][32][33][34][35][36][301] 12                                   ^ 13                                   decode position 6 14                                   kv slot 111 ```**
+
+```text
+R1: [11][12][13][14][101]
+                         ^
+                         decode position 4
+                         kv slot 109
+
+R2: [21][22][23][201]
+                    ^
+                    decode position 3
+                    kv slot 110
+
+R3: [31][32][33][34][35][36][301]
+                                   ^
+                                   decode position 6
+                                   kv slot 111
+```
+
 
 decode 完成这一轮 forward 后，完整 KV 索引会继续增长：
 
-**``` 1R1: 2tokens  [11, 12, 13, 14,101] 3kv slot [100,101,102,103,109] 4 5R2: 6tokens  [21, 22, 23,201] 7kv slot [ 80,104,105,110] 8 9R3: 10tokens  [31, 32, 33, 34, 35, 36,301] 11  kv slot [ 90, 91, 92,106,107,108,111] ```**
+
+```text
+R1:
+tokens  [11, 12, 13, 14,101]
+kv slot [100,101,102,103,109]
+
+R2:
+tokens  [21, 22, 23,201]
+kv slot [
+0,104,105,110] 8
+R3:
+tokens  [31, 32, 33, 34, 35, 36,301]
+  kv slot [ 90, 91, 92,106,107,108,111]
+```
+
 
 decode attention 的读写关系也是同一套逻辑。以 R2 为例：
 
-**``` 1本轮 decode input token: 2  201 3 4本轮写新 KV: 5  out_cache_loc = [110] 6 7attention 读取完整上下文 KV: 8  tokens  [21, 22, 23,201] 9  kv slot [80,104,105,110] ```**
+
+```text
+本轮 decode input token:
+  201
+
+本轮写新 KV:
+  out_cache_loc = [110]
+
+attention 读取完整上下文 KV:
+  tokens  [21, 22, 23,201]
+  kv slot [80,104,105,110]
+```
+
 
 所以 decode 阶段不是只读 out\_cache\_loc=110。110 是新 token 的写入位置；attention 读取的是 req\_to\_token\_pool.req\_to\_token 中记录的完整上下文 KV slot，包括历史的 80/104/105 和本轮新写入的 110。
 
@@ -520,60 +1430,215 @@ decode attention 的读写关系也是同一套逻辑。以 R2 为例：
 
 **ScheduleBatch 主要在 Scheduler 和调度相关 worker 中使用：**
 
-**``` 1Scheduler.get_next_batch_to_run: 2返回下一轮要跑的 ScheduleBatch。 3 4get_new_batch_prefill: 5创建 EXTEND ScheduleBatch。 6 7update_running_batch: 8把 running_batch 更新成 DECODE ScheduleBatch。 9 10ScheduleBatch.prepare_for_extend: 11构建 prefill tensor 并分配 KV。 12 13ScheduleBatch.prepare_for_decode: 14构建 decode tensor 并分配 KV。 15 16ScheduleBatch.filter_batch / merge_batch: 17维护 running_batch 生命周期。 18 19Scheduler.process_batch_result: 20根据 forward 结果更新 req.output_ids / finished / logprob。 21 22speculative workers: 23  部分 spec v1 路径仍直接接收 ScheduleBatch。 ```**
+
+```text
+Scheduler.get_next_batch_to_run:
+返回下一轮要跑的 ScheduleBatch。
+
+get_new_batch_prefill:
+创建 EXTEND ScheduleBatch。
+
+update_running_batch:
+把 running_batch 更新成 DECODE ScheduleBatch。
+
+ScheduleBatch.prepare_for_extend:
+构建 prefill tensor 并分配 KV。
+
+ScheduleBatch.prepare_for_decode:
+构建 decode tensor 并分配 KV。
+
+ScheduleBatch.filter_batch / merge_batch:
+维护 running_batch 生命周期。
+
+Scheduler.process_batch_result:
+根据 forward 结果更新 req.output_ids / finished / logprob。
+
+speculative workers:
+  部分 spec v1 路径仍直接接收 ScheduleBatch。
+```
+
 
 **ModelWorkerBatch 的使用位置**
 
 **ModelWorkerBatch 主要出现在 Scheduler 到 worker 的边界：**
 
-**``` 1ScheduleBatch.get_model_worker_batch: 2创建 ModelWorkerBatch。 3 4Scheduler.run_batch: 5普通 generation 大多数路径都会先得到 ModelWorkerBatch。 6 7overlap schedule: 8record_batch_in_overlap(model_worker_batch) 保存 forward stream 需要的快照。 9 10TPWorker.forward_batch_generation: 11接收 ModelWorkerBatch 并转换为 ForwardBatch。 12 13speculative workers: 14target worker / draft worker 之间也会传 ModelWorkerBatch。 15 16embedding path: 17  forward_batch_embedding 也使用 ModelWorkerBatch。 ```**
+
+```text
+ScheduleBatch.get_model_worker_batch:
+创建 ModelWorkerBatch。
+
+Scheduler.run_batch:
+普通 generation 大多数路径都会先得到 ModelWorkerBatch。
+
+overlap schedule:
+record_batch_in_overlap(model_worker_batch) 保存 forward stream 需要的快照。
+
+TPWorker.forward_batch_generation:
+接收 ModelWorkerBatch 并转换为 ForwardBatch。
+
+speculative workers:
+target worker / draft worker 之间也会传 ModelWorkerBatch。
+
+embedding path:
+  forward_batch_embedding 也使用 ModelWorkerBatch。
+```
+
 
 **ForwardBatch 的使用位置**
 
 **ForwardBatch 是模型执行层通用对象：**
 
-**``` 1TPWorker.forward_batch_generation: 2ForwardBatch.init_new(model_worker_batch, model_runner)。 3 4ModelRunner.forward: 5接收 ForwardBatch。 6 7ModelRunner.forward_extend / forward_decode: 8根据 forward_mode 分发执行。 9 10attention backend: 11init_forward_metadata(forward_batch)。 12 13model.forward: 14model.forward(input_ids, positions, forward_batch)。 15 16logits processor: 17根据 forward_mode / seq_lens / extend 信息抽取 logits。 18 19sampler: 20使用 sampling_info、positions、logprob 字段采样 next_token_ids。 21 22cuda graph / piecewise cuda graph: 23capture/replay 时也构造或复用 ForwardBatch。 24 25DP attention: 26  ForwardBatch.prepare_mlp_sync_batch 处理 global_num_tokens 和 padding。 ```**
+
+```text
+TPWorker.forward_batch_generation:
+ForwardBatch.init_new(model_worker_batch, model_runner)。
+
+ModelRunner.forward:
+接收 ForwardBatch。
+
+ModelRunner.forward_extend / forward_decode:
+根据 forward_mode 分发执行。
+
+attention backend:
+init_forward_metadata(forward_batch)。
+
+model.forward:
+model.forward(input_ids, positions, forward_batch)。
+
+logits processor:
+根据 forward_mode / seq_lens / extend 信息抽取 logits。
+
+sampler:
+使用 sampling_info、positions、logprob 字段采样 next_token_ids。
+
+cuda graph / piecewise cuda graph:
+capture/replay 时也构造或复用 ForwardBatch。
+
+DP attention:
+  ForwardBatch.prepare_mlp_sync_batch 处理 global_num_tokens 和 padding。
+```
+
 
 **为什么不直接从 ScheduleBatch 到 ForwardBatch**
 
 **看起来可以省掉 ModelWorkerBatch，但实际有几个原因需要中间层：**
 
-**``` 11. 隔离 Scheduler 内部状态 2   ScheduleBatch 带有 reqs、tree_cache、allocator、filter/merge 等调度逻辑。 3   model worker 不应该依赖这些调度细节。 4 52. 支持 overlap schedule 6   overlap 模式下 Scheduler 线程和 forward stream 并行。 7   ModelWorkerBatch 是一个更稳定的 forward 快照。 8 93. 支持不同 worker 类型 10   TP worker、speculative worker、embedding worker、MLX worker 都可以围绕 ModelWorkerBatch 建接口。 11 124. 运行时对象必须由 ModelRunner 注入 13   token_to_kv_pool、attn_backend、device-specific positions 不属于 Scheduler。 14   它们在 ForwardBatch.init_new 中由 model_runner 注入更合理。 ```**
+
+```text
+1. 隔离 Scheduler 内部状态
+   ScheduleBatch 带有 reqs、tree_cache、allocator、filter/merge 等调度逻辑。
+   model worker 不应该依赖这些调度细节。
+
+2. 支持 overlap schedule
+   overlap 模式下 Scheduler 线程和 forward stream 并行。
+   ModelWorkerBatch 是一个更稳定的 forward 快照。
+
+3. 支持不同 worker 类型
+   TP worker、speculative worker、embedding worker、MLX worker 都可以围绕 ModelWorkerBatch 建接口。
+
+4. 运行时对象必须由 ModelRunner 注入
+   token_to_kv_pool、attn_backend、device-specific positions 不属于 Scheduler。
+   它们在 ForwardBatch.init_new 中由 model_runner 注入更合理。
+```
+
 
 **常见容易绕的点**
 
 **1. input\_ids 在三层中是同一批 token，但含义取决于 forward\_mode**
 
-**``` 1EXTEND: 2  input_ids 是未命中 prefix cache 的 prompt token 拼平。 3 4DECODE: 5  input_ids 是每个请求上一轮采样出的最后一个 token。 ```**
+
+```text
+EXTEND:
+  input_ids 是未命中 prefix cache 的 prompt token 拼平。
+
+DECODE:
+  input_ids 是每个请求上一轮采样出的最后一个 token。
+```
+
 
 **2. positions 不在 ScheduleBatch 中**
 
 **Scheduler 不直接生成 positions。它只提供：**
 
-**``` 1seq_lens 2prefix_lens 3extend_lens 4extend_num_tokens ```**
+
+```text
+seq_lens
+prefix_lens
+extend_lens
+extend_num_tokens
+```
+
 
 真正的 positions 在 ForwardBatch.init\_new 中生成，因为它依赖 model runner 的后端、device 和特殊模型逻辑。
 
 **3. out\_cache\_loc 由 Scheduler 分配，但由 attention 执行使用**
 
-**``` 1ScheduleBatch.prepare_for_extend / prepare_for_decode: 2  分配 out_cache_loc。 3 4ForwardBatch: 5  携带 out_cache_loc。 6 7attention backend / attention layer: 8  根据 out_cache_loc 把新 KV 写入 token_to_kv_pool。 ```**
+
+```text
+ScheduleBatch.prepare_for_extend / prepare_for_decode:
+  分配 out_cache_loc。
+
+ForwardBatch:
+  携带 out_cache_loc。
+
+attention backend / attention layer:
+  根据 out_cache_loc 把新 KV 写入 token_to_kv_pool。
+```
+
 
 **4. sampling\_info 从 ScheduleBatch 一直传到 ForwardBatch**
 
 **sampling\_info 在 ScheduleBatch.prepare\_for\_extend 或 decode 生命周期中创建/维护，然后一路传到 ForwardBatch。采样时 ModelRunner.sample 会使用它：**
 
-**``` 1temperature 2top_p 3top_k 4min_p 5presence/frequency penalty 6grammar mask 7logprob 参数 ```**
+
+```text
+temperature
+top_p
+top_k
+min_p
+presence/frequency penalty
+grammar mask
+logprob 参数
+```
+
 
 **5. ForwardBatch 是局部执行对象**
 
 **ForwardBatch 通常只在一次 forward 中使用。forward 结束后，结果会通过 GenerationBatchResult 回到 Scheduler，再由 ScheduleBatch 和 Req 更新长期状态。**
 
-**``` 1ForwardBatch: 2  执行期临时对象。 3 4ScheduleBatch / Req: 5  调度和请求生命周期状态。 ```**
+
+```text
+ForwardBatch:
+  执行期临时对象。
+
+ScheduleBatch / Req:
+  调度和请求生命周期状态。
+```
+
 
 **最后串起来**
 
 **一次普通 generation 的主路径可以总结成：**
 
-**``` 1Req 2-> Scheduler admission 3-> ScheduleBatch.prepare_for_extend / prepare_for_decode 4-> ScheduleBatch.get_model_worker_batch 5-> TPWorker.forward_batch_generation 6-> ForwardBatch.init_new 7-> attention_backend.init_forward_metadata 8-> model.forward(input_ids, positions, forward_batch) 9-> embed_tokens(input_ids) / input_embeds 10-> hidden_states 11-> transformer layers(hidden_states, positions, forward_batch) 12-> logits processor 13-> sampler 14-> GenerationBatchResult 15-> Scheduler.process_batch_result 16  -> Req.output_ids / finished 状态更新 ```**
+
+```text
+Req
+-> Scheduler admission
+-> ScheduleBatch.prepare_for_extend / prepare_for_decode
+-> ScheduleBatch.get_model_worker_batch
+-> TPWorker.forward_batch_generation
+-> ForwardBatch.init_new
+-> attention_backend.init_forward_metadata
+-> model.forward(input_ids, positions, forward_batch)
+-> embed_tokens(input_ids) / input_embeds
+-> hidden_states
+-> transformer layers(hidden_states, positions, forward_batch)
+-> logits processor
+-> sampler
+-> GenerationBatchResult
+-> Scheduler.process_batch_result
+  -> Req.output_ids / finished 状态更新
+```
+
 
 理解这条链路后，再看 DP attention、overlap schedule、speculative decoding、cuda graph、multimodal、LoRA 等分支，本质上都是在这三个 Batch 对象上增加字段、补 runtime metadata，或者改变它们的转换时机。

@@ -28,7 +28,14 @@
 最直觉的做法：一个 `build_graph(string arch)` 函数，用 `if-else` 分派：
 
 ```
-if (arch == "llama") {    for (每层) { rms_norm(...); matmul(q_proj, ...); rope(...); attn(...); ffn(...); }} else if (arch == "qwen3") {    for (每层) { ...; rms_norm(q, ...); rms_norm(k, ...); ... }  // 多两行} else if (arch == "mamba") {    for (每层) { ssm_conv(...); ... }  // 完全不同} // ... 130 个分支
+if (arch == "llama") {
+    for (每层) { rms_norm(...); matmul(q_proj, ...); rope(...); attn(...); ffn(...); }
+} else if (arch == "qwen3") {
+    for (每层) { ...; rms_norm(q, ...); rms_norm(k, ...); ... }  // 多两行
+} else if (arch == "mamba") {
+    for (每层) { ssm_conv(...); ... }  // 完全不同
+}
+// ... 130 个分支
 ```
 
 这个函数会膨胀到 26,000 行。每次新增一个架构——比如刚发布的 DeepSeek V4——就要在这个巨型函数里再塞一个 200 行的分支。没有人愿意维护。而且 llama.cpp 的 PR 规范要求代码必须由人类贡献者亲自编写和维护（不能用 AI 生成后直接提交）——每个新架构都需要理解它的人持续维护。
@@ -50,7 +57,14 @@ Qwen3 在 QKV 投影和 RoPE 之间**插入了**两个额外的归一化操作�
 ### 方案三（llama.cpp 的实际选择）：每个架构一个 C++ 类
 
 ```
-src/models/├── llama.cpp      (248行)  — LLaMA 1/2/3 + Mixtral MoE├── qwen3.cpp      (156行)  — Qwen3├── mamba.cpp      (137行)  — Mamba（无 Attention）├── gemma.cpp      (144行)  — Gemma├── deepseek2.cpp  (439行)  — DeepSeek V2/V3/R1（含 MLA 和 MoE）├── rwkv7.cpp      (196行)  — RWKV v7（类 RNN）└── ... 114 个文件，平均 ~200 行/个
+src/models/
+├── llama.cpp      (248行)  — LLaMA 1/2/3 + Mixtral MoE
+├── qwen3.cpp      (156行)  — Qwen3
+├── mamba.cpp      (137行)  — Mamba（无 Attention）
+├── gemma.cpp      (144行)  — Gemma
+├── deepseek2.cpp  (439行)  — DeepSeek V2/V3/R1（含 MLA 和 MoE）
+├── rwkv7.cpp      (196行)  — RWKV v7（类 RNN）
+└── ... 114 个文件，平均 ~200 行/个
 ```
 
 **这看起来暴力——114 个类，每个手动描述计算图。但读懂源码之后你会发现，每个 Builder 其实只是一份"组合清单"——告诉 GGML 基类"用 helper X 接 helper Y 接 helper Z"。真正的重活在基类里。** 把这 114 个 Builder 想象成 IKEA 的 114 套家具图纸——每套图纸只告诉你"木板 A 接木板 B 接螺丝 C"，但螺丝和木板本身（GGML 操作）是所有图纸通用的。变了的是组装顺序，而不是零件。核心矛盾在这里被化解：架构变体的数量（130+）和核心操作的数量（~20 个 helper 覆盖 90% 场景）之间差了近一个数量级。
@@ -89,7 +103,19 @@ cur = build_norm(cur, ffn_norm_weight, ...);     // 归一化cur = build_ffn
 不同架构的层结构天差地别。llama.cpp 的做法不是为每种架构定义不同的层结构体，然后搞一个复杂的继承体系——而是定义了一个**超集**结构体，包含 40+ 个字段，覆盖所有 130+ 种架构可能需要的全部权重。
 
 ```
-llama_layer 字段（按类别）:  注意力相关：               FFN 相关：               SSM 相关 (Mamba用)：  wq, wk, wv, wo            ffn_gate                 ssm_in  bq, bk, bv, bo            ffn_up                   ssm_dt  wqkv (融合QKV投影)         ffn_down                 ssm_a  attn_norm (pre-attn)       ffn_norm (pre-FFN)       ssm_d  attn_norm_2 (Falcon双norm)                           ssm_conv1d  attn_q_norm (Qwen3的Q-norm)  MoE 相关：              ssm_norm  attn_k_norm (Qwen3的K-norm)  ffn_gate_inp (路由器)  attn_out_norm                 ffn_gate_exps (多专家gate)  DeepSeek MLA：  ...                           ffn_up_exps   (多专家up)    wq_a                                ffn_down_exps (多专家down)  wkv_a
+llama_layer 字段（按类别）:
+
+注意力相关:                     FFN 相关:                   SSM 相关 (Mamba用):
+wq, wk, wv, wo                  ffn_gate                    ssm_in
+bq, bk, bv, bo                  ffn_up                      ssm_dt
+wqkv (融合QKV投影)               ffn_down                    ssm_a
+attn_norm (pre-attn)            ffn_norm (pre-FFN)          ssm_d
+attn_norm_2 (Falcon双norm)                                  ssm_conv1d
+attn_q_norm (Qwen3的Q-norm)     MoE 相关:                   ssm_norm
+attn_k_norm (Qwen3的K-norm)     ffn_gate_inp (路由器)
+attn_out_norm                   ffn_gate_exps (多专家gate)   DeepSeek MLA:
+                                ffn_up_exps (多专家up)      wq_a
+                                ffn_down_exps (多专家down)  wkv_a
 ```
 
 **各架构的实际使用情况：**
@@ -222,7 +248,17 @@ MoE 的精髓：虽然有 8 套完整 FFN 权重（每个约 3.7MB），但每�
 对比 `llama.cpp`（LLaMA）和 `qwen3.cpp`（Qwen3），差异只有两行：
 
 ```
-// LLaMA: QKV投影后直接RoPEQcur = build_lora_mm(wq, cur, ...);Kcur = build_lora_mm(wk, cur, ...);// → RoPE// Qwen3: Q和K在RoPE前各多过一次归一化Qcur = build_lora_mm(wq, cur, ...);Kcur = build_lora_mm(wk, cur, ...);Qcur = build_norm(Qcur, attn_q_norm, NULL, LLM_NORM_RMS, il);  // ← 多这行Kcur = build_norm(Kcur, attn_k_norm, NULL, LLM_NORM_RMS, il);  // ← 多这行// → RoPE
+// LLaMA: QKV投影后直接RoPE
+Qcur = build_lora_mm(wq, cur, ...);
+Kcur = build_lora_mm(wk, cur, ...);
+// → RoPE
+
+// Qwen3: Q和K在RoPE前各多过一次归一化
+Qcur = build_lora_mm(wq, cur, ...);
+Kcur = build_lora_mm(wk, cur, ...);
+Qcur = build_norm(Qcur, attn_q_norm, NULL, LLM_NORM_RMS, il);  // ← 多这行
+Kcur = build_norm(Kcur, attn_k_norm, NULL, LLM_NORM_RMS, il);  // ← 多这行
+// → RoPE
 ```
 
 **Qwen3 的 Builder 几乎就是 LLaMA 的 Builder 加两行。** 这不是巧合——130+ 种架构里，绝大多数 Transformer 变体都只是"标准 LLaMA 模板"的微调。基类提供共享逻辑，Builder 只表达差异。

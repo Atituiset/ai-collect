@@ -437,7 +437,14 @@ dk倍。
 权重初始化伪代码：
 
 ```
-if layer_name in ['o_proj', 'down_proj']:    # 如果是残差分支的出口层    # std = 0.02 / sqrt(2 * num_layers)    scaled_std = self.config.initializer_range / math.sqrt(2.0 * self.config.num_hidden_layers)    init.normal_(weight, mean=0.0, std=scaled_std)else:    # 其他普通的层 (q, k, v, up, gate 等)，照常使用 0.02    init.normal_(weight, mean=0.0, std=self.config.initializer_range)
+if layer_name in ['o_proj', 'down_proj']:
+    # 如果是残差分支的出口层
+    # std = 0.02 / sqrt(2 * num_layers)
+    scaled_std = self.config.initializer_range / math.sqrt(2.0 * self.config.num_hidden_layers)
+    init.normal_(weight, mean=0.0, std=scaled_std)
+else:
+    # 其他普通的层 (q, k, v, up, gate 等)，照常使用 0.02
+    init.normal_(weight, mean=0.0, std=self.config.initializer_range)
 ```
 
 然后你可能也看见了，对于残差分支的出口层还做了额外的缩放std=![图片](../images/e80f3414_640_25_.webp)，主要是为了防止Transformer 几十上百层的残差连接（Residual Connection）累加引发的方差爆炸。
