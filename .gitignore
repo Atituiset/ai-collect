@@ -16,7 +16,8 @@ collects/
 .env
 
 # Build output
-book/
+docs/.vitepress/dist
+docs/.vitepress/cache
 
 # Misc
 dist/

@@ -1,0 +1,17 @@
+{
+  "name": "ai-collect-docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI 技术全景：从 Transformer 到 Agent 工程 - 在线文档",
+  "scripts": {
+    "docs:dev": "vitepress dev .",
+    "docs:build": "vitepress build .",
+    "docs:preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.13"
+  }
+}
