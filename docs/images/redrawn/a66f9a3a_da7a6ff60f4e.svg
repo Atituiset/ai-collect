@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="720" fill="#faf9f6"/>
+
+  <text x="540" y="42" fill="#1c2b24" font-size="26" font-weight="bold" text-anchor="middle">用 SCR 框架讲好你的真实故事：一次项目延期的教训与成长</text>
+  <text x="540" y="72" fill="#1c2b24" font-size="14" text-anchor="middle">面试不是背简历，而是讲故事说服对方。用真实案例展现你的思考、决策与成长。</text>
+
+  <!-- column headers -->
+  <g font-weight="bold">
+    <rect x="10" y="92" width="340" height="62" rx="8" fill="#2e7d5b"/>
+    <text x="34" y="132" fill="#ffffff" font-size="36">S</text>
+    <text x="70" y="122" fill="#ffffff" font-size="17">Situation 情景</text>
+    <text x="70" y="144" fill="#ffffff" font-size="12">项目背景 &amp; 初衷</text>
+    <rect x="370" y="92" width="340" height="62" rx="8" fill="#2e7d5b"/>
+    <text x="394" y="132" fill="#ffffff" font-size="36">C</text>
+    <text x="430" y="122" fill="#ffffff" font-size="17">Complication 冲突/问题</text>
+    <text x="430" y="144" fill="#ffffff" font-size="12">问题爆发 &amp; 风险升级</text>
+    <rect x="730" y="92" width="340" height="62" rx="8" fill="#2e7d5b"/>
+    <text x="754" y="132" fill="#ffffff" font-size="36">R</text>
+    <text x="790" y="122" fill="#ffffff" font-size="17">Resolution 解决方案</text>
+    <text x="790" y="144" fill="#ffffff" font-size="12">应对策略 &amp; 最终结果</text>
+  </g>
+
+  <!-- S cards -->
+  <g fill="#ffffff" stroke="#9fb3aa" stroke-width="1">
+    <rect x="10" y="166" width="340" height="112" rx="6"/>
+    <rect x="10" y="290" width="340" height="112" rx="6"/>
+    <rect x="10" y="414" width="340" height="100" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="12">
+    <text x="52" y="192" font-size="14" font-weight="bold" fill="#2e7d5b">🎯 项目重要且困难</text>
+    <text x="26" y="216">· 公司战略级项目，涉及多部门协作</text>
+    <text x="26" y="238">· 时间紧、需求多、技术挑战大</text>
+    <text x="26" y="260">· 对业务增长和团队影响巨大</text>
+    <text x="52" y="316" font-size="14" font-weight="bold" fill="#2e7d5b">👥 我如何带领团队</text>
+    <text x="26" y="340">· 带领8人核心团队，立下军令状</text>
+    <text x="26" y="362">· 过度追求成功，连续加班4周</text>
+    <text x="26" y="384">· 高强度推进，强调结果，忽视风险</text>
+    <text x="52" y="440" font-size="14" font-weight="bold" fill="#2e7d5b">🧠 我当时的心态</text>
+    <text x="26" y="464">“我一度认为：</text>
+    <text x="26" y="484">那是我人生至暗的一个星期，</text>
+    <text x="26" y="504">但时过境迁，我认为一切都是财富。”</text>
+  </g>
+
+  <!-- C cards -->
+  <g fill="#ffffff" stroke="#9fb3aa" stroke-width="1">
+    <rect x="370" y="166" width="340" height="80" rx="6"/>
+    <rect x="370" y="256" width="340" height="80" rx="6"/>
+    <rect x="370" y="346" width="340" height="80" rx="6"/>
+    <rect x="370" y="436" width="340" height="78" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="12">
+    <text x="412" y="190" font-size="14" font-weight="bold" fill="#b58900">🏃 关键成员离职</text>
+    <text x="386" y="212">压力太大导致核心成员离职</text>
+    <text x="386" y="232">项目关键模块进度受阻</text>
+    <text x="412" y="280" font-size="14" font-weight="bold" fill="#b58900">⚠️ 我选择死扛</text>
+    <text x="386" y="302">不愿承认问题，想证明自己</text>
+    <text x="386" y="322">继续高压推进，未及时调整</text>
+    <text x="412" y="370" font-size="14" font-weight="bold" fill="#b58900">👥 团队士气下降</text>
+    <text x="386" y="392">其他成员工作量激增</text>
+    <text x="386" y="412">团队不满情绪升级，效率下降</text>
+    <text x="412" y="460" font-size="14" font-weight="bold" fill="#b58900">📉 项目风险爆发</text>
+    <text x="386" y="482">多项里程碑延期，交付风险巨大</text>
+    <text x="386" y="502">业务方开始质疑，信任危机</text>
+  </g>
+
+  <!-- R cards -->
+  <g fill="#ffffff" stroke="#9fb3aa" stroke-width="1">
+    <rect x="730" y="166" width="340" height="64" rx="6"/>
+    <rect x="730" y="238" width="340" height="64" rx="6"/>
+    <rect x="730" y="310" width="340" height="64" rx="6"/>
+    <rect x="730" y="382" width="340" height="64" rx="6"/>
+    <rect x="730" y="454" width="340" height="60" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="12">
+    <text x="772" y="188" font-size="14" font-weight="bold" fill="#2e7d5b">📢 主动上报风险</text>
+    <text x="746" y="208">评估自身能力边界，向上汇报风险</text>
+    <text x="746" y="226">坦诚问题，争取支持</text>
+    <text x="772" y="260" font-size="14" font-weight="bold" fill="#2e7d5b">🤝 上级协调资源</text>
+    <text x="746" y="280">Leader 上抛风险，总监亲自介入</text>
+    <text x="746" y="298">协调资源，提供专业指导</text>
+    <text x="772" y="332" font-size="14" font-weight="bold" fill="#2e7d5b">📖 学习 &amp; 调整</text>
+    <text x="746" y="352">总监指导项目管理方法</text>
+    <text x="746" y="370">我快速学习，优化计划与分工</text>
+    <text x="772" y="404" font-size="14" font-weight="bold" fill="#2e7d5b">👥 重新激励团队</text>
+    <text x="746" y="424">坦诚沟通，重建信任</text>
+    <text x="746" y="442">明确目标与分工，激发团队士气</text>
+    <text x="772" y="476" font-size="14" font-weight="bold" fill="#2e7d5b">🏆 最终成功上线</text>
+    <text x="746" y="496">在总监支持与团队努力下</text>
+    <text x="746" y="512">项目按期上线，获得业务认可</text>
+  </g>
+
+  <!-- bottom: reflection -->
+  <rect x="10" y="528" width="690" height="128" rx="8" fill="#ece9f6" stroke="#7b5ea7" stroke-width="1"/>
+  <rect x="10" y="528" width="690" height="28" rx="8" fill="#7b5ea7"/>
+  <text x="355" y="547" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">我的反思与成长</text>
+  <g fill="#1c2b24" font-size="11.5">
+    <text x="24" y="578" font-weight="bold">👤 作为项目负责人的心得</text>
+    <text x="24" y="600">· 盲目压榨团队不可持续</text>
+    <text x="24" y="620">· 风险透明 &gt; 个人面子</text>
+    <text x="24" y="640">· 领导力 = 影响力 + 责任感</text>
+    <text x="262" y="578" font-weight="bold">⚙️ 团队机制建设</text>
+    <text x="262" y="600">· 建立风险预警机制</text>
+    <text x="262" y="620">· 合理评估与资源规划</text>
+    <text x="262" y="640">· 定期复盘，持续改进</text>
+    <text x="492" y="578" font-weight="bold">📈 带给我的长期价值</text>
+    <text x="492" y="600">· 项目管理能力大幅提升</text>
+    <text x="492" y="620">· 更懂团队，更懂业务</text>
+    <text x="492" y="640">· 从“救火队员”到“预防者”</text>
+  </g>
+
+  <!-- bottom right: what interviewer wants -->
+  <rect x="720" y="528" width="350" height="128" rx="8" fill="#ffffff" stroke="#1c2b24" stroke-width="1"/>
+  <text x="735" y="552" font-size="14" font-weight="bold" fill="#1c2b24">面试官想看到的</text>
+  <g fill="#1c2b24" font-size="12.5">
+    <text x="735" y="578">✓  你如何面对问题</text>
+    <text x="735" y="600">✓  你如何思考与决策</text>
+    <text x="735" y="622">✓  你如何与人协作解决</text>
+    <text x="735" y="644">✓  你从中学到了什么</text>
+  </g>
+
+  <!-- footer bar -->
+  <rect x="10" y="668" width="1060" height="40" rx="8" fill="#1c2b24"/>
+  <text x="540" y="694" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">★ 真实经历 + 深刻反思 + 成长沉淀 = 打动面试官的故事</text>
+</svg>

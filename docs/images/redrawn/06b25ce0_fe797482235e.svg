@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 600" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <defs>
+    <marker id="arr5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3a6ea8"/>
+    </marker>
+    <marker id="arr5b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c2b24"/>
+    </marker>
+  </defs>
+  <rect width="1080" height="600" fill="#faf9f6"/>
+
+  <text x="30" y="92" font-size="40" font-weight="bold" fill="#2e7d5b">Cross-Attention Block</text>
+
+  <!-- left grids -->
+  <text x="62" y="192" font-size="22" font-weight="bold" font-style="italic" fill="#1c2b24">what?</text>
+  <g fill="#c4c9c2" stroke="#1c2b24" stroke-width="1.1">
+    <rect x="60" y="205" width="76" height="100"/>
+    <path d="M60,230 H136 M60,255 H136 M60,280 H136 M79,205 V305 M98,205 V305 M117,205 V305" fill="none"/>
+  </g>
+  <text x="55" y="365" font-size="22" font-weight="bold" font-style="italic" fill="#1c2b24">where?</text>
+  <g fill="#c4c9c2" stroke="#1c2b24" stroke-width="1.1">
+    <rect x="60" y="378" width="76" height="76"/>
+    <path d="M60,403 H136 M60,429 H136 M85,378 V454 M111,378 V454" fill="none"/>
+  </g>
+
+  <!-- V_enc K_enc Q_dec boxes -->
+  <rect x="220" y="160" width="95" height="76" rx="10" fill="#a9cbe8" stroke="#3a6ea8" stroke-width="2"/>
+  <text x="267" y="206" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#1c2b24">V<tspan dy="4" font-size="14">enc</tspan></text>
+  <rect x="220" y="265" width="95" height="76" rx="10" fill="#f2d3a7" stroke="#c07a1e" stroke-width="2"/>
+  <text x="267" y="311" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#1c2b24">K<tspan dy="4" font-size="14">enc</tspan></text>
+  <rect x="220" y="370" width="95" height="76" rx="10" fill="#c9c3e0" stroke="#6a5ea8" stroke-width="2"/>
+  <text x="267" y="416" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#1c2b24">Q<tspan dy="4" font-size="14">dec</tspan></text>
+
+  <!-- arrows from grids -->
+  <line x1="138" y1="230" x2="216" y2="190" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+  <line x1="138" y1="260" x2="216" y2="295" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+  <line x1="138" y1="415" x2="216" y2="408" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+
+  <!-- attention energy grid (4x4 with highlights) -->
+  <g stroke="#1c2b24" stroke-width="1.1" fill="#f7e9dc">
+    <rect x="455" y="265" width="92" height="92"/>
+    <path d="M455,288 H547 M455,311 H547 M455,334 H547 M478,265 V357 M501,265 V357 M524,265 V357" fill="none"/>
+  </g>
+  <g fill="#d98a4b" stroke="#1c2b24" stroke-width="1.1">
+    <rect x="478" y="288" width="23" height="23"/>
+    <rect x="455" y="311" width="23" height="23"/>
+    <rect x="478" y="334" width="23" height="23"/>
+  </g>
+  <g fill="#b35c1e" stroke="#1c2b24" stroke-width="1.1">
+    <rect x="501" y="288" width="23" height="23"/>
+    <rect x="478" y="311" width="23" height="23"/>
+  </g>
+  <text x="490" y="452" text-anchor="middle" font-size="16" font-weight="bold" fill="#1c2b24">Attention energy</text>
+
+  <!-- output context grid -->
+  <g stroke="#1c2b24" stroke-width="1.1" fill="#d3e2f2">
+    <rect x="592" y="250" width="84" height="84"/>
+    <path d="M592,271 H676 M592,292 H676 M592,313 H676 M613,250 V334 M634,250 V334 M655,250 V334" fill="none"/>
+  </g>
+  <g fill="#2e4a6b" stroke="#1c2b24" stroke-width="1.1">
+    <rect x="592" y="250" width="21" height="21"/>
+    <rect x="655" y="313" width="21" height="21"/>
+  </g>
+  <text x="640" y="452" text-anchor="middle" font-size="16" font-weight="bold" fill="#1c2b24">Output context</text>
+
+  <!-- flow arrows -->
+  <line x1="315" y1="303" x2="449" y2="306" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+  <line x1="315" y1="408" x2="449" y2="345" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+  <path d="M315,198 H560 V246" fill="none" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+  <line x1="549" y1="330" x2="588" y2="330" stroke="#3a6ea8" stroke-width="2.2" marker-end="url(#arr5)"/>
+
+  <!-- ===== right: encoder/decoder mini ===== -->
+  <text x="963" y="58" text-anchor="middle" font-size="18" font-weight="bold" fill="#2e7d5b">Decoder</text>
+  <text x="855" y="207" text-anchor="middle" font-size="18" font-weight="bold" fill="#c07a1e">Encoder</text>
+
+  <!-- decoder column -->
+  <text x="953" y="82" text-anchor="middle" font-size="10" fill="#1c2b24">Output</text>
+  <text x="953" y="94" text-anchor="middle" font-size="10" fill="#1c2b24">Probabilities</text>
+  <rect x="905" y="100" width="96" height="20" rx="4" fill="#dcefe0" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="114" text-anchor="middle" font-size="10" fill="#1c2b24">Softmax</text>
+  <line x1="953" y1="128" x2="953" y2="122" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+  <rect x="905" y="128" width="96" height="20" rx="4" fill="#d3e7f2" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="142" text-anchor="middle" font-size="10" fill="#1c2b24">Linear</text>
+
+  <rect x="898" y="154" width="110" height="330" rx="9" fill="#eaf3e6" stroke="#2e7d5b" stroke-width="1.6"/>
+  <rect x="907" y="162" width="92" height="20" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="176" text-anchor="middle" font-size="9.5" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="907" y="188" width="92" height="34" rx="4" fill="#cfe4f2" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="201" text-anchor="middle" font-size="9.5" fill="#1c2b24">Feed</text>
+  <text x="953" y="214" text-anchor="middle" font-size="9.5" fill="#1c2b24">Forward</text>
+  <!-- cross-attention highlight -->
+  <rect x="901" y="228" width="104" height="88" rx="6" fill="none" stroke="#c0392b" stroke-width="2"/>
+  <rect x="907" y="232" width="92" height="20" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="246" text-anchor="middle" font-size="9.5" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="907" y="258" width="92" height="50" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="275" text-anchor="middle" font-size="9.5" fill="#1c2b24">Multi-Head</text>
+  <text x="953" y="289" text-anchor="middle" font-size="9.5" fill="#1c2b24">Attention</text>
+  <rect x="907" y="322" width="92" height="20" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="336" text-anchor="middle" font-size="9.5" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="907" y="348" width="92" height="56" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="364" text-anchor="middle" font-size="9.5" fill="#1c2b24">Masked</text>
+  <text x="953" y="377" text-anchor="middle" font-size="9.5" fill="#1c2b24">Multi-Head</text>
+  <text x="953" y="390" text-anchor="middle" font-size="9.5" fill="#1c2b24">Attention</text>
+  <text x="1014" y="330" font-size="11" font-style="italic" fill="#1c2b24">N×</text>
+  <line x1="953" y1="154" x2="953" y2="150" stroke="#1c2b24" stroke-width="1.2"/>
+  <line x1="953" y1="484" x2="953" y2="408" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+
+  <!-- decoder positional + embedding -->
+  <circle cx="940" cy="512" r="9" fill="#fff" stroke="#1c2b24" stroke-width="1.1"/>
+  <path d="M940,507 L940,517 M935,512 L945,512" stroke="#1c2b24" stroke-width="1.3"/>
+  <circle cx="968" cy="512" r="11" fill="#fff" stroke="#1c2b24" stroke-width="1.1"/>
+  <path d="M960,512 q4,-7 8,0 q4,7 8,0" fill="none" stroke="#1c2b24" stroke-width="1.2"/>
+  <text x="1000" y="500" font-size="9" fill="#1c2b24">Positional</text>
+  <text x="1000" y="512" font-size="9" fill="#1c2b24">Encoding</text>
+  <line x1="953" y1="540" x2="953" y2="523" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+  <rect x="905" y="540" width="96" height="26" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="953" y="551" text-anchor="middle" font-size="9.5" fill="#1c2b24">Output</text>
+  <text x="953" y="562" text-anchor="middle" font-size="9.5" fill="#1c2b24">Embedding</text>
+  <line x1="953" y1="586" x2="953" y2="568" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+  <text x="953" y="596" text-anchor="middle" font-size="10" font-weight="bold" fill="#1c2b24">Outputs</text>
+
+  <!-- encoder column -->
+  <rect x="755" y="228" width="110" height="256" rx="9" fill="#eaf3e6" stroke="#2e7d5b" stroke-width="1.6"/>
+  <rect x="764" y="236" width="92" height="20" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="810" y="250" text-anchor="middle" font-size="9.5" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="764" y="262" width="92" height="34" rx="4" fill="#cfe4f2" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="810" y="275" text-anchor="middle" font-size="9.5" fill="#1c2b24">Feed</text>
+  <text x="810" y="288" text-anchor="middle" font-size="9.5" fill="#1c2b24">Forward</text>
+  <rect x="764" y="302" width="92" height="20" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="810" y="316" text-anchor="middle" font-size="9.5" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="764" y="328" width="92" height="50" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="810" y="345" text-anchor="middle" font-size="9.5" fill="#1c2b24">Multi-Head</text>
+  <text x="810" y="359" text-anchor="middle" font-size="9.5" fill="#1c2b24">Attention</text>
+  <text x="738" y="360" font-size="11" font-style="italic" fill="#1c2b24">N×</text>
+  <line x1="810" y1="484" x2="810" y2="382" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+
+  <!-- encoder positional + embedding -->
+  <circle cx="797" cy="512" r="9" fill="#fff" stroke="#1c2b24" stroke-width="1.1"/>
+  <path d="M797,507 L797,517 M792,512 L802,512" stroke="#1c2b24" stroke-width="1.3"/>
+  <circle cx="825" cy="512" r="11" fill="#fff" stroke="#1c2b24" stroke-width="1.1"/>
+  <path d="M817,512 q4,-7 8,0 q4,7 8,0" fill="none" stroke="#1c2b24" stroke-width="1.2"/>
+  <text x="700" y="500" font-size="9" fill="#1c2b24">Positional</text>
+  <text x="700" y="512" font-size="9" fill="#1c2b24">Encoding</text>
+  <line x1="810" y1="540" x2="810" y2="523" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+  <rect x="762" y="540" width="96" height="26" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="0.9"/>
+  <text x="810" y="551" text-anchor="middle" font-size="9.5" fill="#1c2b24">Input</text>
+  <text x="810" y="562" text-anchor="middle" font-size="9.5" fill="#1c2b24">Embedding</text>
+  <line x1="810" y1="586" x2="810" y2="568" stroke="#1c2b24" stroke-width="1.2" marker-end="url(#arr5b)"/>
+  <text x="810" y="596" text-anchor="middle" font-size="10" font-weight="bold" fill="#1c2b24">Inputs</text>
+
+  <!-- encoder output up to decoder cross attention -->
+  <path d="M810,228 L810,212 L883,212 L883,283 L899,283" fill="none" stroke="#2e7d5b" stroke-width="1.4" marker-end="url(#arr5b)"/>
+</svg>

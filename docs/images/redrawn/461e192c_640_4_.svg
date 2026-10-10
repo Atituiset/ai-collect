@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1324 515" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="1324" height="515" fill="#faf9f6"/>
+<rect x="6" y="12" width="74" height="491" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="23.0" y="257.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 23.0 257.5)">Execution</text>
+<text x="43.0" y="257.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 43.0 257.5)">Environment</text>
+<text x="63.0" y="257.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 63.0 257.5)">&amp; Sandbox</text>
+<rect x="64" y="12" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="38.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">General-Purpose</text>
+<text x="189.0" y="60.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Managed Sandboxes</text>
+<line x1="314" y1="43.0" x2="336" y2="43.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="12" width="972" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="38" font-size="14" fill="#1c2b24">Daytona (Daytona Platforms, Inc., 2024), E2B (E2B, 2024), Modal (Modal Labs, 2024), Northflank (Northflank, 2024), OpenSandbox</text>
+<text x="350" y="58" font-size="14" fill="#1c2b24">(Alibaba, 2026), Docker Sandboxes (Docker, Inc., 2025)</text>
+<rect x="64" y="82" width="250" height="52" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="103.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Computer-Use</text>
+<text x="189.0" y="125.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Agent Infrastructure</text>
+<line x1="314" y1="108.0" x2="336" y2="108.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="82" width="972" height="52" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="108" font-size="14" fill="#1c2b24">Anthropic Computer Use (Anthropic, 2024b), CUA (Cua, 2024), OSWorld (Xie et al., 2024)</text>
+<rect x="64" y="142" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="168.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Code and Repository</text>
+<text x="189.0" y="190.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Execution Sandboxes</text>
+<line x1="314" y1="173.0" x2="336" y2="173.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="142" width="972" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="168" font-size="14" fill="#1c2b24">Judge0 (Došilović, 2024), OpenAI Code Interpreter (OpenAI, 2023), sandboxed.sh (Th0rgal, 2026), langchain-sandbox (LangChain,</text>
+<text x="350" y="188" font-size="14" fill="#1c2b24">2025c), Repo2Run (Hu et al., 2025a)</text>
+<rect x="64" y="212" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="238.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Framework-Integrated</text>
+<text x="189.0" y="260.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Runtimes</text>
+<line x1="314" y1="243.0" x2="336" y2="243.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="212" width="972" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="238" font-size="14" fill="#1c2b24">OpenHands (Wang et al., 2025b), GoEX (Patil et al., 2024a), agent-infra sandbox (Agent Infra, 2024), smolagents executors (Roucher</text>
+<text x="350" y="258" font-size="14" fill="#1c2b24">et al., 2025)</text>
+<rect x="64" y="282" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="308.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Browser Evaluation</text>
+<text x="189.0" y="330.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Environments</text>
+<line x1="314" y1="313.0" x2="336" y2="313.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="282" width="972" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="308" font-size="14" fill="#1c2b24">WebArena (Zhou et al., 2024), VisualWebArena (Koh et al., 2024), BrowserGym (Chezelles et al., 2024), WorkArena (Drouin et al.,</text>
+<text x="350" y="328" font-size="14" fill="#1c2b24">2024)</text>
+<rect x="64" y="352" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="378.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">OS-Level Permission</text>
+<text x="189.0" y="400.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Runtime Security</text>
+<line x1="314" y1="383.0" x2="336" y2="383.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="352" width="972" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="378" font-size="14" fill="#1c2b24">Anthropic sandbox-runtime (Anthropic, 2025g), Claude Code sandboxing (Anthropic, 2025b), IsolateGPT (Wu et al., 2025),</text>
+<text x="350" y="398" font-size="14" fill="#1c2b24">AgentBound (Bühler et al., 2025), transactional sandboxing (Yan, 2025)</text>
+<rect x="64" y="422" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="457.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Sandbox Abstractions,</text>
+<text x="189.0" y="479.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Training, and Evaluation</text>
+<line x1="314" y1="462.5" x2="336" y2="462.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="422" width="972" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="448" font-size="14" fill="#1c2b24">SWE-ReX (SWE-agent Team, 2024), SWE-agent (Yang et al., 2024), K8s Agent Sandbox (Kubernetes SIG Apps, 2025), R2E-Gym (Jain</text>
+<text x="350" y="468" font-size="14" fill="#1c2b24">et al., 2025), EnvScaler (Song et al., 2026), SandMLE (Zhou et al., 2026), SandboxEscapeBench (Marchand et al., 2026), CIBER (Ba et</text>
+<text x="350" y="488" font-size="14" fill="#1c2b24">al., 2026)</text>
+</svg>

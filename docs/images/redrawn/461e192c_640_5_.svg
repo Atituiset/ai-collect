@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 334" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="1190" height="334" fill="#faf9f6"/>
+<rect x="6" y="12" width="54" height="310" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="23.0" y="167.0" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 23.0 167.0)">Tool Interface</text>
+<text x="43.0" y="167.0" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 43.0 167.0)">&amp; Protocol</text>
+<rect x="64" y="12" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="38.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Protocol and</text>
+<text x="189.0" y="60.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Interface Standards</text>
+<line x1="314" y1="43.0" x2="336" y2="43.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="12" width="838" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="38" font-size="14" fill="#1c2b24">MCP (Model Context Protocol, 2025b;c), A2A (A2A Project, 2025), Function Calling (OpenAI, 2026c), OpenAPI</text>
+<text x="350" y="58" font-size="14" fill="#1c2b24">(OpenAPI Initiative, 2025), AGENTS.md (agentsmd, 2025), Interop. Survey (Ehtesham et al., 2025)</text>
+<rect x="64" y="82" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="108.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Tool Description, Discovery,</text>
+<text x="189.0" y="130.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Selection</text>
+<line x1="314" y1="113.0" x2="336" y2="113.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="82" width="838" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="108" font-size="14" fill="#1c2b24">EasyTool (Yuan et al., 2025), MCP-Zero (Fei et al., 2025), AnyTool (Du et al., 2024), CRAFT (Yuan et al., 2023),</text>
+<text x="350" y="128" font-size="14" fill="#1c2b24">MetaTool (Huang et al., 2023), ToolRegistry (Ding, 2025), ToolRet (Shi et al., 2025b)</text>
+<rect x="64" y="152" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="187.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Tool-Augmented Training</text>
+<text x="189.0" y="209.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Integration</text>
+<line x1="314" y1="192.5" x2="336" y2="192.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="152" width="838" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="178" font-size="14" fill="#1c2b24">Toolformer (Schick et al., 2023), Gorilla (Patil et al., 2024b), ToolLLM/ToolBench (Qin et al., 2024), ToolkenGPT (Hao</text>
+<text x="350" y="198" font-size="14" fill="#1c2b24">et al., 2023), CREATOR (Qian et al., 2023b), Agentic Code Reasoning (Ugare &amp; Chandra, 2026), LangChain</text>
+<text x="350" y="218" font-size="14" fill="#1c2b24">(LangChain, 2026c), Semantic Kernel (Microsoft, 2026), smolagents (Hugging Face, 2026)</text>
+<rect x="64" y="241" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="276.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Scalability and</text>
+<text x="189.0" y="298.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Session Management</text>
+<line x1="314" y1="281.5" x2="336" y2="281.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="241" width="838" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="267" font-size="14" fill="#1c2b24">ReAct (Yao et al., 2023), LLMCompiler (Kim et al., 2024), E2B (E2B, 2024), MCP Code Execution (Anthropic, 2025f),</text>
+<text x="350" y="287" font-size="14" fill="#1c2b24">BFCL (Patil et al., 2025), StableToolBench (Guo et al., 2024), API-Bank (Li et al., 2023b), TaskBench (Shen et al.,</text>
+<text x="350" y="307" font-size="14" fill="#1c2b24">2024)</text>
+</svg>

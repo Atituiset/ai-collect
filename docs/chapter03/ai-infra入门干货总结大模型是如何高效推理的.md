@@ -102,15 +102,15 @@ Embedding Lookup 本质上是一个查表操作，它将一维的 Token ID 数�
 
 #### 理论实现
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_0.png) 维度 | 权重矩阵 ![插图](../images/formulas/5b20ae69_formula_1.png) 维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 $X_{ids}$ 维度 | 权重矩阵 $W_{emb}$ 维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| Embedding | ![插图](../images/formulas/5b20ae69_formula_2.png) | `[batch_size, seq_len]` | `[V, hidden_size]` | `[batch_size, seq_len, hidden_size]` | 本质是索引取值，而非矩阵乘法 |
+| Embedding | $E = W_{emb}[X_{ids}]$ | `[batch_size, seq_len]` | `[V, hidden_size]` | `[batch_size, seq_len, hidden_size]` | 本质是索引取值，而非矩阵乘法 |
 
 #### vLLM中的实现
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_3.png)  维度 | 权重矩阵 ![插图](../images/formulas/5b20ae69_formula_4.png) 维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 $X_{ids}$  维度 | 权重矩阵 $W_{emb}$ 维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| Embedding | ![插图](../images/formulas/5b20ae69_formula_5.png) | `[num_sched_tokens]` | `[V, hidden_size]` | `[num_sched_tokens, hidden_size]` | Flattened 布局 |
+| Embedding | $E = W_{emb}[X_{ids}]$ | `[num_sched_tokens]` | `[V, hidden_size]` | `[num_sched_tokens, hidden_size]` | Flattened 布局 |
 
 将 Batch 中所有请求的有效 Token 拼接为一维长向量，彻底消除 Padding。
 
@@ -122,25 +122,25 @@ Embedding Lookup 本质上是一个查表操作，它将一维的 Token ID 数�
 
 为了保证大模型在神经网络中的数值稳定性，必须引入特征归一化（Normalization）机制。与传统 LayerNorm 要求同时缩放与平移不同，为了提升计算效率，现代大模型广泛为采用了 RMSNorm ：砍掉平移操作，仅沿特征维度对数据进行尺度缩放，能够有效防止前向传播中的方差膨胀与硬件数值溢出，从而极大缓解反向传播时的梯度异常（消失或爆炸）问题，为深层网络的稳定训练提供基础保障。
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_6.png) 维度 | 权重![插图](../images/formulas/5b20ae69_formula_7.png)维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 $X$ 维度 | 权重$W_{\mathrm{norm}}$维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| RMSNorm | ![插图](../images/formulas/5b20ae69_formula_8.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size]` | `[num_sched_tokens, hidden_size]` | ![插图](../images/formulas/5b20ae69_formula_9.png) 是一维向量而非矩阵，做的是逐通道缩放而非 GEMM |
+| RMSNorm | $y = \frac{x}{\mathrm{RMS}(x)} \odot W_{\mathrm{norm}}$ | `[num_sched_tokens, hidden_size]` | `[hidden_size]` | `[num_sched_tokens, hidden_size]` | $W_{\mathrm{norm}}$ 是一维向量而非矩阵，做的是逐通道缩放而非 GEMM |
 
 ##### Q/K/V Linear Proj - Fused QKV
 
-| 目标矩阵 | 计算公式 | 输入 X 维度 | 权重矩阵 ![插图](../images/formulas/5b20ae69_formula_10.png) 维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 X 维度 | 权重矩阵 $W_{qkv}$ 维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| Fused QKV | ![插图](../images/formulas/5b20ae69_formula_11.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size,qkv_proj_size]` | `[num_sched_tokens, qkv_proj_size]` | 权重按列拼接，执行单次宽矩阵 GEMM 4096 (Q) + 1024 (K) + 1024 (V) = 6144 |
+| Fused QKV | $QKV_{out} = X \cdot W_{qkv}$ | `[num_sched_tokens, hidden_size]` | `[hidden_size,qkv_proj_size]` | `[num_sched_tokens, qkv_proj_size]` | 权重按列拼接，执行单次宽矩阵 GEMM 4096 (Q) + 1024 (K) + 1024 (V) = 6144 |
 
 ##### Reshape & Cache
 
 | 目标矩阵 | Q, K, V Slice | RoPE(维度不变) | Multi-Head Reshape | **备注** |
 | --- | --- | --- | --- | --- |
-| Query (![插图](../images/formulas/5b20ae69_formula_12.png)) | `[num_sched_tokens, hidden_size]` | ![插图](../images/formulas/5b20ae69_formula_13.png) | `[num_sched_tokens,num_heads,head_dim]` | ![插图](../images/formulas/5b20ae69_formula_14.png) 前 4096 列 |
-| Key (![插图](../images/formulas/5b20ae69_formula_15.png)) | `[num_sched_tokens, kv_channels]` | ![插图](../images/formulas/5b20ae69_formula_16.png) | `[num_sched_tokens,num_kv_heads,head_dim]` | ![插图](../images/formulas/5b20ae69_formula_17.png) 中间 1024 列 |
-| Value (![插图](../images/formulas/5b20ae69_formula_18.png)) | `[num_sched_tokens, kv_channels]` |  | `[num_sched_tokens,num_kv_heads,head_dim]` | ![插图](../images/formulas/5b20ae69_formula_19.png) 最后 1024 列 |
+| Query ($Q$) | `[num_sched_tokens, hidden_size]` | $Q_{rope} = R_{pos} \cdot Q$ | `[num_sched_tokens,num_heads,head_dim]` | $QKV_{out}$ 前 4096 列 |
+| Key ($K$) | `[num_sched_tokens, kv_channels]` | $K_{rope} = R_{pos} \cdot K$ | `[num_sched_tokens,num_kv_heads,head_dim]` | $QKV_{out}$ 中间 1024 列 |
+| Value ($V$) | `[num_sched_tokens, kv_channels]` |  | `[num_sched_tokens,num_kv_heads,head_dim]` | $QKV_{out}$ 最后 1024 列 |
 
-注：![插图](../images/formulas/5b20ae69_formula_20.png)是一个块对角旋转矩阵，实际实现中通过元素级 sin/cos 运算避免矩阵乘法。
+注：$R_{pos}$是一个块对角旋转矩阵，实际实现中通过元素级 sin/cos 运算避免矩阵乘法。
 
 这个阶段的大概流程： QKV 按列拆分 -> 对Q、K进行RoPE计算 -> Q、K、V Reshape多头视角  -> 然后reshape\_and\_cache按照slot\_mapping Scatter写入Paged KVCache。
 
@@ -148,9 +148,9 @@ RoPE 的核心思想就是：**用旋转的角度来代表 Token 的位置**。 
 
 ##### Attention (FlashAttention, Scaled Dot-Product Attention)
 
-![插图](../images/formulas/5b20ae69_formula_21.png) 读取请求对应 KV Cache 进行 FlashAttention 计算。
+$\text{Attention}(Q, K, V) = \text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)V$ 读取请求对应 KV Cache 进行 FlashAttention 计算。
 
-> Softmax 的核心原理可以用一句话概括：将一组任意的实数（通常称为 Logits），转化为一套总和为 1 的概率分布，同时放大差异。ps: 这里的![插图](../images/formulas/5b20ae69_formula_22.png)为head\_dim。
+> Softmax 的核心原理可以用一句话概括：将一组任意的实数（通常称为 Logits），转化为一套总和为 1 的概率分布，同时放大差异。ps: 这里的$d_k$为head\_dim。
 
 感觉Attention的逻辑是整个LLM推理最复杂的地方了：
 
@@ -168,17 +168,17 @@ Q的Shape为`[query_lens, num_heads, head_dim]`，query\_lens是本次Q对应的
 | 操作名称 | 数学公式 | 逻辑说明 / 目的 |
 | --- | --- | --- |
 | GQA分组共享 | 1 KV Head 映射给 4 Q Head | 把KV的Shape从`[seq_lens, num_kv_heads, head_dim]`变为`[seq_lens, num_heads, head_dim]` 逻辑上等价于将1个KV Head的数据广播给4个Q Head；物理实现中通过索引映射kv\_head\_idx = q\_head\_idx // (num\_heads // num\_kv\_heads)避免显存复制。 |
-| Q-K Dot Product | ![插图](../images/formulas/5b20ae69_formula_23.png) | 查询Query和该请求所有Key的点积，注意力原始分数。->`[query_lens, num_heads, seq_lens]` |
-| Scale | ![插图](../images/formulas/5b20ae69_formula_24.png) | 对原始分数进行数值缩放（![插图](../images/formulas/5b20ae69_formula_25.png) 为向量维度），防止 Softmax 函数进入梯度极小的区域。 |
-| Mask | ![插图](../images/formulas/5b20ae69_formula_26.png) | 注入因果逻辑，通过加上掩码矩阵 ![插图](../images/formulas/5b20ae69_formula_27.png)（通常将未来位置设为 ![插图](../images/formulas/5b20ae69_formula_28.png)），阻止模型“看到”未来的信息。 |
-| Softmax | ![插图](../images/formulas/5b20ae69_formula_29.png) | 将处理后的分数转化为总和为 1 的注意力权重（概率）。->`[query_lens, num_heads, seq_lens]` |
-| MatMul | ![插图](../images/formulas/5b20ae69_formula_30.png) | 根据注意力权重 ![插图](../images/formulas/5b20ae69_formula_31.png) 对值向量（Value）进行加权求和，得到最终的**输出特征表示**。 V的Shape为`[seq_lens, num_heads, head_dim]`   -> `[query_lens, num_heads, head_dim]` |
+| Q-K Dot Product | $S = Q \times K^T$ | 查询Query和该请求所有Key的点积，注意力原始分数。->`[query_lens, num_heads, seq_lens]` |
+| Scale | $S = S / \sqrt{d}$ | 对原始分数进行数值缩放（$d$ 为向量维度），防止 Softmax 函数进入梯度极小的区域。 |
+| Mask | $S = S + M$ | 注入因果逻辑，通过加上掩码矩阵 $M$（通常将未来位置设为 $-\infty$），阻止模型“看到”未来的信息。 |
+| Softmax | $P = \mathrm{softmax}(S)$ | 将处理后的分数转化为总和为 1 的注意力权重（概率）。->`[query_lens, num_heads, seq_lens]` |
+| MatMul | $O = P \times V$ | 根据注意力权重 $P$ 对值向量（Value）进行加权求和，得到最终的**输出特征表示**。 V的Shape为`[seq_lens, num_heads, head_dim]`   -> `[query_lens, num_heads, head_dim]` |
 
-Attention 的数学逻辑非常清晰，但在大模型推理（尤其是长文本 Prefill 阶段）中，如果严格按照数学公式分步执行，会在 GPU 的 HBM（全局显存）中产生庞大的中间矩阵 ![插图](../images/formulas/5b20ae69_formula_32.png)（注意力分数）和 ![插图](../images/formulas/5b20ae69_formula_33.png)（Softmax概率），其 ![插图](../images/formulas/5b20ae69_formula_34.png) 的内存访问量会严重影响性能，即所谓的内存墙问题。
+Attention 的数学逻辑非常清晰，但在大模型推理（尤其是长文本 Prefill 阶段）中，如果严格按照数学公式分步执行，会在 GPU 的 HBM（全局显存）中产生庞大的中间矩阵 $S$（注意力分数）和 $P$（Softmax概率），其 $\mathcal{O}(N^2)$ 的内存访问量会严重影响性能，即所谓的内存墙问题。
 
 为了打破这个瓶颈，vLLM 默认采用 FlashAttention 及其变体（如 Flash-Decoding）。FlashAttention 的核心思想是 Kernel 融合 (Kernel Fusion) 与 分块计算 (Tiling)。但分块计算面临一个致命的数学障碍：Softmax 操作需要知道全局的最大值和指数和才能计算，这通常要求完整的中间矩阵驻留在显存中。FlashAttention 巧妙地引入了 **Online Softmax** 算法，通过维护局部的当前最大值（Running Max）和当前指数和（Running Sum），并在读入新块时利用动态缩放因子（Rescaling Factor）对旧结果进行修正。
 
-正是凭借 Online Softmax，FlashAttention 成功解除了全局数据依赖，将从 Q-K 点积、Softmax 到乘 V 的整个逻辑步骤，融合成了一个单一的 CUDA Kernel。在物理执行上，它一块一块地在 SRAM 中完成计算，彻底避免了将庞大的中间矩阵 ![插图](../images/formulas/5b20ae69_formula_35.png) 和 ![插图](../images/formulas/5b20ae69_formula_36.png) 读写 HBM，从而大幅打破了内存墙限制。
+正是凭借 Online Softmax，FlashAttention 成功解除了全局数据依赖，将从 Q-K 点积、Softmax 到乘 V 的整个逻辑步骤，融合成了一个单一的 CUDA Kernel。在物理执行上，它一块一块地在 SRAM 中完成计算，彻底避免了将庞大的中间矩阵 $S$ 和 $P$ 读写 HBM，从而大幅打破了内存墙限制。
 
 ![图片](../images/5b20ae69_640_7_.webp)
 
@@ -203,7 +203,7 @@ Decode阶段，seq\_lens为已计算的历史 token 总数， query\_lens为1。
 
 而 Continuous Batching 的价值在于在Prefill实现请求内复用模型权重的基础上，进一步通过token-level的调度让多个请求复用模型权重，将 QKV\_Proj、O\_Proj、MLP 重新变回矩阵乘法，极大地摊薄了读取权重的显存开销。
 
-但是Attention则比较特殊，由于每个请求必须读取自己独占的 KV Cache（无法跨请求共享），而且Decode每次只处理一个 Token，Attention 计算始终无法均摊访存开销。此外，由于当前 Query 必须与所有历史 Key/Value 交互，哪怕有KVCache的存在，其计算与访存量也是随着上下文长度 ![插图](../images/formulas/5b20ae69_formula_37.png) 呈 ![插图](../images/formulas/5b20ae69_formula_38.png) 线性膨胀。这里特别注意其实Prefill阶段每次处理num\_prompt\_tokens个Token，Attention 计算是可以均摊访存开销的。
+但是Attention则比较特殊，由于每个请求必须读取自己独占的 KV Cache（无法跨请求共享），而且Decode每次只处理一个 Token，Attention 计算始终无法均摊访存开销。此外，由于当前 Query 必须与所有历史 Key/Value 交互，哪怕有KVCache的存在，其计算与访存量也是随着上下文长度 $L$ 呈 $O(L)$ 线性膨胀。这里特别注意其实Prefill阶段每次处理num\_prompt\_tokens个Token，Attention 计算是可以均摊访存开销的。
 
 ps: 所以其实我们日常所说的Prefill是Compute-bound，Decode是Memory-bound，主要是基于 1. 从 HBM 读取模型权重的访存摊销， 2. 从 HBM 读取模型KV的访存摊销。
 
@@ -215,17 +215,17 @@ ps: 所以其实我们日常所说的Prefill是Compute-bound，Decode是Memory-b
 
 ##### O\_Proj - 线性融合 (Output Projection)
 
-| **目标矩阵** | **计算公式** | **输入 ![插图](../images/formulas/5b20ae69_formula_39.png)维度** | **权重矩阵 ![插图](../images/formulas/5b20ae69_formula_40.png) 维度** | **输出结果维度** | **备注** |
+| **目标矩阵** | **计算公式** | **输入 $X_{concat}$维度** | **权重矩阵 $W_o$ 维度** | **输出结果维度** | **备注** |
 | --- | --- | --- | --- | --- | --- |
-| O\_Proj | ![插图](../images/formulas/5b20ae69_formula_41.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size, hidden_size]` | `[num_sched_tokens, hidden_size]` | 跨 Head 的信息交互与融合。这也是一次标准的稠密矩阵乘法（GEMM / GEMV）。 |
+| O\_Proj | $O_{out} = X_{concat} \cdot W_o$ | `[num_sched_tokens, hidden_size]` | `[hidden_size, hidden_size]` | `[num_sched_tokens, hidden_size]` | 跨 Head 的信息交互与融合。这也是一次标准的稠密矩阵乘法（GEMM / GEMV）。 |
 
 ##### Residual Connection
 
 不要推翻重来，而是在原有的基础上学习“修正值”（Delta）。如果没有 ResNet 证明网络可以堆到 100 层以上且不梯度消失，后来的 BERT (24层) 和 GPT (96层+) 根本不敢设计得那么深。**它是“Scaling Law”在架构上的物理基础。**
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_42.png) 维度 | 输入 ![插图](../images/formulas/5b20ae69_formula_43.png) 维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 $X_{orig}$ 维度 | 输入 $O_{out}$ 维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| **Residual Add** | ![插图](../images/formulas/5b20ae69_formula_44.png) | `[num_sched_tokens, hidden_size]` | `[num_sched_tokens, hidden_size]` | `[num_sched_tokens, hidden_size]` | ![插图](../images/formulas/5b20ae69_formula_45.png) 是**进入这一层 RMSNorm 之前**的原始输入。将注意力机制提取的新特征“加回”主干数据流中。 |
+| **Residual Add** | $X = X_{orig} + O_{out}$ | `[num_sched_tokens, hidden_size]` | `[num_sched_tokens, hidden_size]` | `[num_sched_tokens, hidden_size]` | $X_{orig}$ 是**进入这一层 RMSNorm 之前**的原始输入。将注意力机制提取的新特征“加回”主干数据流中。 |
 
 实际vLLM中，Residual Add会和下一步的RMSNorm融合成一个 CUDA kernel。
 
@@ -233,7 +233,7 @@ ps: 所以其实我们日常所说的Prefill是Compute-bound，Decode是Memory-b
 
 ##### RMSNorm
 
-对 ![插图](../images/formulas/5b20ae69_formula_46.png) 再进行一次归一化。在 vLLM 中，通常与上一层残差相加（Residual Add）融合，减少 HBM 读写。
+对 $x$ 再进行一次归一化。在 vLLM 中，通常与上一层残差相加（Residual Add）融合，减少 HBM 读写。
 
 ##### Gate\_Proj & Up\_Proj
 
@@ -241,16 +241,16 @@ ps: 所以其实我们日常所说的Prefill是Compute-bound，Decode是Memory-b
 
 | 目标矩阵 | 计算公式 | 输入 X 维度 | 权重 W 维度 | 输出维度 |
 | --- | --- | --- | --- | --- |
-| Gate Proj | ![插图](../images/formulas/5b20ae69_formula_47.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size, intermediate_size]` | `[num_sched_tokens, intermediate_size]` |
-| Up Proj | ![插图](../images/formulas/5b20ae69_formula_48.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size, intermediate_size]` | `[num_sched_tokens, intermediate_size]` |
+| Gate Proj | $X_{gate} = X \cdot W_{gate}$ | `[num_sched_tokens, hidden_size]` | `[hidden_size, intermediate_size]` | `[num_sched_tokens, intermediate_size]` |
+| Up Proj | $X_{up} = X \cdot W_{up}$ | `[num_sched_tokens, hidden_size]` | `[hidden_size, intermediate_size]` | `[num_sched_tokens, intermediate_size]` |
 
 vLLM 工程实现（Fused Gate/Up）
 
-为了减少 GPU 核函数启动（Kernel Launch）次数并充分利用内存带宽，vLLM 在加载模型时会将 ![插图](../images/formulas/5b20ae69_formula_49.png) 和 ![插图](../images/formulas/5b20ae69_formula_50.png) 按列拼接。这样原本两次中等规模的矩阵乘法，就变成了一次宽矩阵 GEMM。
+为了减少 GPU 核函数启动（Kernel Launch）次数并充分利用内存带宽，vLLM 在加载模型时会将 $W_{gate}$ 和 $W_{up}$ 按列拼接。这样原本两次中等规模的矩阵乘法，就变成了一次宽矩阵 GEMM。
 
 | 目标矩阵 | 计算公式 | 输入 X 维度 | 权重 Wgate\_up 维度 | 输出维度 |
 | --- | --- | --- | --- | --- |
-| Fused Gate/Up | ![插图](../images/formulas/5b20ae69_formula_51.png) | `[num_sched_tokens, hidden_size]` | `[hidden_size, 2*intermediate_size]` | `[num_sched_tokens, 2*intermediate_size]` |
+| Fused Gate/Up | $X_{fused} = X \cdot W_{gate\_up}$ | `[num_sched_tokens, hidden_size]` | `[hidden_size, 2*intermediate_size]` | `[num_sched_tokens, 2*intermediate_size]` |
 
 #### Activation
 
@@ -258,13 +258,13 @@ vLLM 工程实现（Fused Gate/Up）
 
 | 操作名称 | 数学公式 | 物理实现说明 |
 | --- | --- | --- |
-| Slice & Act | ![插图](../images/formulas/5b20ae69_formula_52.png) | ![插图](../images/formulas/5b20ae69_formula_53.png) 为 ![插图](../images/formulas/5b20ae69_formula_54.png) 前一半，![插图](../images/formulas/5b20ae69_formula_55.png) 为后一半。 |
+| Slice & Act | $X_{act} = \mathrm{SiLU}(X_{gate}) \otimes X_{up}$ | $X_{gate}$ 为 $X_{fused}$ 前一半，$X_{up}$ 为后一半。 |
 
 ##### Down\_Proj
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_56.png) 维度 | 权重 ![插图](../images/formulas/5b20ae69_formula_57.png) 维度 | 输出结果维度 |
+| 目标矩阵 | 计算公式 | 输入 $X_{act}$ 维度 | 权重 $W_{down}$ 维度 | 输出结果维度 |
 | --- | --- | --- | --- | --- |
-| Down Proj | ![插图](../images/formulas/5b20ae69_formula_58.png) | `[num_sched_tokens, intermediate_size]` | `[intermediate_size, hidden_size]` | `[num_sched_tokens, hidden_size]` |
+| Down Proj | $O_{ffn} = X_{act} \cdot W_{down}$ | `[num_sched_tokens, intermediate_size]` | `[intermediate_size, hidden_size]` | `[num_sched_tokens, hidden_size]` |
 
 ##### Residual Connection
 
@@ -298,8 +298,8 @@ class LlamaMLP(nn.Module):
 >
 > 如果只需要最后一个 token 的生成结果，那么在最后一层（Last Layer）：
 >
-> 1. 必须要算的部分：所有 token 的 ![插图](../images/formulas/5b20ae69_formula_59.png) 和 ![插图](../images/formulas/5b20ae69_formula_60.png)（因为这层的 KV cache 要存下来，供后续 Decode 阶段使用）。
-> 2. 理论上可以只算最后一个 token：![插图](../images/formulas/5b20ae69_formula_61.png) 的投影、Attention 的计算（其实退化成了 Decode 阶段的 Flash-Decoding 计算）、LayerNorm、以及庞大的 MLP。
+> 1. 必须要算的部分：所有 token 的 $K$ 和 $V$（因为这层的 KV cache 要存下来，供后续 Decode 阶段使用）。
+> 2. 理论上可以只算最后一个 token：$Q$ 的投影、Attention 的计算（其实退化成了 Decode 阶段的 Flash-Decoding 计算）、LayerNorm、以及庞大的 MLP。
 
 但是vLLM中最后一层还是老老实实把所有 query\_lens 都算了一遍，本质上是工程与物理极限的 Trade-off。
 
@@ -309,9 +309,9 @@ class LlamaMLP(nn.Module):
 
 #### Linear (LM Head)
 
-| 目标矩阵 | 计算公式 | 输入 ![插图](../images/formulas/5b20ae69_formula_62.png) 维度 | 权重矩阵 ![插图](../images/formulas/5b20ae69_formula_63.png) 维度 | 输出结果维度 | 备注 |
+| 目标矩阵 | 计算公式 | 输入 $X_{last}$ 维度 | 权重矩阵 $W_{lm}$ 维度 | 输出结果维度 | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| **LM Head** | ![插图](../images/formulas/5b20ae69_formula_64.png) | `[num_reqs, hidden_size]` | `[hidden_size, vocab_size]` | `[num_reqs, vocab_size]` | `num_reqs` 即当前 Batch 中的请求数量。 以 Llama-3-8B 为例，`vocab_size` 高达 128256，这是一个极庞大的矩阵，vLLM 通常会使用张量并行（TP）按列切分该权重以加速计算。 |
+| **LM Head** | $\text{Logits} = X_{last} \cdot W_{lm}$ | `[num_reqs, hidden_size]` | `[hidden_size, vocab_size]` | `[num_reqs, vocab_size]` | `num_reqs` 即当前 Batch 中的请求数量。 以 Llama-3-8B 为例，`vocab_size` 高达 128256，这是一个极庞大的矩阵，vLLM 通常会使用张量并行（TP）按列切分该权重以加速计算。 |
 
 ### Sampling
 
@@ -365,32 +365,32 @@ def sampling_type(self) -> SamplingType:
 
 1. Greedy 先行：在 temperature 缩放之前，先对当前 logits 执行一次 `argmax`，保存为 `greedy_sampled`。
 
-- 如果整个 batch **全是 greedy**（所有请求的 ![插图](../images/formulas/5b20ae69_formula_65.png)），到这里就直接返回，后续步骤全部跳过。
+- 如果整个 batch **全是 greedy**（所有请求的 $T \approx 0$），到这里就直接返回，后续步骤全部跳过。
 - 这一步必须在 temperature 之前做，否则 greedy 请求的 logits 会被不必要地除以 temperature 导致精度损失。
 
 2. Temperature Scaling：`Logits = Logits / Temperature`。
 
-   > ![插图](../images/formulas/5b20ae69_formula_66.png): 拉大分数差距。高分越明显，低分被压得更低。模型变得**保守、确定**。![插图](../images/formulas/5b20ae69_formula_67.png): 缩小分数差距。分布趋向均匀。模型变得**随机、有创造力**（但也容易胡说八道）。
+   > $T < 1$: 拉大分数差距。高分越明显，低分被压得更低。模型变得**保守、确定**。$T > 1$: 缩小分数差距。分布趋向均匀。模型变得**随机、有创造力**（但也容易胡说八道）。
    >
-   > 对于 ![插图](../images/formulas/5b20ae69_formula_68.png)的 greedy 请求，此处会用 ![插图](../images/formulas/5b20ae69_formula_69.png) 跳过除法（避免除以零），它们的最终结果由 Step 1 的 `greedy_sampled` 决定。
+   > 对于 $T < 10^{-5}$的 greedy 请求，此处会用 $T = 1$ 跳过除法（避免除以零），它们的最终结果由 Step 1 的 `greedy_sampled` 决定。
 3. Argmax-invariant Processors（如 min\_p）：
 
-   min\_p是目前唯一的 argmax-invariant 处理器。其规则为：概率不到token最高概率的 min\_p倍的 token，全部淘汰。>公式：阈值 = ![插图](../images/formulas/5b20ae69_formula_70.png)，低于阈值的 token 得分设为 ![插图](../images/formulas/5b20ae69_formula_71.png)。
+   min\_p是目前唯一的 argmax-invariant 处理器。其规则为：概率不到token最高概率的 min\_p倍的 token，全部淘汰。>公式：阈值 = $p_{top} \times min\_p$，低于阈值的 token 得分设为 $-\infty$。
 
-   > 示例（`min_p = 0.1`，![插图](../images/formulas/5b20ae69_formula_72.png)，阈值 = 0.04）：
+   > 示例（`min_p = 0.1`，$p_{top} = 0.40$，阈值 = 0.04）：
    >
    > ![图片](../images/5b20ae69_640_10_.webp)
    >
    > min\_p 的核心价值在于**自适应**：
    >
-   > 最高概率的 token 自身永远不会被砍（因为 ![插图](../images/formulas/5b20ae69_formula_73.png)），所以 argmax 结果不变。
+   > 最高概率的 token 自身永远不会被砍（因为 $p_{top} \times min\_p < p_{top}$），所以 argmax 结果不变。
 
-- 模型很确定时（![插图](../images/formulas/5b20ae69_formula_74.png)）：阈值 = 0.09，砍得多，几乎只剩最优解。
-- 模型不确定时（![插图](../images/formulas/5b20ae69_formula_75.png)）：阈值 = 0.008，砍得少，保留充分的探索空间。
+- 模型很确定时（$p_{top} = 0.90$）：阈值 = 0.09，砍得多，几乎只剩最优解。
+- 模型不确定时（$p_{top} = 0.08$）：阈值 = 0.008，砍得少，保留充分的探索空间。
 
-4. Top-K 截断：只保留分数最高的 ![插图](../images/formulas/5b20ae69_formula_76.png) 个 Token，其余得分全部设为 ![插图](../images/formulas/5b20ae69_formula_77.png)。
-5. Top-P  Masking：按分数从高到低排序并累加 softmax 概率，保留累积概率刚好超过 ![插图](../images/formulas/5b20ae69_formula_78.png) 的前若干 Token，尾部 Token 得分设为 ![插图](../images/formulas/5b20ae69_formula_79.png)。
-6. Softmax + Gumbel-Max 采样  确保结果的随机性         公式： ![插图](../images/formulas/5b20ae69_formula_80.png)，其中![插图](../images/formulas/5b20ae69_formula_81.png)
+4. Top-K 截断：只保留分数最高的 $K$ 个 Token，其余得分全部设为 $-\infty$。
+5. Top-P  Masking：按分数从高到低排序并累加 softmax 概率，保留累积概率刚好超过 $P$ 的前若干 Token，尾部 Token 得分设为 $-\infty$。
+6. Softmax + Gumbel-Max 采样  确保结果的随机性         公式： $\mathrm{argmax}_i \frac{p_i}{q_i}$，其中$q_i \sim \mathrm{Exp}(1)$
 
    Gumbel-Max 用加噪求最大值替代了传统的轮盘赌算法。它将原本需要串行计算前缀和的采样过程，转化为完全独立的 element-wise 并行运算，打破了超大词表下的全局数据依赖。
 
@@ -440,10 +440,10 @@ output得到 `Next Token ID`，并将其追加到 Input 序列中，进入下�
 | hidden\_size | 4096 | 隐藏层总维度，也是 Q 向量的总宽度。 |
 | num\_heads/num\_q\_heads | 32 | Query 的头数。决定了注意力机制的并行度。 |
 | num\_kv\_heads | 8 | Key/Value 的头数。GQA 架构中用于压缩缓存。 |
-| head\_dim/head\_size | 128 | 单个头的维度。公式 ![插图](../images/formulas/5b20ae69_formula_82.png) 中的 ![插图](../images/formulas/5b20ae69_formula_83.png)。 |
+| head\_dim/head\_size | 128 | 单个头的维度。公式 $\sqrt{d_k}$ 中的 $d_k$。 |
 | kv\_channels/kv\_dim | 1024 | 单侧（K 或 V）矩阵的总宽度 (`num_kv_heads*head_dim`)。 |
 | qkv\_proj\_size | 6144 | Fused QKV 层的输出总宽度 (`hidden_size + kv_channels*2`)。 |
-| intermediate\_size | 14336 | FFN 内部升维后的维度（通常为 ![插图](../images/formulas/5b20ae69_formula_84.png)）。 |
+| intermediate\_size | 14336 | FFN 内部升维后的维度（通常为 $H \times 8/3$）。 |
 | fused\_ffn\_size/gate\_up\_proj\_size | 28672 | Fused Gate/Up 层的输出总宽度 (`intermediate_size*2`)。 |
 | vocab\_size | 128256 | 词表大小。决定了 LM Head 的输出矩阵尺寸。 |
 | num\_hidden\_layers | 32 | Transformer Block 的层数。 |

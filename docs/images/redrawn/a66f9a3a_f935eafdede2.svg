@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1026 508" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1026" height="508" fill="#faf9f6"/>
+  <rect x="12" y="12" width="1002" height="484" rx="48" fill="none" stroke="#2e7d5b" stroke-width="5"/>
+  <g fill="#ffffff" stroke="#1c2b24" stroke-width="3">
+    <rect x="62" y="55" width="200" height="110" rx="14"/>
+    <rect x="295" y="55" width="200" height="110" rx="14"/>
+    <rect x="528" y="55" width="200" height="110" rx="14"/>
+    <rect x="761" y="55" width="200" height="110" rx="14"/>
+    <rect x="62" y="199" width="200" height="110" rx="14"/>
+    <rect x="295" y="199" width="200" height="110" rx="14"/>
+    <rect x="528" y="199" width="200" height="110" rx="14"/>
+    <rect x="761" y="199" width="200" height="110" rx="14"/>
+    <rect x="62" y="343" width="200" height="110" rx="14"/>
+    <rect x="295" y="343" width="200" height="110" rx="14"/>
+    <rect x="528" y="343" width="200" height="110" rx="14"/>
+    <rect x="761" y="343" width="200" height="110" rx="14"/>
+  </g>
+  <g fill="#1c2b24" font-size="40" text-anchor="middle">
+    <text x="162" y="125">关键岗位</text>
+    <text x="395" y="125">职级</text>
+    <text x="628" y="125">股票</text>
+    <text x="861" y="125">期权</text>
+    <text x="162" y="269">口头嘉奖</text>
+    <text x="395" y="269">奖金</text>
+    <text x="628" y="269">加薪</text>
+    <text x="861" y="269">稀缺培训</text>
+    <text x="162" y="413">关键项目</text>
+    <text x="395" y="413">关键信息</text>
+    <text x="628" y="413">市场价值</text>
+    <text x="861" y="418">…</text>
+  </g>
+</svg>

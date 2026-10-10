@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 638" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <defs>
+    <marker id="arr4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c2b24"/>
+    </marker>
+  </defs>
+  <rect width="1080" height="638" fill="#faf9f6"/>
+
+  <!-- ===== left: mini transformer ===== -->
+  <text x="292" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#1c2b24">Output</text>
+  <text x="292" y="96" text-anchor="middle" font-size="14" font-weight="bold" fill="#1c2b24">Probabilities</text>
+  <rect x="245" y="104" width="100" height="24" rx="4" fill="#e4ddf3" stroke="#1c2b24"/>
+  <text x="295" y="120" text-anchor="middle" font-size="12" fill="#1c2b24">Softmax</text>
+  <line x1="295" y1="137" x2="295" y2="130" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+  <rect x="245" y="137" width="100" height="24" rx="4" fill="#d3e7f2" stroke="#1c2b24"/>
+  <text x="295" y="153" text-anchor="middle" font-size="12" fill="#1c2b24">Linear</text>
+
+  <!-- decoder -->
+  <rect x="205" y="167" width="155" height="303" rx="10" fill="#fdf3d7" stroke="#b08642" stroke-width="1.6"/>
+  <rect x="220" y="175" width="125" height="24" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="191" text-anchor="middle" font-size="11" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="220" y="207" width="125" height="40" rx="4" fill="#cfe4f2" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="223" text-anchor="middle" font-size="11" fill="#1c2b24">Feed</text>
+  <text x="282" y="238" text-anchor="middle" font-size="11" fill="#1c2b24">Forward</text>
+  <rect x="220" y="255" width="125" height="24" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="271" text-anchor="middle" font-size="11" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="220" y="287" width="125" height="40" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="303" text-anchor="middle" font-size="11" fill="#1c2b24">Multi-Head</text>
+  <text x="282" y="318" text-anchor="middle" font-size="11" fill="#1c2b24">Attention</text>
+  <rect x="220" y="335" width="125" height="24" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="351" text-anchor="middle" font-size="11" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="220" y="367" width="125" height="52" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="1"/>
+  <text x="282" y="383" text-anchor="middle" font-size="11" fill="#1c2b24">Masked</text>
+  <text x="282" y="397" text-anchor="middle" font-size="11" fill="#1c2b24">Multi-Head</text>
+  <text x="282" y="411" text-anchor="middle" font-size="11" fill="#1c2b24">Attention</text>
+  <text x="368" y="330" font-size="14" font-style="italic" fill="#1c2b24">N×</text>
+  <!-- decoder residuals -->
+  <path d="M335,419 H353 V347 H346" fill="none" stroke="#1c2b24" stroke-width="1.1" marker-end="url(#arr4)"/>
+  <path d="M335,287 H353 V267 H346" fill="none" stroke="#1c2b24" stroke-width="1.1" marker-end="url(#arr4)"/>
+  <path d="M335,207 H353 V187 H346" fill="none" stroke="#1c2b24" stroke-width="1.1" marker-end="url(#arr4)"/>
+  <line x1="282" y1="167" x2="282" y2="163" stroke="#1c2b24" stroke-width="1.4"/>
+  <line x1="282" y1="470" x2="282" y2="423" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+
+  <!-- encoder -->
+  <rect x="45" y="240" width="155" height="230" rx="10" fill="#fdf3d7" stroke="#b08642" stroke-width="1.6"/>
+  <rect x="60" y="250" width="125" height="24" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="1"/>
+  <text x="122" y="266" text-anchor="middle" font-size="11" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="60" y="282" width="125" height="40" rx="4" fill="#cfe4f2" stroke="#1c2b24" stroke-width="1"/>
+  <text x="122" y="298" text-anchor="middle" font-size="11" fill="#1c2b24">Feed</text>
+  <text x="122" y="313" text-anchor="middle" font-size="11" fill="#1c2b24">Forward</text>
+  <rect x="60" y="330" width="125" height="24" rx="4" fill="#fbf1cd" stroke="#1c2b24" stroke-width="1"/>
+  <text x="122" y="346" text-anchor="middle" font-size="11" fill="#1c2b24">Add &amp; Norm</text>
+  <rect x="60" y="362" width="125" height="52" rx="4" fill="#f2e2f4" stroke="#1c2b24" stroke-width="1"/>
+  <text x="122" y="382" text-anchor="middle" font-size="11" fill="#1c2b24">Multi-Head</text>
+  <text x="122" y="397" text-anchor="middle" font-size="11" fill="#1c2b24">Attention</text>
+  <text x="30" y="360" font-size="14" font-style="italic" fill="#1c2b24">N×</text>
+  <!-- encoder residuals -->
+  <path d="M175,414 H193 V342 H186" fill="none" stroke="#1c2b24" stroke-width="1.1" marker-end="url(#arr4)"/>
+  <path d="M175,282 H193 V262 H186" fill="none" stroke="#1c2b24" stroke-width="1.1" marker-end="url(#arr4)"/>
+  <line x1="122" y1="470" x2="122" y2="418" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+
+  <!-- cross connection -->
+  <path d="M122,240 L122,222 L282,222 L282,283" fill="none" stroke="#2e7d5b" stroke-width="1.6" marker-end="url(#arr4)"/>
+
+  <!-- positional encoding circles -->
+  <text x="8" y="498" font-size="11" font-weight="bold" fill="#1c2b24">Positional</text>
+  <text x="8" y="513" font-size="11" font-weight="bold" fill="#1c2b24">Encoding</text>
+  <circle cx="85" cy="505" r="14" fill="#fff" stroke="#1c2b24" stroke-width="1.3"/>
+  <path d="M74,505 q5,-9 11,0 q5,9 11,0" fill="none" stroke="#1c2b24" stroke-width="1.4"/>
+  <circle cx="122" cy="505" r="11" fill="#fff" stroke="#1c2b24" stroke-width="1.3"/>
+  <path d="M122,499 L122,511 M116,505 L128,505" stroke="#1c2b24" stroke-width="1.6"/>
+  <line x1="99" y1="505" x2="110" y2="505" stroke="#1c2b24" stroke-width="1.3"/>
+
+  <circle cx="262" cy="505" r="11" fill="#fff" stroke="#1c2b24" stroke-width="1.3"/>
+  <path d="M262,499 L262,511 M256,505 L268,505" stroke="#1c2b24" stroke-width="1.6"/>
+  <circle cx="300" cy="505" r="14" fill="#fff" stroke="#1c2b24" stroke-width="1.3"/>
+  <path d="M289,505 q5,-9 11,0 q5,9 11,0" fill="none" stroke="#1c2b24" stroke-width="1.4"/>
+  <line x1="273" y1="505" x2="285" y2="505" stroke="#1c2b24" stroke-width="1.3"/>
+  <text x="322" y="498" font-size="11" font-weight="bold" fill="#1c2b24">Positional</text>
+  <text x="322" y="513" font-size="11" font-weight="bold" fill="#1c2b24">Encoding</text>
+
+  <!-- embeddings -->
+  <rect x="55" y="538" width="135" height="34" rx="5" fill="#f2e2f4" stroke="#1c2b24" stroke-width="1.2"/>
+  <text x="122" y="552" text-anchor="middle" font-size="11" fill="#1c2b24">Input</text>
+  <text x="122" y="566" text-anchor="middle" font-size="11" fill="#1c2b24">Embedding</text>
+  <line x1="122" y1="538" x2="122" y2="518" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+  <line x1="122" y1="598" x2="122" y2="574" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+  <text x="122" y="614" text-anchor="middle" font-size="13" font-weight="bold" fill="#1c2b24">Inputs</text>
+
+  <rect x="215" y="538" width="135" height="34" rx="5" fill="#f2e2f4" stroke="#1c2b24" stroke-width="1.2"/>
+  <text x="282" y="552" text-anchor="middle" font-size="11" fill="#1c2b24">Output</text>
+  <text x="282" y="566" text-anchor="middle" font-size="11" fill="#1c2b24">Embedding</text>
+  <line x1="262" y1="538" x2="262" y2="518" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+  <line x1="282" y1="598" x2="282" y2="574" stroke="#1c2b24" stroke-width="1.4" marker-end="url(#arr4)"/>
+  <text x="282" y="612" text-anchor="middle" font-size="13" font-weight="bold" fill="#1c2b24">Outputs</text>
+  <text x="282" y="628" text-anchor="middle" font-size="11" fill="#1c2b24">(shifted right)</text>
+
+  <!-- ===== right: formulation ===== -->
+  <text x="720" y="42" text-anchor="middle" font-size="18" font-weight="bold" fill="#2e7d5b">Formulation for Positional Encoding</text>
+  <text x="440" y="78" font-size="18" font-style="italic" fill="#1c2b24">PE<tspan dy="4" font-size="12">(pos,2i)</tspan><tspan dy="-4"> = sin(pos / 10000</tspan><tspan dy="-7" font-size="12">2i/d</tspan><tspan dy="3" font-size="9">model</tspan><tspan dy="4">)</tspan></text>
+  <text x="440" y="110" font-size="18" font-style="italic" fill="#1c2b24">PE<tspan dy="4" font-size="12">(pos,2i+1)</tspan><tspan dy="-4"> = cos(pos / 10000</tspan><tspan dy="-7" font-size="12">2i/d</tspan><tspan dy="3" font-size="9">model</tspan><tspan dy="4">)</tspan></text>
+
+  <!-- table row 1: input encoding -->
+  <g stroke="#1c2b24" stroke-width="1.2" fill="#ffffff">
+    <rect x="400" y="150" width="131" height="52"/>
+    <rect x="531" y="150" width="131" height="52"/>
+    <rect x="662" y="150" width="131" height="52"/>
+    <rect x="793" y="150" width="131" height="52"/>
+    <rect x="924" y="150" width="131" height="52"/>
+  </g>
+  <g font-style="italic" fill="#1c2b24">
+    <!-- cell 1: cos, 2/5 -->
+    <text x="418" y="166" font-size="12">e<tspan dy="2" font-size="9">1</tspan><tspan dy="-2"> +</tspan></text>
+    <text x="408" y="192" font-size="13">cos(</text>
+    <text x="445" y="172" font-size="11">n</text>
+    <line x1="438" y1="176" x2="478" y2="176" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="438" y="192" font-size="10">10000<tspan dy="-4" font-size="8">2/5</tspan></text>
+    <text x="482" y="192" font-size="13">)</text>
+    <!-- cell 2: sin, 4/5 -->
+    <text x="549" y="166" font-size="12">e<tspan dy="2" font-size="9">2</tspan><tspan dy="-2"> +</tspan></text>
+    <text x="540" y="192" font-size="13">sin(</text>
+    <text x="576" y="172" font-size="11">n</text>
+    <line x1="569" y1="176" x2="609" y2="176" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="569" y="192" font-size="10">10000<tspan dy="-4" font-size="8">4/5</tspan></text>
+    <text x="613" y="192" font-size="13">)</text>
+    <!-- cell 3: cos, 6/5 -->
+    <text x="680" y="166" font-size="12">e<tspan dy="2" font-size="9">3</tspan><tspan dy="-2"> +</tspan></text>
+    <text x="670" y="192" font-size="13">cos(</text>
+    <text x="707" y="172" font-size="11">n</text>
+    <line x1="700" y1="176" x2="740" y2="176" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="700" y="192" font-size="10">10000<tspan dy="-4" font-size="8">6/5</tspan></text>
+    <text x="744" y="192" font-size="13">)</text>
+    <!-- cell 4: sin, 8/5 -->
+    <text x="811" y="166" font-size="12">e<tspan dy="2" font-size="9">4</tspan><tspan dy="-2"> +</tspan></text>
+    <text x="801" y="192" font-size="13">sin(</text>
+    <text x="838" y="172" font-size="11">n</text>
+    <line x1="831" y1="176" x2="871" y2="176" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="831" y="192" font-size="10">10000<tspan dy="-4" font-size="8">8/5</tspan></text>
+    <text x="875" y="192" font-size="13">)</text>
+    <!-- cell 5: cos, 10/5 -->
+    <text x="942" y="166" font-size="12">e<tspan dy="2" font-size="9">5</tspan><tspan dy="-2"> +</tspan></text>
+    <text x="932" y="192" font-size="13">cos(</text>
+    <text x="969" y="172" font-size="11">n</text>
+    <line x1="962" y1="176" x2="1002" y2="176" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="962" y="192" font-size="10">10000<tspan dy="-4" font-size="8">10/5</tspan></text>
+    <text x="1006" y="192" font-size="13">)</text>
+  </g>
+  <text x="727" y="232" text-anchor="middle" font-size="15" font-weight="bold" fill="#2e7d5b">Input Encoding for Token n to the Transformer</text>
+
+  <text x="455" y="285" font-size="12" fill="#8a8a84">© AIML.com Research</text>
+  <text x="727" y="300" text-anchor="middle" font-size="24" fill="#1c2b24">=</text>
+
+  <!-- table row 2: positional encoding -->
+  <g stroke="#1c2b24" stroke-width="1.2" fill="#ffffff">
+    <rect x="400" y="320" width="131" height="52"/>
+    <rect x="531" y="320" width="131" height="52"/>
+    <rect x="662" y="320" width="131" height="52"/>
+    <rect x="793" y="320" width="131" height="52"/>
+    <rect x="924" y="320" width="131" height="52"/>
+  </g>
+  <g font-style="italic" fill="#1c2b24">
+    <text x="408" y="358" font-size="13">cos(</text>
+    <text x="445" y="338" font-size="11">n</text>
+    <line x1="438" y1="342" x2="478" y2="342" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="438" y="358" font-size="10">10000<tspan dy="-4" font-size="8">2/5</tspan></text>
+    <text x="482" y="358" font-size="13">)</text>
+    <text x="540" y="358" font-size="13">sin(</text>
+    <text x="576" y="338" font-size="11">n</text>
+    <line x1="569" y1="342" x2="609" y2="342" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="569" y="358" font-size="10">10000<tspan dy="-4" font-size="8">4/5</tspan></text>
+    <text x="613" y="358" font-size="13">)</text>
+    <text x="670" y="358" font-size="13">cos(</text>
+    <text x="707" y="338" font-size="11">n</text>
+    <line x1="700" y1="342" x2="740" y2="342" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="700" y="358" font-size="10">10000<tspan dy="-4" font-size="8">6/5</tspan></text>
+    <text x="744" y="358" font-size="13">)</text>
+    <text x="801" y="358" font-size="13">sin(</text>
+    <text x="838" y="338" font-size="11">n</text>
+    <line x1="831" y1="342" x2="871" y2="342" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="831" y="358" font-size="10">10000<tspan dy="-4" font-size="8">8/5</tspan></text>
+    <text x="875" y="358" font-size="13">)</text>
+    <text x="932" y="358" font-size="13">cos(</text>
+    <text x="969" y="338" font-size="11">n</text>
+    <line x1="962" y1="342" x2="1002" y2="342" stroke="#1c2b24" stroke-width="0.9"/>
+    <text x="962" y="358" font-size="10">10000<tspan dy="-4" font-size="8">10/5</tspan></text>
+    <text x="1006" y="358" font-size="13">)</text>
+  </g>
+  <g font-size="11" font-style="italic" fill="#1c2b24">
+    <text x="452" y="390">i=1</text>
+    <text x="583" y="390">i=2</text>
+    <text x="714" y="390">i=3</text>
+    <text x="845" y="390">i=4</text>
+    <text x="976" y="390">i=5</text>
+  </g>
+  <text x="727" y="418" text-anchor="middle" font-size="15" font-weight="bold" fill="#2e7d5b">Positional Encoding for Token at position n</text>
+  <text x="645" y="440" font-size="13" font-style="italic" fill="#2e7d5b">where, pos=n, d<tspan dy="3" font-size="10">model</tspan><tspan dy="-3"> = 5</tspan></text>
+
+  <text x="935" y="492" text-anchor="middle" font-size="26" fill="#1c2b24">+</text>
+  <text x="935" y="512" text-anchor="middle" font-size="11" fill="#1c2b24">element-wise Addition</text>
+
+  <!-- bottom: input token embeddings -->
+  <text x="455" y="498" font-size="14" font-weight="bold" fill="#2e7d5b">Input Token</text>
+  <text x="455" y="516" font-size="14" font-weight="bold" fill="#2e7d5b">Embeddings</text>
+  <line x1="545" y1="503" x2="572" y2="503" stroke="#2e7d5b" stroke-width="2" marker-end="url(#arr4)"/>
+  <g stroke="#1c2b24" stroke-width="1.1" fill="#ffffff">
+    <rect x="578" y="482" width="48" height="40"/>
+    <rect x="626" y="482" width="48" height="40"/>
+    <rect x="674" y="482" width="48" height="40"/>
+    <rect x="722" y="482" width="48" height="40"/>
+    <rect x="770" y="482" width="48" height="40"/>
+  </g>
+  <text x="845" y="510" font-size="20" fill="#1c2b24">...</text>
+  <g stroke="#1c2b24" stroke-width="1.1" fill="#f2d7d0">
+    <rect x="880" y="482" width="34" height="40"/>
+    <rect x="914" y="482" width="34" height="40"/>
+    <rect x="948" y="482" width="34" height="40"/>
+    <rect x="982" y="482" width="34" height="40"/>
+    <rect x="1016" y="482" width="34" height="40"/>
+  </g>
+  <g font-size="13" font-style="italic" fill="#1c2b24" text-anchor="middle">
+    <text x="897" y="507">e<tspan dy="2" font-size="9">1</tspan></text>
+    <text x="931" y="507">e<tspan dy="2" font-size="9">2</tspan></text>
+    <text x="965" y="507">e<tspan dy="2" font-size="9">3</tspan></text>
+    <text x="999" y="507">e<tspan dy="2" font-size="9">4</tspan></text>
+    <text x="1033" y="507">e<tspan dy="2" font-size="9">5</tspan></text>
+  </g>
+  <text x="603" y="552" font-size="13" font-weight="bold" fill="#1c2b24">Embedding for Token 1 (t<tspan dy="3" font-size="10">1</tspan><tspan dy="-3">)</tspan></text>
+  <text x="698" y="572" text-anchor="middle" font-size="11" font-style="italic" fill="#1c2b24">vector of dim<tspan dy="3" font-size="8">model</tspan></text>
+  <text x="878" y="552" font-size="12" font-weight="bold" fill="#2e7d5b">Embedding for Token n (t<tspan dy="3" font-size="9">n</tspan><tspan dy="-3">)</tspan></text>
+  <text x="965" y="570" text-anchor="middle" font-size="10" font-style="italic" fill="#2e7d5b">vector of dim<tspan dy="3" font-size="8">model</tspan></text>
+</svg>

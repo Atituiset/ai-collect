@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 449" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="449" fill="#faf9f6"/>
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d5b"/>
+    </marker>
+  </defs>
+
+  <!-- evolution arrow -->
+  <line x1="70" y1="47" x2="1030" y2="47" stroke="#2e7d5b" stroke-width="3" marker-end="url(#arr)"/>
+
+  <!-- Column 1: Prompt Engineering -->
+  <rect x="30" y="24" width="300" height="46" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="180" y="53" font-size="19" font-weight="700" fill="#1c2b24" text-anchor="middle">Prompt Engineering</text>
+  <text x="180" y="98" font-size="16" fill="#1c2b24" text-anchor="middle">Single-call Optimization</text>
+  <text x="180" y="119" font-size="13.5" fill="#55605a" text-anchor="middle">Optimize the model input</text>
+
+  <rect x="30" y="134" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="46" y="156" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="56" y="164" width="16" height="20" rx="2" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <line x1="59" y1="170" x2="69" y2="170" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="59" y1="175" x2="69" y2="175" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="59" y1="180" x2="66" y2="180" stroke="#2e7d5b" stroke-width="1.4"/>
+  <text x="315" y="168" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Instruction &amp; Role</text>
+  <text x="315" y="188" font-size="12" fill="#55605a" text-anchor="end">Define task, persona</text>
+  <text x="315" y="203" font-size="12" fill="#55605a" text-anchor="end">and constraints</text>
+
+  <rect x="30" y="228" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="46" y="250" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="55" y="259" width="9" height="9" rx="1.5" fill="none" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="66" y="259" width="9" height="9" rx="1.5" fill="none" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="55" y="270" width="9" height="9" rx="1.5" fill="none" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="66" y="270" width="9" height="9" rx="1.5" fill="none" stroke="#2e7d5b" stroke-width="1.4"/>
+  <text x="315" y="262" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Example &amp; Format</text>
+  <text x="315" y="282" font-size="12" fill="#55605a" text-anchor="end">Define task, persona</text>
+  <text x="315" y="297" font-size="12" fill="#55605a" text-anchor="end">and constraints</text>
+
+  <rect x="30" y="322" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="46" y="344" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <circle cx="64" cy="362" r="10" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <path d="M64 354 A 10 10 0 0 1 74 362" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <path d="M74 358 L74 364 L70 361 Z" fill="#2e7d5b"/>
+  <text x="315" y="356" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Prompt Iteration</text>
+  <text x="315" y="376" font-size="12" fill="#55605a" text-anchor="end">Refine wording from</text>
+  <text x="315" y="391" font-size="12" fill="#55605a" text-anchor="end">observed failures</text>
+
+  <!-- Column 2: Context Engineering -->
+  <rect x="360" y="24" width="300" height="46" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="510" y="53" font-size="19" font-weight="700" fill="#1c2b24" text-anchor="middle">Context Engineering</text>
+  <text x="510" y="98" font-size="16" fill="#1c2b24" text-anchor="middle">Multi-step Context Optimization</text>
+  <text x="510" y="119" font-size="13.5" fill="#55605a" text-anchor="middle">Optimize what the model sees</text>
+
+  <rect x="360" y="134" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="376" y="156" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <ellipse cx="394" cy="167" rx="9" ry="4" fill="none" stroke="#2e7d5b" stroke-width="1.5"/>
+  <path d="M385 167 v10 a9 4 0 0 0 18 0 v-10" fill="none" stroke="#2e7d5b" stroke-width="1.5"/>
+  <path d="M385 177 a9 4 0 0 0 18 0" fill="none" stroke="#2e7d5b" stroke-width="1.5"/>
+  <text x="645" y="168" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Retrieval &amp; Loading</text>
+  <text x="645" y="188" font-size="12" fill="#55605a" text-anchor="end">Bring in relevant files, docs</text>
+  <text x="645" y="203" font-size="12" fill="#55605a" text-anchor="end">and tool outputs</text>
+
+  <rect x="360" y="228" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="376" y="250" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <rect x="387" y="261" width="14" height="14" rx="2" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <line x1="391" y1="255" x2="391" y2="261" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="397" y1="255" x2="397" y2="261" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="391" y1="275" x2="391" y2="281" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="397" y1="275" x2="397" y2="281" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="381" y1="265" x2="387" y2="265" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="381" y1="271" x2="387" y2="271" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="401" y1="265" x2="407" y2="265" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="401" y1="271" x2="407" y2="271" stroke="#2e7d5b" stroke-width="1.4"/>
+  <text x="645" y="262" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Memory &amp; State</text>
+  <text x="645" y="282" font-size="12" fill="#55605a" text-anchor="end">Track progress, decisions,</text>
+  <text x="645" y="297" font-size="12" fill="#55605a" text-anchor="end">and prior steps</text>
+
+  <rect x="360" y="322" width="300" height="82" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="376" y="344" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <path d="M385 353 h18 l-6 8 v8 l-6 3 v-11 Z" fill="none" stroke="#2e7d5b" stroke-width="1.6" stroke-linejoin="round"/>
+  <text x="645" y="356" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Compression &amp; Filtering</text>
+  <text x="645" y="376" font-size="12" fill="#55605a" text-anchor="end">Keep useful context,</text>
+  <text x="645" y="391" font-size="12" fill="#55605a" text-anchor="end">and remove stale information</text>
+
+  <!-- Column 3: Harness Engineering -->
+  <rect x="690" y="24" width="300" height="46" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <text x="840" y="53" font-size="19" font-weight="700" fill="#1c2b24" text-anchor="middle">Harness Engineering</text>
+  <text x="840" y="98" font-size="16" font-weight="700" fill="#2e7d5b" text-anchor="middle">System-level Optimization</text>
+  <text x="840" y="119" font-size="13.5" fill="#55605a" text-anchor="middle">Optimize how the model runs</text>
+
+  <rect x="690" y="134" width="300" height="60" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="706" y="146" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="716" y1="172" x2="732" y2="156" stroke="#2e7d5b" stroke-width="2"/>
+  <circle cx="716" cy="172" r="3" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <circle cx="732" cy="156" r="3" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <text x="975" y="157" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Tools &amp; Environment</text>
+  <text x="975" y="174" font-size="11.5" fill="#55605a" text-anchor="end">Run action safely and</text>
+  <text x="975" y="188" font-size="11.5" fill="#55605a" text-anchor="end">expose callable tools</text>
+
+  <rect x="690" y="204" width="300" height="60" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="706" y="216" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <circle cx="716" cy="226" r="2.6" fill="#2e7d5b"/>
+  <circle cx="732" cy="226" r="2.6" fill="#2e7d5b"/>
+  <circle cx="724" cy="242" r="2.6" fill="#2e7d5b"/>
+  <line x1="716" y1="226" x2="732" y2="226" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="716" y1="226" x2="724" y2="242" stroke="#2e7d5b" stroke-width="1.4"/>
+  <line x1="732" y1="226" x2="724" y2="242" stroke="#2e7d5b" stroke-width="1.4"/>
+  <text x="975" y="227" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Orchestration</text>
+  <text x="975" y="244" font-size="11.5" fill="#55605a" text-anchor="end">Plan, act, verify, retry,</text>
+  <text x="975" y="258" font-size="11.5" fill="#55605a" text-anchor="end">or delegate</text>
+
+  <rect x="690" y="274" width="300" height="60" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="706" y="286" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <circle cx="722" cy="302" r="7" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <line x1="727" y1="307" x2="734" y2="314" stroke="#2e7d5b" stroke-width="1.8"/>
+  <path d="M719 302 l2.5 2.5 l4 -4" fill="none" stroke="#2e7d5b" stroke-width="1.6"/>
+  <text x="975" y="297" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Verification &amp; Evaluation</text>
+  <text x="975" y="314" font-size="11.5" fill="#55605a" text-anchor="end">Trace behavior, measure cost,</text>
+  <text x="975" y="328" font-size="11.5" fill="#55605a" text-anchor="end">and check results</text>
+
+  <rect x="690" y="344" width="300" height="60" rx="10" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+  <rect x="706" y="356" width="36" height="36" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+  <path d="M724 362 l8 3 v7 c0 6 -4 9 -8 11 c-4 -2 -8 -5 -8 -11 v-7 Z" fill="none" stroke="#2e7d5b" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M721 373 l2.5 2.5 l4.5 -4.5" fill="none" stroke="#2e7d5b" stroke-width="1.5"/>
+  <text x="975" y="367" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="end">Governance &amp; Security</text>
+  <text x="975" y="384" font-size="11.5" fill="#55605a" text-anchor="end">Enforce permissions, approvals</text>
+  <text x="975" y="398" font-size="11.5" fill="#55605a" text-anchor="end">and audit rules</text>
+</svg>

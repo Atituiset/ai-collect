@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1378" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="1378" fill="#faf9f6"/>
+  <g fill="#ffffff" stroke="#2e7d5b" stroke-width="4">
+    <rect x="60" y="70" width="960" height="220" rx="24"/>
+    <rect x="60" y="340" width="960" height="220" rx="24"/>
+    <rect x="60" y="610" width="960" height="220" rx="24"/>
+    <rect x="60" y="880" width="960" height="220" rx="24"/>
+    <rect x="60" y="1150" width="960" height="180" rx="24"/>
+  </g>
+  <g fill="#1c2b24" font-size="64" text-anchor="middle">
+    <text x="540" y="200">个人信息</text>
+    <text x="540" y="470">技能/项目特长</text>
+    <text x="540" y="740">教育信息</text>
+    <text x="540" y="1010">公司信息</text>
+    <text x="540" y="1250">重要项目信息</text>
+  </g>
+</svg>

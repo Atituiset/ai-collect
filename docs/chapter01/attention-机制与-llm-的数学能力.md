@@ -10,7 +10,7 @@
 
 ### 核心公式
 
-![插图](../images/formulas/1435ea74_formula_0.png)
+$$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left(\frac{Q \times K^T}{\sqrt{d_k}}\right) \times V$$
 
 别被吓到，拆开来就 **6 步**，每一步都很直觉。
 

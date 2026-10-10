@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 461" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="1024" height="461" fill="#faf9f6"/>
+<rect x="6" y="12" width="54" height="437" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="23.0" y="230.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 23.0 230.5)">Context &amp; Memory</text>
+<text x="43.0" y="230.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 43.0 230.5)">Management</text>
+<rect x="64" y="12" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="47.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Short-Term Active</text>
+<text x="189.0" y="69.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Context Window</text>
+<line x1="314" y1="52.5" x2="336" y2="52.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="12" width="672" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="38" font-size="14" fill="#1c2b24">Effective Context Engineering (Anthropic Applied AI Team, 2025), Manus Context</text>
+<text x="350" y="58" font-size="14" fill="#1c2b24">Engineering (Manus Team, 2025), Context Management (Anthropic, 2025c), Agent Skills</text>
+<text x="350" y="78" font-size="14" fill="#1c2b24">(Koylan, 2025), Context-Space (context-space, 2025)</text>
+<rect x="64" y="101" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="136.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Mid-Term Session State</text>
+<text x="189.0" y="158.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Cross-Run Persistence</text>
+<line x1="314" y1="141.5" x2="336" y2="141.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="101" width="672" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="127" font-size="14" fill="#1c2b24">Structured Note-Taking (Anthropic Applied AI Team, 2025), Planning-with-Files (OthmanAdi,</text>
+<text x="350" y="147" font-size="14" fill="#1c2b24">2025), Trellis (mindfold-ai, 2025), Claude-Mem (thedotmack, 2025),</text>
+<text x="350" y="167" font-size="14" fill="#1c2b24">Everything-Claude-Code (affaan-m, 2025)</text>
+<rect x="64" y="190" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="225.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Long-Term Persistent</text>
+<text x="189.0" y="247.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Memory Systems</text>
+<line x1="314" y1="230.5" x2="336" y2="230.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="190" width="672" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="216" font-size="14" fill="#1c2b24">MemGPT (Packer et al., 2023), Generative Agents (Park et al., 2023), MemoryBank (Zhong</text>
+<text x="350" y="236" font-size="14" fill="#1c2b24">et al., 2024), Mem0 (Chhikara et al., 2025), A-MEM (Xu et al., 2025), Hindsight</text>
+<text x="350" y="256" font-size="14" fill="#1c2b24">(Vectorize.io, 2025), Honcho (Plastic Labs, 2025), CQ (Mozilla AI, 2025)</text>
+<rect x="64" y="279" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="314.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Long-Horizon</text>
+<text x="189.0" y="336.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Context Techniques</text>
+<line x1="314" y1="319.5" x2="336" y2="319.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="279" width="672" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="305" font-size="14" fill="#1c2b24">Context Compaction (Anthropic Applied AI Team, 2025), Sub-Agent Context Isolation</text>
+<text x="350" y="325" font-size="14" fill="#1c2b24">(Anthropic, 2025e), Manus Context Sharing (Manus Team, 2025), Harness Design</text>
+<text x="350" y="345" font-size="14" fill="#1c2b24">(Anthropic, 2026c), Effective Harnesses (Anthropic, 2025d)</text>
+<rect x="64" y="368" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="403.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Context Drift</text>
+<text x="189.0" y="425.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Limits</text>
+<line x1="314" y1="408.5" x2="336" y2="408.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="368" width="672" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="394" font-size="14" fill="#1c2b24">Lost in the Middle (Liu et al., 2024), Context Rot (Hong et al., 2025), Harness Boundary</text>
+<text x="350" y="414" font-size="14" fill="#1c2b24">(Bowne-Anderson &amp; Huber, 2026), MemBench (Tan et al., 2025), MemoryArena (He et al.,</text>
+<text x="350" y="434" font-size="14" fill="#1c2b24">2026), Incremental Memory Evaluation (Hu et al., 2025b)</text>
+</svg>

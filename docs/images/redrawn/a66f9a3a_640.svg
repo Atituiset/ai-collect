@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 810" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="810" fill="#faf9f6"/>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d5b"/>
+    </marker>
+  </defs>
+
+  <!-- title -->
+  <text x="540" y="48" fill="#1c2b24" font-size="42" font-weight="bold" text-anchor="middle">面试与 AI 能力系统图</text>
+  <text x="540" y="80" fill="#1c2b24" font-size="17" text-anchor="middle">— 从通用能力，到 AI 专业能力，再到团队用人本质 —</text>
+
+  <!-- ========== Panel A ========== -->
+  <rect x="10" y="96" width="1060" height="208" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="106" width="28" height="28" rx="5" fill="#2e7d5b"/>
+  <text x="36" y="127" fill="#ffffff" font-size="18" font-weight="bold" text-anchor="middle">A</text>
+  <text x="60" y="127" fill="#1c2b24" font-size="21" font-weight="bold">面试能力评价模型</text>
+  <text x="245" y="127" fill="#666666" font-size="13">（按目标角色划分）</text>
+
+  <text x="48" y="185" fill="#1c2b24" font-size="14" text-anchor="middle">重点</text>
+  <text x="48" y="246" fill="#1c2b24" font-size="14" text-anchor="middle">说明</text>
+
+  <!-- 4 role columns -->
+  <g font-size="16" font-weight="bold" text-anchor="middle">
+    <rect x="110" y="142" width="155" height="34" rx="4" fill="#2e7d5b"/>
+    <text x="187" y="165" fill="#ffffff">一线员工</text>
+    <rect x="273" y="142" width="155" height="34" rx="4" fill="#2e7d5b"/>
+    <text x="350" y="165" fill="#ffffff">一线经理</text>
+    <rect x="436" y="142" width="155" height="34" rx="4" fill="#2e7d5b"/>
+    <text x="513" y="165" fill="#ffffff">总监</text>
+    <rect x="599" y="142" width="155" height="34" rx="4" fill="#2e7d5b"/>
+    <text x="676" y="165" fill="#ffffff">高管</text>
+  </g>
+  <g font-size="17" font-weight="bold" fill="#2e7d5b" text-anchor="middle">
+    <text x="187" y="205">专业能力</text>
+    <text x="350" y="205">项目管理</text>
+    <text x="513" y="205">机制推进</text>
+    <text x="676" y="197">业务创新 /</text>
+    <text x="676" y="219">品牌与业务理解</text>
+  </g>
+  <g font-size="13" fill="#1c2b24" text-anchor="middle">
+    <text x="187" y="248">能不能把活干明白</text>
+    <text x="350" y="248">能不能带人把项目交付</text>
+    <text x="513" y="240">能不能把能力沉淀成</text>
+    <text x="513" y="258">组织机制</text>
+    <text x="676" y="248">能不能定义方向并拿结果</text>
+  </g>
+  <rect x="110" y="272" width="644" height="26" rx="4" fill="#e6f0ea"/>
+  <text x="432" y="291" fill="#1c2b24" font-size="15" font-weight="bold" text-anchor="middle">共同底线：专业能力必须先达标</text>
+
+  <!-- 面试三原则 -->
+  <rect x="790" y="106" width="268" height="180" rx="8" fill="none" stroke="#1c2b24" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="924" y="134" fill="#1c2b24" font-size="16" font-weight="bold" text-anchor="middle">面试三原则</text>
+  <g fill="#ffffff" stroke="#1c2b24" stroke-width="1">
+    <rect x="806" y="148" width="236" height="36" rx="6"/>
+    <rect x="806" y="192" width="236" height="36" rx="6"/>
+    <rect x="806" y="236" width="236" height="36" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="15" text-anchor="middle">
+    <text x="924" y="171">主动原则</text>
+    <text x="924" y="215">优势优先原则</text>
+    <text x="924" y="259">态度优先原则</text>
+  </g>
+
+  <!-- ========== Panel B ========== -->
+  <rect x="10" y="316" width="1060" height="248" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="326" width="28" height="28" rx="5" fill="#2e7d5b"/>
+  <text x="36" y="347" fill="#ffffff" font-size="18" font-weight="bold" text-anchor="middle">B</text>
+  <text x="60" y="347" fill="#1c2b24" font-size="21" font-weight="bold">AI 岗位六层能力框架</text>
+
+  <!-- six layers -->
+  <g font-size="14">
+    <rect x="60" y="360" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="360" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="379" fill="#ffffff" font-weight="bold" text-anchor="middle">6</text>
+    <text x="96" y="379" fill="#1c2b24" font-weight="bold">Agent Runtime</text>
+    <text x="270" y="379" fill="#1c2b24">：运行时、状态、权限、安全、可观测性、治理</text>
+
+    <rect x="60" y="394" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="394" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="413" fill="#ffffff" font-weight="bold" text-anchor="middle">5</text>
+    <text x="96" y="413" fill="#1c2b24" font-weight="bold">Agent</text>
+    <text x="270" y="413" fill="#1c2b24">：任务执行、工具调用、规划、边界与兜底</text>
+
+    <rect x="60" y="428" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="428" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="447" fill="#ffffff" font-weight="bold" text-anchor="middle">4</text>
+    <text x="96" y="447" fill="#1c2b24" font-weight="bold">AI Coding</text>
+    <text x="270" y="447" fill="#1c2b24">：研发提效、代码生成、测试、规范化工程</text>
+
+    <rect x="60" y="462" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="462" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="481" fill="#ffffff" font-weight="bold" text-anchor="middle">3</text>
+    <text x="96" y="481" fill="#1c2b24" font-weight="bold">RAG / Context Engineering</text>
+    <text x="300" y="481" fill="#1c2b24">：知识增强、文档处理、检索、重排、上下文组织</text>
+
+    <rect x="60" y="496" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="496" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="515" fill="#ffffff" font-weight="bold" text-anchor="middle">2</text>
+    <text x="96" y="515" fill="#1c2b24" font-weight="bold">Prompt / Workflow</text>
+    <text x="270" y="515" fill="#1c2b24">：提示词、流程编排、节点控制、低代码平台</text>
+
+    <rect x="60" y="530" width="545" height="28" rx="4" fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1"/>
+    <rect x="60" y="530" width="28" height="28" rx="4" fill="#2e7d5b"/>
+    <text x="74" y="549" fill="#ffffff" font-weight="bold" text-anchor="middle">1</text>
+    <text x="96" y="549" fill="#1c2b24" font-weight="bold">AI 项目认知框架</text>
+    <text x="270" y="549" fill="#1c2b24">：业务场景、ROI、风险、人工兜底</text>
+  </g>
+  <g fill="#2e7d5b" font-size="12" text-anchor="middle">
+    <text x="255" y="392">▲</text>
+    <text x="255" y="426">▲</text>
+    <text x="255" y="460">▲</text>
+    <text x="255" y="494">▲</text>
+    <text x="255" y="528">▲</text>
+  </g>
+
+  <!-- center card -->
+  <rect x="615" y="360" width="175" height="198" rx="8" fill="#fdf6e3" stroke="#b58900" stroke-width="1"/>
+  <text x="702" y="410" fill="#1c2b24" font-size="18" font-weight="bold" text-anchor="middle">面试官问的是</text>
+  <text x="702" y="442" fill="#b58900" font-size="24" font-weight="bold" text-anchor="middle">一个点，</text>
+  <text x="702" y="482" fill="#1c2b24" font-size="18" font-weight="bold" text-anchor="middle">你回答的是</text>
+  <text x="702" y="514" fill="#b58900" font-size="24" font-weight="bold" text-anchor="middle">一条线</text>
+
+  <!-- right question box -->
+  <rect x="810" y="326" width="248" height="226" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.2"/>
+  <rect x="810" y="326" width="248" height="30" rx="8" fill="#2e7d5b"/>
+  <text x="934" y="346" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">讲项目时可回归的表达问题</text>
+  <g fill="#1c2b24" font-size="12.5">
+    <text x="822" y="378">✓  为什么这个业务场景需要 AI？</text>
+    <text x="822" y="408">✓  我把任务拆成了哪些节点？</text>
+    <text x="822" y="438">✓  哪些地方用 Prompt / Workflow？</text>
+    <text x="822" y="468">✓  是否需要 RAG，知识怎么处理？</text>
+    <text x="822" y="498">✓  是否涉及 Agent 和工具调用？</text>
+    <text x="822" y="528">✓  稳定性、评测、数据回流如何做？</text>
+  </g>
+
+  <!-- ========== Panel C ========== -->
+  <rect x="10" y="576" width="1060" height="192" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="586" width="28" height="28" rx="5" fill="#2e7d5b"/>
+  <text x="36" y="607" fill="#ffffff" font-size="18" font-weight="bold" text-anchor="middle">C</text>
+  <text x="60" y="607" fill="#1c2b24" font-size="21" font-weight="bold">面试的本质：团队梯队建设</text>
+
+  <ellipse cx="180" cy="645" rx="135" ry="27" fill="#f6f0fb" stroke="#7b5ea7" stroke-width="1.2"/>
+  <ellipse cx="180" cy="692" rx="120" ry="27" fill="#eef4fb" stroke="#4a6fa5" stroke-width="1.2"/>
+  <ellipse cx="180" cy="739" rx="105" ry="27" fill="#e9f4ee" stroke="#2e7d5b" stroke-width="1.2"/>
+  <g fill="#1c2b24" font-size="15" font-weight="bold" text-anchor="middle">
+    <text x="180" y="650">第一梯队干部</text>
+    <text x="180" y="697">第二梯队干部</text>
+    <text x="180" y="744">第三梯队干活的人</text>
+  </g>
+
+  <g stroke="#2e7d5b" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+    <line x1="315" y1="645" x2="395" y2="645"/>
+    <line x1="300" y1="692" x2="395" y2="692"/>
+    <line x1="285" y1="739" x2="395" y2="739"/>
+    <line x1="755" y1="645" x2="800" y2="630"/>
+    <line x1="755" y1="692" x2="800" y2="692"/>
+    <line x1="755" y1="739" x2="800" y2="740"/>
+  </g>
+  <g fill="#ffffff" stroke="#1c2b24" stroke-width="1">
+    <rect x="400" y="626" width="350" height="36" rx="4"/>
+    <rect x="400" y="673" width="350" height="36" rx="4"/>
+    <rect x="400" y="720" width="350" height="36" rx="4"/>
+  </g>
+  <g fill="#1c2b24" font-size="14" text-anchor="middle">
+    <text x="575" y="649">核心工作 / 高忠诚 / 高权限 / 很少外招</text>
+    <text x="575" y="696">外招中层 / 能力输入 / 良性竞争 / 机制补位</text>
+    <text x="575" y="743">一线交付 / 一个萝卜一个坑 / 专业达标</text>
+  </g>
+
+  <rect x="805" y="590" width="255" height="168" rx="8" fill="#fdf6e3" stroke="#b58900" stroke-width="1"/>
+  <text x="932" y="614" fill="#b58900" font-size="15" font-weight="bold" text-anchor="middle">企业真正关心什么？</text>
+  <g fill="#1c2b24" font-size="13.5">
+    <text x="822" y="644">❶ 缺什么位置</text>
+    <text x="822" y="678">❷ 缺什么能力</text>
+    <text x="822" y="712">❸ 给多少权限</text>
+    <text x="822" y="746">❹ 承担什么风险</text>
+  </g>
+
+  <!-- footer -->
+  <text x="540" y="796" fill="#b58900" font-size="19" font-weight="bold" text-anchor="middle">🏆 你的回答，必须证明：你正好能补这个坑</text>
+</svg>

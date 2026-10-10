@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 968 1185" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="968" height="1185" fill="#faf9f6"/>
+<rect x="10" y="14" width="40" height="1157" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="30" y="592.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 30 592.5)">Agent Harness Engineering</text>
+<rect x="96" y="55.61" width="300" height="135.78" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="118.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Execution Environment</text>
+<text x="246.0" y="140.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">&amp; Sandbox (E) (§3)</text>
+<line x1="396" y1="123.5" x2="412" y2="123.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="27.5" x2="412" y2="219.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="27.5" x2="448" y2="27.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="14" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="32.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">General-Purpose Managed Sandboxes</text>
+<line x1="412" y1="59.5" x2="448" y2="59.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="46" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="64.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Computer-Use Agent Infrastructure</text>
+<line x1="412" y1="91.5" x2="448" y2="91.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="78" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="96.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Code-Specialized Sandboxes</text>
+<line x1="412" y1="123.5" x2="448" y2="123.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="110" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="128.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Framework-Integrated Runtimes</text>
+<line x1="412" y1="155.5" x2="448" y2="155.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="142" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="160.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Browser Evaluation Environments</text>
+<line x1="412" y1="187.5" x2="448" y2="187.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="174" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="192.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">OS-Level Permission Sandboxes</text>
+<line x1="412" y1="219.5" x2="448" y2="219.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="206" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="224.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Sandbox Abstraction Layers</text>
+<rect x="96" y="268.37" width="300" height="76.26" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="301.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Tool Interface</text>
+<text x="246.0" y="323.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">&amp; Protocol (T) (§4)</text>
+<line x1="396" y1="306.5" x2="412" y2="306.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="258.5" x2="412" y2="354.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="258.5" x2="448" y2="258.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="245" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="263.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Protocol and Interface Standards</text>
+<line x1="412" y1="290.5" x2="448" y2="290.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="277" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="295.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Tool Description, Discovery, and Selection</text>
+<line x1="412" y1="322.5" x2="448" y2="322.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="309" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="327.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Tool-Augmented Training and Integration</text>
+<line x1="412" y1="354.5" x2="448" y2="354.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="341" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="359.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Scalability and Session Management</text>
+<rect x="96" y="409.45" width="300" height="96.1" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="452.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Context &amp; Memory</text>
+<text x="246.0" y="474.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Management (C) (§5)</text>
+<line x1="396" y1="457.5" x2="412" y2="457.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="393.5" x2="412" y2="521.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="393.5" x2="448" y2="393.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="380" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="398.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Short-Term Active Context Window</text>
+<line x1="412" y1="425.5" x2="448" y2="425.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="412" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="430.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Mid-Term Session State and Cross-Run Persistence</text>
+<line x1="412" y1="457.5" x2="448" y2="457.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="444" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="462.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Long-Term Persistent Memory Systems</text>
+<line x1="412" y1="489.5" x2="448" y2="489.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="476" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="494.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Long-Horizon Context Techniques</text>
+<line x1="412" y1="521.5" x2="448" y2="521.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="508" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="526.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Context Drift and Limits</text>
+<rect x="96" y="564.29" width="300" height="56.42" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="587.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Lifecycle &amp;</text>
+<text x="246.0" y="609.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Orchestration (L) (§6)</text>
+<line x1="396" y1="592.5" x2="412" y2="592.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="560.5" x2="412" y2="624.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="560.5" x2="448" y2="560.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="547" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="565.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Single-Agent Inner Loop</text>
+<line x1="412" y1="592.5" x2="448" y2="592.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="579" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="597.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Multi-Agent Orchestration Patterns</text>
+<line x1="412" y1="624.5" x2="448" y2="624.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="611" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="629.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Full Lifecycle Task Pipelines</text>
+<rect x="96" y="679.45" width="300" height="96.1" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="722.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Observability &amp;</text>
+<text x="246.0" y="744.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Operations (O) (§7)</text>
+<line x1="396" y1="727.5" x2="412" y2="727.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="663.5" x2="412" y2="791.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="663.5" x2="448" y2="663.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="650" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="668.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Tracing and Monitoring Platforms</text>
+<line x1="412" y1="695.5" x2="448" y2="695.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="682" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="700.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Agent-Specific Operations Platforms</text>
+<line x1="412" y1="727.5" x2="448" y2="727.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="714" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="732.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Cost Tracking and Optimization</text>
+<line x1="412" y1="759.5" x2="448" y2="759.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="746" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="764.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Reliability Engineering</text>
+<line x1="412" y1="791.5" x2="448" y2="791.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="778" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="796.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Unified Observability</text>
+<rect x="96" y="846.45" width="300" height="96.1" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="889.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Verification &amp;</text>
+<text x="246.0" y="911.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Evaluation (V) (§8)</text>
+<line x1="396" y1="894.5" x2="412" y2="894.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="830.5" x2="412" y2="958.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="830.5" x2="448" y2="830.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="817" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="835.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Task and Benchmark Grounding</text>
+<line x1="412" y1="862.5" x2="448" y2="862.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="849" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="867.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Pre-Execution Readiness Validation</text>
+<line x1="412" y1="894.5" x2="448" y2="894.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="881" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="899.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Controlled Execution and Trace Capture</text>
+<line x1="412" y1="926.5" x2="448" y2="926.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="913" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="931.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Multi-Level Judgement and Failure Attribution</text>
+<line x1="412" y1="958.5" x2="448" y2="958.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="945" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="963.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Continuous Regression and Deployment Feedback</text>
+<rect x="96" y="1019.53" width="300" height="115.94" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="246.0" y="1072.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Governance &amp;</text>
+<text x="246.0" y="1094.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Security (G) (§9)</text>
+<line x1="396" y1="1077.5" x2="412" y2="1077.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="997.5" x2="412" y2="1157.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<line x1="412" y1="997.5" x2="448" y2="997.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="984" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1002.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Permission Models and Identity Management</text>
+<line x1="412" y1="1029.5" x2="448" y2="1029.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="1016" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1034.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Lifecycle Hooks</text>
+<line x1="412" y1="1061.5" x2="448" y2="1061.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="1048" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1066.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Component Hardening</text>
+<line x1="412" y1="1093.5" x2="448" y2="1093.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="1080" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1098.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Declarative Constitutions</text>
+<line x1="412" y1="1125.5" x2="448" y2="1125.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="1112" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1130.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Audit Infrastructure</text>
+<line x1="412" y1="1157.5" x2="448" y2="1157.5" stroke="#2e7d5b" stroke-width="1.4"/>
+<rect x="448" y="1144" width="506" height="27" rx="7" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="701.0" y="1162.5" font-size="14.5" fill="#1c2b24" text-anchor="middle">Agent Security Landscape</text>
+</svg>

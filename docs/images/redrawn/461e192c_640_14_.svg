@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 215" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="215" fill="#faf9f6"/>
+  <defs>
+    <marker id="arr14" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d5b"/>
+    </marker>
+    <marker id="arr14d" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#55605a"/>
+    </marker>
+  </defs>
+
+  <!-- flow arrows -->
+  <g stroke="#2e7d5b" stroke-width="2" marker-end="url(#arr14)">
+    <line x1="132" y1="52" x2="168" y2="52"/>
+    <line x1="302" y1="52" x2="338" y2="52"/>
+    <line x1="422" y1="52" x2="458" y2="52"/>
+    <line x1="602" y1="52" x2="638" y2="52"/>
+    <line x1="722" y1="52" x2="758" y2="52"/>
+    <line x1="932" y1="52" x2="968" y2="52"/>
+  </g>
+
+  <!-- solid boxes -->
+  <g font-size="15" fill="#1c2b24" text-anchor="middle">
+    <rect x="40" y="30" width="92" height="44" rx="8" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4"/>
+    <text x="86" y="58">Input</text>
+    <rect x="340" y="30" width="80" height="44" rx="8" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4"/>
+    <text x="380" y="58">LLM</text>
+    <rect x="640" y="30" width="80" height="44" rx="8" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4"/>
+    <text x="680" y="58">Tool</text>
+    <rect x="970" y="30" width="90" height="44" rx="8" fill="#ffffff" stroke="#1c2b24" stroke-width="1.4"/>
+    <text x="1015" y="58">Response</text>
+  </g>
+
+  <!-- dashed hook boxes -->
+  <g font-size="14" fill="#1c2b24" text-anchor="middle">
+    <rect x="170" y="30" width="130" height="44" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4" stroke-dasharray="6 4"/>
+    <text x="235" y="49" font-weight="700">H1</text>
+    <text x="235" y="66">Input GR</text>
+    <rect x="460" y="30" width="140" height="44" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4" stroke-dasharray="6 4"/>
+    <text x="530" y="49" font-weight="700">H2</text>
+    <text x="530" y="66">Action GR</text>
+    <rect x="760" y="30" width="170" height="44" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4" stroke-dasharray="6 4"/>
+    <text x="845" y="49" font-weight="700">H3</text>
+    <text x="845" y="66">Post-exec IFC</text>
+  </g>
+
+  <!-- H4 -->
+  <rect x="400" y="140" width="260" height="44" rx="8" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="530" y="167" font-size="14" fill="#1c2b24" text-anchor="middle">H4: Human-in-the-Loop</text>
+  <line x1="530" y1="138" x2="530" y2="80" stroke="#55605a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arr14d)"/>
+</svg>

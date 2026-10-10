@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 348" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="348" fill="#faf9f6"/>
+
+  <!-- table -->
+  <line x1="40" y1="24" x2="1040" y2="24" stroke="#1c2b24" stroke-width="2"/>
+  <g font-size="15" font-weight="700" fill="#1c2b24">
+    <text x="40" y="48">Boundary</text>
+    <text x="270" y="48">Standard</text>
+    <text x="540" y="48">Wire</text>
+    <text x="680" y="48">Typed</text>
+    <text x="770" y="48">Runtime disc.</text>
+    <text x="920" y="48">Long-running</text>
+  </g>
+  <line x1="40" y1="60" x2="1040" y2="60" stroke="#1c2b24" stroke-width="1.2"/>
+
+  <g font-size="14.5" fill="#1c2b24">
+    <!-- group 1 -->
+    <text x="40" y="92">Model ↔ Function</text>
+    <text x="270" y="92">Function calling</text>
+    <text x="540" y="92">JSON</text>
+    <text x="690" y="93" font-size="16">●</text>
+    <text x="800" y="93" font-size="16">○</text>
+    <text x="950" y="93" font-size="16">○</text>
+
+    <!-- group 2 -->
+    <text x="40" y="143">Agent ↔ Capability</text>
+    <text x="270" y="126">MCP</text>
+    <text x="540" y="126">JSON-RPC</text>
+    <text x="690" y="127" font-size="16">●</text>
+    <text x="800" y="127" font-size="16">●</text>
+    <text x="950" y="127" font-size="16">◑</text>
+    <text x="270" y="160">OpenAPI</text>
+    <text x="540" y="160">HTTP</text>
+    <text x="690" y="161" font-size="16">●</text>
+    <text x="800" y="161" font-size="16">◑</text>
+    <text x="950" y="161" font-size="16">○</text>
+
+    <!-- group 3 -->
+    <text x="40" y="211">Agent ↔ Agent</text>
+    <text x="270" y="194">A2A</text>
+    <text x="540" y="194">JSON-RPC</text>
+    <text x="690" y="195" font-size="16">●</text>
+    <text x="800" y="195" font-size="16">●</text>
+    <text x="950" y="195" font-size="16">●</text>
+    <text x="270" y="228">ACP / ANP</text>
+    <text x="540" y="228">HTTP</text>
+    <text x="690" y="229" font-size="16">●</text>
+    <text x="800" y="229" font-size="16">●</text>
+    <text x="950" y="229" font-size="16">●</text>
+
+    <!-- group 4 -->
+    <text x="40" y="262">Agent ↔ Repo / env</text>
+    <text x="270" y="262">AGENTS.md / AGENT.md</text>
+    <text x="540" y="262">Markdown</text>
+    <text x="690" y="263" font-size="16">○</text>
+    <text x="800" y="263" font-size="16">◑</text>
+    <text x="950" y="263" font-size="16">○</text>
+  </g>
+
+  <!-- group separators -->
+  <line x1="40" y1="109" x2="1040" y2="109" stroke="#c9c4ba" stroke-width="1"/>
+  <line x1="40" y1="177" x2="1040" y2="177" stroke="#c9c4ba" stroke-width="1"/>
+  <line x1="40" y1="245" x2="1040" y2="245" stroke="#c9c4ba" stroke-width="1"/>
+  <line x1="40" y1="279" x2="1040" y2="279" stroke="#1c2b24" stroke-width="2"/>
+
+  <!-- caption -->
+  <text x="40" y="308" font-size="13.5" fill="#1c2b24"><tspan font-weight="700">表 1:</tspan> 按所跨越的集成边界（行）与四个与 harness 相关的能力轴（列）排列的工具/接口标准。</text>
+  <text x="40" y="330" font-size="13.5" fill="#55605a">● 表示一流支持；◑ 表示部分或约定级支持；○ 表示不在范围内。参考文献见正文。</text>
+</svg>

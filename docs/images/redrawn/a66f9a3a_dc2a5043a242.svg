@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1055 1491" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1055" height="1491" fill="#faf9f6"/>
+
+  <text x="527" y="58" fill="#1c2b24" font-size="42" font-weight="bold" text-anchor="middle">AI 岗位能力模型：6层认知与工程框架</text>
+  <text x="527" y="100" fill="#1c2b24" font-size="16" text-anchor="middle">面试里，真正拉开差距的，不是会不会某个工具，而是有没有从项目认知到系统落地的完整判断力。</text>
+
+  <!-- ============ 01 ============ -->
+  <g>
+    <rect x="15" y="120" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="120" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="198" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">01</text>
+    <text x="70" y="262" fill="#ffffff" font-size="34" text-anchor="middle">🧠</text>
+    <text x="160" y="160" fill="#1c2b24" font-size="24" font-weight="bold">第一层：AI 项目认知框架</text>
+    <text x="160" y="194" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="222" fill="#1c2b24" font-size="15">判断力</text>
+    <line x1="310" y1="140" x2="310" y2="300" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="194" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="216">不要一聊 AI 就空谈替代。真正要判断的是：</text>
+      <text x="330" y="235">任务是否标准化、输入是否稳定、结果是否可</text>
+      <text x="330" y="254">验证、出错风险有多大、是否涉及权限操作、</text>
+      <text x="330" y="273">是否需要人工兜底、成本是否划算、用户是否</text>
+      <text x="330" y="292">接受。</text>
+    </g>
+    <line x1="655" y1="140" x2="655" y2="300" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="194" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="216">成熟表达：AI 客服适合先从高频、低风险、</text>
+      <text x="675" y="235">标准化问题切入；第一阶段不做高风险操作，</text>
+      <text x="675" y="254">不直接写数据库，知识不足时转人工，并沉淀</text>
+      <text x="675" y="273">低置信度问题池。</text>
+    </g>
+  </g>
+
+  <!-- ============ 02 ============ -->
+  <g>
+    <rect x="15" y="330" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="330" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="408" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">02</text>
+    <text x="70" y="472" fill="#ffffff" font-size="34" text-anchor="middle">🗂</text>
+    <text x="160" y="370" fill="#1c2b24" font-size="24" font-weight="bold">第二层：Prompt / Workflow</text>
+    <text x="160" y="404" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="432" fill="#1c2b24" font-size="15">业务拆解能力</text>
+    <line x1="310" y1="350" x2="310" y2="510" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="404" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="426">Prompt 是把业务规则、任务目标、输入信</text>
+      <text x="330" y="445">息、输出格式、约束边界，翻译成模型可执行</text>
+      <text x="330" y="464">的说明。Workflow 是把业务流程拆成稳定、</text>
+      <text x="330" y="483">可控、可观测的任务链。</text>
+    </g>
+    <line x1="655" y1="350" x2="655" y2="510" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="404" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="426">例如 AI 简历筛选可拆成：简历上传 → 文件解析 →</text>
+      <text x="675" y="445">信息抽取 → JD 结构化 → 评分规则读取 →</text>
+      <text x="675" y="464">匹配度判断 → 风险点识别 → 面试问题生成 →</text>
+      <text x="675" y="483">写入表格 → 人工复核。要知道哪些节点用模型，</text>
+      <text x="675" y="502">哪些节点用规则，哪些节点必须人工审核。</text>
+    </g>
+  </g>
+
+  <!-- ============ 03 ============ -->
+  <g>
+    <rect x="15" y="540" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="540" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="618" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">03</text>
+    <text x="70" y="682" fill="#ffffff" font-size="34" text-anchor="middle">🗄</text>
+    <text x="160" y="580" fill="#1c2b24" font-size="24" font-weight="bold">第三层：RAG / Context Engineering</text>
+    <text x="160" y="614" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="642" fill="#1c2b24" font-size="15">知识与上下文</text>
+    <text x="160" y="664" fill="#1c2b24" font-size="15">控制能力</text>
+    <line x1="310" y1="560" x2="310" y2="720" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="614" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="636">RAG 不是简单的向量数据库，而是让模型看到</text>
+      <text x="330" y="655">当前任务必须知道的知识。关键链路包括：文</text>
+      <text x="330" y="674">档解析、数据清洗、chunk 切分、查询改写、</text>
+      <text x="330" y="693">召回、rerank、TopK 控制、低置信度处理、</text>
+      <text x="330" y="712">失败问题回流。Context Engineering 则关注：</text>
+      <text x="330" y="731">这一轮任务到底该让模型看到什么。</text>
+    </g>
+    <line x1="655" y1="560" x2="655" y2="720" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="614" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="636">真正难点不是塞更多上下文，而是判断哪些信</text>
+      <text x="675" y="655">息必须保留、哪些需要压缩、哪些应丢弃、</text>
+      <text x="675" y="674">哪些要动态加载、哪些必须写入日志。</text>
+    </g>
+  </g>
+
+  <!-- ============ 04 ============ -->
+  <g>
+    <rect x="15" y="750" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="750" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="828" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">04</text>
+    <text x="70" y="892" fill="#ffffff" font-size="30" text-anchor="middle">&lt;/&gt;</text>
+    <text x="160" y="790" fill="#1c2b24" font-size="24" font-weight="bold">第四层：AI Coding</text>
+    <text x="160" y="824" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="852" fill="#1c2b24" font-size="15">真实交付能力</text>
+    <line x1="310" y1="770" x2="310" y2="930" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="824" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="846">AI Coding 不只是让模型写一段代码，而是完整</text>
+      <text x="330" y="865">参与：需求澄清、Spec 编写、任务拆解、代码</text>
+      <text x="330" y="884">生成、代码解释、代码重构、测试补充、错误</text>
+      <text x="330" y="903">排查、接口联调、交付验收。</text>
+    </g>
+    <line x1="655" y1="770" x2="655" y2="930" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="824" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="846">更成熟的说法：先把需求整理成明确 Spec，再</text>
+      <text x="675" y="865">让 AI 辅助拆任务和生成代码；重点检查边界条</text>
+      <text x="675" y="884">件、异常处理、接口兼容性、数据结构和测试</text>
+      <text x="675" y="903">覆盖，而不是直接复制粘贴。</text>
+    </g>
+  </g>
+
+  <!-- ============ 05 ============ -->
+  <g>
+    <rect x="15" y="960" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="960" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="1038" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">05</text>
+    <text x="70" y="1102" fill="#ffffff" font-size="34" text-anchor="middle">🤖</text>
+    <text x="160" y="1000" fill="#1c2b24" font-size="24" font-weight="bold">第五层：Agent</text>
+    <text x="160" y="1034" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="1062" fill="#1c2b24" font-size="15">从回答系统进入</text>
+    <text x="160" y="1084" fill="#1c2b24" font-size="15">行动系统</text>
+    <line x1="310" y1="980" x2="310" y2="1140" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="1034" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="1056">Agent 的关键不只是自主规划，而是行动后的</text>
+      <text x="330" y="1075">工程控制：该不该调用工具、调用哪个工具、</text>
+      <text x="330" y="1094">参数怎么填、工具失败怎么办、结果是否可信、</text>
+      <text x="330" y="1113">是否继续下一步、有没有权限、有没有成本上</text>
+      <text x="330" y="1132">限、有没有执行日志、有没有人工兜底。</text>
+    </g>
+    <line x1="655" y1="980" x2="655" y2="1140" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="1034" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="1056">更稳妥的判断：如果业务流程稳定、规则明确，</text>
+      <text x="675" y="1075">优先用 Workflow；如果任务路径不固定，需</text>
+      <text x="675" y="1094">要模型动态判断、调用工具、处理多步反馈，</text>
+      <text x="675" y="1113">才考虑 Agent。Agent 不是越复杂越好。</text>
+    </g>
+  </g>
+
+  <!-- ============ 06 ============ -->
+  <g>
+    <rect x="15" y="1170" width="1025" height="200" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="15" y="1170" width="110" height="200" rx="10" fill="#2e7d5b"/>
+    <text x="70" y="1248" fill="#ffffff" font-size="52" font-weight="bold" text-anchor="middle">06</text>
+    <text x="70" y="1312" fill="#ffffff" font-size="34" text-anchor="middle">☁️</text>
+    <text x="160" y="1210" fill="#1c2b24" font-size="24" font-weight="bold">第六层：Agent Runtime</text>
+    <text x="160" y="1244" fill="#2e7d5b" font-size="13" font-weight="bold">👁 看点</text>
+    <text x="160" y="1272" fill="#1c2b24" font-size="15">系统能力 /</text>
+    <text x="160" y="1294" fill="#1c2b24" font-size="15">生产级底座</text>
+    <line x1="310" y1="1190" x2="310" y2="1350" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="330" y="1244" fill="#2e7d5b" font-size="13" font-weight="bold">📋 核心内容</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="330" y="1266">生产环境里真正难的是 Runtime。它解决：</text>
+      <text x="330" y="1285">消息管理、上下文管理、工具管理、状态管理、</text>
+      <text x="330" y="1304">记忆管理、权限控制、错误恢复、执行预算、</text>
+      <text x="330" y="1323">多轮任务调度、人工介入、日志追踪、安全边界、</text>
+      <text x="330" y="1342">成本控制。</text>
+    </g>
+    <line x1="655" y1="1190" x2="655" y2="1350" stroke="#e0e0e0" stroke-width="1"/>
+    <text x="675" y="1244" fill="#2e7d5b" font-size="13" font-weight="bold">🎯 更好的面试表达 / 关键结论</text>
+    <g fill="#1c2b24" font-size="12">
+      <text x="675" y="1266">本质问题是：它为什么调用这个工具？拿到</text>
+      <text x="675" y="1285">了什么结果？下一步为什么这么做？有没有</text>
+      <text x="675" y="1304">权限？失败后怎么恢复？会不会无限循环？</text>
+      <text x="675" y="1323">用了多少 token？执行过程能不能复盘？谁</text>
+      <text x="675" y="1342">来兜底？</text>
+    </g>
+  </g>
+
+  <!-- footer -->
+  <rect x="15" y="1388" width="1025" height="52" rx="10" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+  <text x="185" y="1421" fill="#1c2b24" font-size="17" font-weight="bold" text-anchor="middle">📈 上层看判断力</text>
+  <line x1="345" y1="1399" x2="345" y2="1429" stroke="#9fb3aa" stroke-width="1"/>
+  <text x="527" y="1421" fill="#1c2b24" font-size="17" font-weight="bold" text-anchor="middle">🛠 中层看应用工程能力</text>
+  <line x1="700" y1="1399" x2="700" y2="1429" stroke="#9fb3aa" stroke-width="1"/>
+  <text x="877" y="1421" fill="#1c2b24" font-size="17" font-weight="bold" text-anchor="middle">🛡 下层看系统能力与生产可用性</text>
+  <text x="527" y="1474" fill="#1c2b24" font-size="15" text-anchor="middle">— ●  越往下，越接近真实生产环境。  ● —</text>
+</svg>

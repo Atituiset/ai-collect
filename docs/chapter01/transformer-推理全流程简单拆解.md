@@ -60,7 +60,7 @@ GPT-4 使用的词表大小约为 10 万，意味着模型"认识"约 10 万种�
 
 动画将 4096 维空间简化为 2D 散点图来直观展示：你可以看到"天""气""晴"聚在一起（天气词区域），而"真""好""棒"聚在另一个区域（正面词区域）。这种聚类不是人为设计的，而是模型在大量文本上训练后自然涌现的。
 
-词嵌入的维度（![插图](../images/formulas/257bfa6a_formula_1.png)）是模型的核心超参数。原始 Transformer 使用 512 维，GPT-2 小模型使用 768 维，GPT-3 达到 12288 维，LLaMA-2-70B 使用 8192 维。维度越高，模型能编码的语义信息越精细，但也需要更多数据和算力来训练。
+词嵌入的维度（$d_{\text{model}}$）是模型的核心超参数。原始 Transformer 使用 512 维，GPT-2 小模型使用 768 维，GPT-3 达到 12288 维，LLaMA-2-70B 使用 8192 维。维度越高，模型能编码的语义信息越精细，但也需要更多数据和算力来训练。
 
 ### 位置编码：告诉模型"词在哪里"
 
@@ -72,15 +72,15 @@ GPT-4 使用的词表大小约为 10 万，意味着模型"认识"约 10 万种�
 
 *Attention Is All You Need* 论文使用的是**正弦-余弦位置编码**：
 
-![插图](../images/formulas/257bfa6a_formula_2.png)
+$$PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)$$
 
-![插图](../images/formulas/257bfa6a_formula_3.png)
+$$PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)$$
 
-其中 ![插图](../images/formulas/257bfa6a_formula_4.png) 是位置索引（0, 1, 2, ...），![插图](../images/formulas/257bfa6a_formula_5.png) 是维度索引。低维度对应高频正弦波（相邻位置差异大），高维度对应低频正弦波（远距离位置也能区分）。这种设计的巧妙之处在于：
+其中 $pos$ 是位置索引（0, 1, 2, ...），$i$ 是维度索引。低维度对应高频正弦波（相邻位置差异大），高维度对应低频正弦波（远距离位置也能区分）。这种设计的巧妙之处在于：
 
 - **每个位置有唯一的编码**：不同位置的向量不同
 - **可以泛化到训练时未见过的长度**：正弦函数是连续的，即使推理时序列比训练时更长，位置编码仍然有定义
-- **相对位置可被模型学习**：对于任意固定偏移 ![插图](../images/formulas/257bfa6a_formula_6.png)，![插图](../images/formulas/257bfa6a_formula_7.png) 可以表示为 ![插图](../images/formulas/257bfa6a_formula_8.png) 的线性函数
+- **相对位置可被模型学习**：对于任意固定偏移 $k$，$PE_{pos+k}$ 可以表示为 $PE_{pos}$ 的线性函数
 
 可以看到加入位置编码后，散点图中的点发生了偏移——同一个词在不同位置的表示不再相同。
 
@@ -88,7 +88,7 @@ GPT-4 使用的词表大小约为 10 万，意味着模型"认识"约 10 万种�
 
 **至此，输入文本变成了"带位置信息的语义向量"序列。** 以"今天天气"为例，输入到 Transformer 主体的是四个向量：
 
-![插图](../images/formulas/257bfa6a_formula_9.png)
+$$\mathbf{x}_1 = \mathbf{e}_{\text{今}} + \mathbf{p}_1,\quad \mathbf{x}_2 = \mathbf{e}_{\text{天}} + \mathbf{p}_2,\quad \mathbf{x}_3 = \mathbf{e}_{\text{天}} + \mathbf{p}_3,\quad \mathbf{x}_4 = \mathbf{e}_{\text{气}} + \mathbf{p}_4$$
 
 接下来，这些向量将进入 Transformer 的核心机制：自注意力。
 
@@ -126,17 +126,17 @@ RNN 通过依次阅读序列来传递上下文，但信息必须从一步传到�
 
 Q、K、V 不是凭空产生的，而是通过三个不同的可学习矩阵对输入向量做线性变换得到的：
 
-![插图](../images/formulas/257bfa6a_formula_10.png)
+$$Q = XW_Q,\quad K = XW_K,\quad V = XW_V$$
 
-其中 ![插图](../images/formulas/257bfa6a_formula_11.png) 是输入嵌入矩阵（形状 ![插图](../images/formulas/257bfa6a_formula_12.png)），![插图](../images/formulas/257bfa6a_formula_13.png) 是三个不同的权重矩阵（形状 ![插图](../images/formulas/257bfa6a_formula_14.png)）。![插图](../images/formulas/257bfa6a_formula_15.png) 是序列长度，![插图](../images/formulas/257bfa6a_formula_16.png) 是 Q/K/V 的维度（通常 ![插图](../images/formulas/257bfa6a_formula_17.png)，![插图](../images/formulas/257bfa6a_formula_18.png) 是注意力头数）。
+其中 $X$ 是输入嵌入矩阵（形状 $n \times d_{\text{model}}$），$W_Q, W_K, W_V$ 是三个不同的权重矩阵（形状 $d_{\text{model}} \times d_k$）。$n$ 是序列长度，$d_k$ 是 Q/K/V 的维度（通常 $d_k = d_{\text{model}}/h$，$h$ 是注意力头数）。
 
 **同一组输入向量，乘以不同的矩阵，就产生了不同"视角"的表示。** 动画中可以看到，蓝色的输入点通过不同的矩阵乘法，分别移向 Q 区域、K 区域和 V 区域——这就像同一个人拍了三张不同角度的照片，每张照片突出不同的特征。
 
-为什么不让 Q、K、V 直接等于输入？因为线性投影赋予了模型学习"以什么角度看待输入"的能力。![插图](../images/formulas/257bfa6a_formula_19.png) 学到的可能是"这个词在查询什么类型的依赖关系"，![插图](../images/formulas/257bfa6a_formula_20.png) 学到的可能是"这个词能提供什么类型的线索"，![插图](../images/formulas/257bfa6a_formula_21.png) 学到的可能是"这个词传递什么语义内容"。这种分离让注意力计算更灵活、更精确。
+为什么不让 Q、K、V 直接等于输入？因为线性投影赋予了模型学习"以什么角度看待输入"的能力。$W_Q$ 学到的可能是"这个词在查询什么类型的依赖关系"，$W_K$ 学到的可能是"这个词能提供什么类型的线索"，$W_V$ 学到的可能是"这个词传递什么语义内容"。这种分离让注意力计算更灵活、更精确。
 
 ### 维度的变化
 
-注意维度变化：输入是 ![插图](../images/formulas/257bfa6a_formula_22.png) 维，输出 Q/K/V 是 ![插图](../images/formulas/257bfa6a_formula_23.png) 维。在多头注意力中，![插图](../images/formulas/257bfa6a_formula_24.png)，每个头处理 ![插图](../images/formulas/257bfa6a_formula_25.png) 维的子空间，多头拼接后恢复到 ![插图](../images/formulas/257bfa6a_formula_26.png) 维。这样总计算量不变，但每个头可以专注于不同的语义关系——这在后面讲多头注意力时会详细展开。
+注意维度变化：输入是 $d_{\text{model}}$ 维，输出 Q/K/V 是 $d_k$ 维。在多头注意力中，$d_k = d_{\text{model}}/h$，每个头处理 $d_k$ 维的子空间，多头拼接后恢复到 $d_{\text{model}}$ 维。这样总计算量不变，但每个头可以专注于不同的语义关系——这在后面讲多头注意力时会详细展开。
 
 ## 六、注意力分数与 Softmax
 
@@ -144,7 +144,7 @@ Q、K、V 不是凭空产生的，而是通过三个不同的可学习矩阵对�
 
 有了 Q 和 K，怎么判断"谁该关注谁"？方法简单而优雅：**计算 Q 和 K 的点积**。
 
-![插图](../images/formulas/257bfa6a_formula_27.png)
+$$\text{score}_{ij} = Q_i \cdot K_j^T$$
 
 点积衡量两个向量的相似度。Q\_i 代表"第 i 个词在找什么"，K\_j 代表"第 j 个词能提供什么"。如果二者方向一致（点积大），说明第 i 个词应该关注第 j 个词。
 
@@ -165,13 +165,13 @@ Q、K、V 不是凭空产生的，而是通过三个不同的可学习矩阵对�
 
 ### 第二步：缩放
 
-直接使用点积有一个问题：当 ![插图](../images/formulas/257bfa6a_formula_28.png) 较大时，点积的数值会很大（因为每一维都在贡献），导致 Softmax 函数进入饱和区，梯度趋近于零，训练困难。
+直接使用点积有一个问题：当 $d_k$ 较大时，点积的数值会很大（因为每一维都在贡献），导致 Softmax 函数进入饱和区，梯度趋近于零，训练困难。
 
-解决方案是**除以 ![插图](../images/formulas/257bfa6a_formula_29.png)**：
+解决方案是**除以 $\sqrt{d_k}$**：
 
-![插图](../images/formulas/257bfa6a_formula_30.png)
+$$\text{scaled\_score}_{ij} = \frac{Q_i \cdot K_j^T}{\sqrt{d_k}}$$
 
-为什么是 ![插图](../images/formulas/257bfa6a_formula_31.png)？假设 Q 和 K 的每个分量独立且均值为 0、方差为 1，则点积的均值为 0、方差为 ![插图](../images/formulas/257bfa6a_formula_32.png)。除以 ![插图](../images/formulas/257bfa6a_formula_33.png) 后方差变为 1，让点积的数值范围回到 Softmax 的"舒适区"。
+为什么是 $\sqrt{d_k}$？假设 Q 和 K 的每个分量独立且均值为 0、方差为 1，则点积的均值为 0、方差为 $d_k$。除以 $\sqrt{d_k}$ 后方差变为 1，让点积的数值范围回到 Softmax 的"舒适区"。
 
 > 📄 *Attention Is All You Need* 论文中特别比较了两种注意力：加性注意力（Additive Attention）和缩放点积注意力（Scaled Dot-Product Attention）。后者在实践中更快（可以用矩阵乘法高效实现），效果相当，因此成为标准选择。
 
@@ -179,7 +179,7 @@ Q、K、V 不是凭空产生的，而是通过三个不同的可学习矩阵对�
 
 缩放后的分数通过 Softmax 函数转换为概率分布：
 
-![插图](../images/formulas/257bfa6a_formula_34.png)
+$$\alpha_{ij} = \frac{\exp(\text{scaled\_score}_{ij})}{\sum_k \exp(\text{scaled\_score}_{ik})}$$
 
 Softmax 的作用是：
 
@@ -193,15 +193,15 @@ Softmax 的作用是：
 
 把三步合在一起，就是 *Attention Is All You Need* 中最核心的公式：
 
-![插图](../images/formulas/257bfa6a_formula_35.png)
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
 这个公式被称为**缩放点积注意力（Scaled Dot-Product Attention）**。它简洁到只需要一行数学，却承载了 Transformer 最关键的创新。
 
 ## 七、加权求和：融合上下文信息
 
-有了注意力权重 ![插图](../images/formulas/257bfa6a_formula_36.png)，下一步是**对 V 向量做加权求和**：
+有了注意力权重 $\alpha_{ij}$，下一步是**对 V 向量做加权求和**：
 
-![插图](../images/formulas/257bfa6a_formula_37.png)
+$$\text{output}_i = \sum_j \alpha_{ij} \cdot V_j$$
 
 每个词的输出不再是它自己的嵌入，而是所有词的 V 向量的加权和。
 
@@ -215,13 +215,13 @@ Softmax 的作用是：
 
 ### 注意力的复杂度
 
-值得注意的是，自注意力的计算复杂度是 ![插图](../images/formulas/257bfa6a_formula_38.png)，其中 ![插图](../images/formulas/257bfa6a_formula_39.png) 是序列长度。每个词都要和所有词计算注意力分数，因此长序列的计算量会快速增长。这也是为什么大语言模型通常限制输入长度（如 4K、8K、32K tokens），以及为什么近年出现了线性注意力、Flash Attention 等优化方案。
+值得注意的是，自注意力的计算复杂度是 $O(n^2 \cdot d_k)$，其中 $n$ 是序列长度。每个词都要和所有词计算注意力分数，因此长序列的计算量会快速增长。这也是为什么大语言模型通常限制输入长度（如 4K、8K、32K tokens），以及为什么近年出现了线性注意力、Flash Attention 等优化方案。
 
 ## 八、多头注意力：从不同角度理解上下文
 
 ### 为什么需要多头？
 
-单头注意力只有一组 ![插图](../images/formulas/257bfa6a_formula_40.png)，只能从一种"视角"理解词间关系。但语言中的依赖关系是多样的：
+单头注意力只有一组 $W_Q, W_K, W_V$，只能从一种"视角"理解词间关系。但语言中的依赖关系是多样的：
 
 - **语义关系**："猫"和"狗"是同类事物
 - **语法关系**："吃"和"苹果"是动宾搭配
@@ -230,9 +230,9 @@ Softmax 的作用是：
 
 **多头注意力（Multi-Head Attention）** 让模型同时从多个角度理解上下文，每个"头"独立计算注意力，关注不同类型的关系：
 
-![插图](../images/formulas/257bfa6a_formula_41.png)
+$$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
 
-![插图](../images/formulas/257bfa6a_formula_42.png)
+$$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O$$
 
 ![图片](../images/257bfa6a_abfc12ea1e7b.webp)
 
@@ -242,15 +242,15 @@ Softmax 的作用是：
 - **语法结构头**（红色）：关注句法依赖——"天气"是主语，"真好"是谓语
 - **位置信息头**（紫色）：关注词的相对位置——相邻词之间的位置关系
 
-每个头独立运算，产出一个 ![插图](../images/formulas/257bfa6a_formula_43.png) 维的向量。![插图](../images/formulas/257bfa6a_formula_44.png) 个头拼接后总维度为 ![插图](../images/formulas/257bfa6a_formula_45.png)，再通过输出投影矩阵 ![插图](../images/formulas/257bfa6a_formula_46.png) 映射回 ![插图](../images/formulas/257bfa6a_formula_47.png) 维。
+每个头独立运算，产出一个 $d_v$ 维的向量。$h$ 个头拼接后总维度为 $h \cdot d_v$，再通过输出投影矩阵 $W^O$ 映射回 $d_{\text{model}}$ 维。
 
 ### 为什么拆分成多头而非直接用全维度？
 
-直觉上，![插图](../images/formulas/257bfa6a_formula_48.png) 个 ![插图](../images/formulas/257bfa6a_formula_49.png) 维头的总参数量和单头 ![插图](../images/formulas/257bfa6a_formula_50.png) 维相同，计算量也相当。但多头的效果显著优于单头——论文中的消融实验证实了这一点。
+直觉上，$h$ 个 $d_k$ 维头的总参数量和单头 $d_{\text{model}}$ 维相同，计算量也相当。但多头的效果显著优于单头——论文中的消融实验证实了这一点。
 
 原因在于**集成效应**：每个头可以在自己的子空间中独立学习一种关系模式，不受其他模式的干扰。如果只用一个头，它必须把所有类型的关系压缩到同一个空间中，学习会更加困难。多头的优势类似于集成学习中的"弱学习者组合"——每个头不一定完美，但组合起来效果更强。
 
-> 📄 原始论文使用 ![插图](../images/formulas/257bfa6a_formula_51.png) 个头，![插图](../images/formulas/257bfa6a_formula_52.png)。现代大模型更多采用更多头数（如 GPT-3 有 96 个头），配合 GQA（Grouped Query Attention）等优化来平衡性能和效率。
+> 📄 原始论文使用 $h = 8$ 个头，$d_k = d_v = d_{\text{model}}/h = 512/8 = 64$。现代大模型更多采用更多头数（如 GPT-3 有 96 个头），配合 GQA（Grouped Query Attention）等优化来平衡性能和效率。
 
 ## 九、残差连接与层归一化
 
@@ -262,7 +262,7 @@ Softmax 的作用是：
 
 残差连接的思路极为简单：**让输入直接"跳"到输出**，与子层输出相加：
 
-![插图](../images/formulas/257bfa6a_formula_53.png)
+$$\text{output} = x + \text{Sublayer}(x)$$
 
 这样，即使子层学到的变换很小（接近零），信息也可以通过"跳跃连接"无损传递。反向传播时，梯度也可以通过跳跃连接直接流向前层，不受子层梯度衰减的影响。
 
@@ -272,9 +272,9 @@ Softmax 的作用是：
 
 每个残差连接之后紧跟着**层归一化**，将向量的每个特征归一化为均值 0、方差 1：
 
-![插图](../images/formulas/257bfa6a_formula_54.png)
+$$\text{LayerNorm}(x) = \frac{x - \mu}{\sigma} \cdot \gamma + \beta$$
 
-其中 ![插图](../images/formulas/257bfa6a_formula_55.png) 和 ![插图](../images/formulas/257bfa6a_formula_56.png) 是该样本所有特征的均值和标准差，![插图](../images/formulas/257bfa6a_formula_57.png) 和 ![插图](../images/formulas/257bfa6a_formula_58.png) 是可学习的缩放和偏移参数。
+其中 $\mu$ 和 $\sigma$ 是该样本所有特征的均值和标准差，$\gamma$ 和 $\beta$ 是可学习的缩放和偏移参数。
 
 层归一化的作用是稳定每一层的数值范围。如果没有它，经过多层累加后数值可能爆炸或坍缩，训练会变得不稳定。归一化确保每一层的输入始终在一个合理的数值范围内。
 
@@ -294,11 +294,11 @@ Softmax 的作用是：
 
 前馈网络的结构是经典的"先扩展再压缩"：
 
-![插图](../images/formulas/257bfa6a_formula_60.png)
+$$\text{FFN}(x) = W_2 \cdot \text{GELU}(xW_1 + b_1) + b_2$$
 
-- 第一层：![插图](../images/formulas/257bfa6a_formula_61.png) 将维度从 ![插图](../images/formulas/257bfa6a_formula_62.png) 扩展到 ![插图](../images/formulas/257bfa6a_formula_63.png)（例如从 512 到 2048）
+- 第一层：$W_1$ 将维度从 $d_{\text{model}}$ 扩展到 $4 \times d_{\text{model}}$（例如从 512 到 2048）
 - 激活函数：GELU（Gaussian Error Linear Unit），比 ReLU 更平滑
-- 第二层：![插图](../images/formulas/257bfa6a_formula_64.png) 将维度从 ![插图](../images/formulas/257bfa6a_formula_65.png) 压缩回 ![插图](../images/formulas/257bfa6a_formula_66.png)
+- 第二层：$W_2$ 将维度从 $4 \times d_{\text{model}}$ 压缩回 $d_{\text{model}}$
 
 为什么要先扩展再压缩？**中间的"宽层"为模型提供了额外的表达能力**。高维空间中更容易用线性变换分离不同的语义特征，激活函数引入非线性，最后的压缩层将这些非线性特征重新编码回紧凑的表示。可以类比为：先把信号"放大"以便看清细节，再"浓缩"提取精华。
 
@@ -315,13 +315,13 @@ FFN 之后同样有残差连接和层归一化，构成第二个 Add & Norm。
 1. **自注意力**：让每个词看到上下文，融合相关信息
 2. **前馈网络**：对每个词的表示做非线性变换，增强表达能力
 
-每个 Block 的输入输出形状完全相同（![插图](../images/formulas/257bfa6a_formula_67.png)），因此可以无缝堆叠。
+每个 Block 的输入输出形状完全相同（$n \times d_{\text{model}}$），因此可以无缝堆叠。
 
 ### 层数与规模
 
 原始 Transformer 有 6 层编码器 + 6 层解码器。现代 LLM 的规模远超于此：
 
-| 模型 | 层数 | ![插图](../images/formulas/257bfa6a_formula_68.png) | 参数量 |
+| 模型 | 层数 | $d_{\text{model}}$ | 参数量 |
 | --- | --- | --- | --- |
 | GPT-2 | 24 | 1600 | 1.5B |
 | GPT-3 | 96 | 12288 | 175B |
@@ -338,9 +338,9 @@ FFN 之后同样有残差连接和层归一化，构成第二个 Add & Norm。
 
 序列中最后一个 Token 的输出向量经过一个线性层（通常与嵌入矩阵共享权重，称为"tie weights"），映射为词表大小的 logits 向量，再经过 Softmax 得到概率分布：
 
-![插图](../images/formulas/257bfa6a_formula_69.png)
+$$P(\text{next token}) = \text{softmax}(x_{\text{last}} \cdot E^T)$$
 
-其中 ![插图](../images/formulas/257bfa6a_formula_70.png) 是嵌入矩阵。这个概率分布告诉模型：词表中每个 Token 是"下一个词"的概率分别是多少。
+其中 $E$ 是嵌入矩阵。这个概率分布告诉模型：词表中每个 Token 是"下一个词"的概率分别是多少。
 
 ### 自回归：一次一个字
 
@@ -392,13 +392,13 @@ ChatGPT 类产品通常使用 Top-p + Temperature 的组合，在"合理"和"多
 
 自回归生成有一个显而易见的效率问题：每生成一个新 Token，整个序列都要重新经过所有 Transformer 层。
 
-比如生成第 5 个 Token 时，输入序列是 5 个 Token，前 4 个 Token 的计算和生成第 4 个 Token 时完全重复——它们的 Q、K、V 值没有变化，但又被算了一遍。随着生成长度增加，计算量以 ![插图](../images/formulas/257bfa6a_formula_71.png) 增长。
+比如生成第 5 个 Token 时，输入序列是 5 个 Token，前 4 个 Token 的计算和生成第 4 个 Token 时完全重复——它们的 Q、K、V 值没有变化，但又被算了一遍。随着生成长度增加，计算量以 $O(n^2)$ 增长。
 
 ### KV Cache：避免重复计算
 
 **KV Cache** 是解决这个问题的关键优化。
 
-回忆注意力的计算：![插图](../images/formulas/257bfa6a_formula_72.png)。其中 ![插图](../images/formulas/257bfa6a_formula_73.png) 来自当前 Token 的查询，![插图](../images/formulas/257bfa6a_formula_74.png) 和 ![插图](../images/formulas/257bfa6a_formula_75.png) 来自所有 Token 的键和值。
+回忆注意力的计算：$\text{softmax}(QK^T/\sqrt{d_k})V$。其中 $Q$ 来自当前 Token 的查询，$K$ 和 $V$ 来自所有 Token 的键和值。
 
 关键观察：**已生成 Token 的 K 和 V 不会因为新 Token 的加入而改变**（因为每个 Token 的 K/V 只取决于它自身的嵌入和投影矩阵，与其他 Token 无关）。因此，可以把已计算过的 K 和 V 缓存起来，每步只需：
 
@@ -407,7 +407,7 @@ ChatGPT 类产品通常使用 Top-p + Temperature 的组合，在"合理"和"多
 3. 用新 Token 的 Q 与缓存中所有 K 计算注意力
 4. 用注意力权重对缓存中所有 V 加权求和
 
-这样，每步的计算量从 ![插图](../images/formulas/257bfa6a_formula_76.png) 降低到 ![插图](../images/formulas/257bfa6a_formula_77.png)（只算新 Token 与所有历史 Token 的注意力），内存开销增加 ![插图](../images/formulas/257bfa6a_formula_78.png)（存储历史 KV）。
+这样，每步的计算量从 $O(n^2)$ 降低到 $O(n)$（只算新 Token 与所有历史 Token 的注意力），内存开销增加 $O(n)$（存储历史 KV）。
 
 KV Cache 是大模型推理加速最重要的技术之一。没有它，ChatGPT 的响应速度会慢数十倍。但 KV Cache 也带来了显存压力——长对话中 KV Cache 可能占据数 GB 显存，这也是为什么出现了 PagedAttention、MQA（Multi-Query Attention）、GQA（Grouped Query Attention）等进一步优化的方案。
 
@@ -457,4 +457,4 @@ KV Cache 是大模型推理加速最重要的技术之一。没有它，ChatGPT 
 
 这就是 Scaling Law 的故事：同样的架构，规模足够大，就能涌现出令人惊叹的能力。而这一切的起点，就是那篇只有 8 页正文的论文和它提出的那个简洁公式：
 
-![插图](../images/formulas/257bfa6a_formula_80.png)
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$

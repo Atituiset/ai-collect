@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1015 647" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1015" height="647" fill="#faf9f6"/>
+
+  <text x="507" y="42" text-anchor="middle" font-size="26" font-weight="bold" fill="#1c2b24">突破上下文限制的技术方案</text>
+
+  <!-- card 1: 稀疏注意力 -->
+  <rect x="20" y="80" width="465" height="170" rx="14" fill="#ffffff" stroke="#7c6bb0" stroke-width="2.5"/>
+  <text x="255" y="120" text-anchor="middle" font-size="21" font-weight="bold" fill="#7c6bb0">⚡ 稀疏注意力</text>
+  <text x="255" y="158" text-anchor="middle" font-size="16" fill="#1c2b24">不让每个 token 看所有 token</text>
+  <text x="255" y="188" text-anchor="middle" font-size="16" fill="#1c2b24">只看"重要的"邻居</text>
+  <text x="255" y="226" text-anchor="middle" font-size="17" font-weight="bold" fill="#7c6bb0">O(n²) → O(n·log n) 或 O(n)</text>
+
+  <!-- card 2: 滑动窗口注意力 -->
+  <rect x="530" y="80" width="465" height="170" rx="14" fill="#ffffff" stroke="#2e7d5b" stroke-width="2.5"/>
+  <text x="762" y="120" text-anchor="middle" font-size="21" font-weight="bold" fill="#2e7d5b">🪟 滑动窗口注意力</text>
+  <text x="762" y="158" text-anchor="middle" font-size="16" fill="#1c2b24">每个 token 只看前后 N 个</text>
+  <text x="762" y="188" text-anchor="middle" font-size="16" fill="#1c2b24">像手电筒照一小段</text>
+  <text x="762" y="226" text-anchor="middle" font-size="17" font-weight="bold" fill="#2e7d5b">Mistral / Longformer 在用</text>
+
+  <!-- card 3: KV Cache 压缩 -->
+  <rect x="20" y="290" width="465" height="170" rx="14" fill="#ffffff" stroke="#c9a227" stroke-width="2.5"/>
+  <text x="255" y="330" text-anchor="middle" font-size="21" font-weight="bold" fill="#a8851b">🗜️ KV Cache 压缩</text>
+  <text x="255" y="368" text-anchor="middle" font-size="16" fill="#1c2b24">量化 / 淘汰不重要的 KV 对</text>
+  <text x="255" y="398" text-anchor="middle" font-size="16" fill="#1c2b24">用更少的显存存更多上下文</text>
+  <text x="255" y="436" text-anchor="middle" font-size="17" font-weight="bold" fill="#a8851b">GQA / MQA / PagedAttention</text>
+
+  <!-- card 4: 位置编码外推 -->
+  <rect x="530" y="290" width="465" height="170" rx="14" fill="#ffffff" stroke="#c05a7a" stroke-width="2.5"/>
+  <text x="762" y="330" text-anchor="middle" font-size="21" font-weight="bold" fill="#c05a7a">📐 位置编码外推</text>
+  <text x="762" y="368" text-anchor="middle" font-size="16" fill="#1c2b24">让位置编码适应更长序列</text>
+  <text x="762" y="398" text-anchor="middle" font-size="16" fill="#1c2b24">不重新训练就能扩展长度</text>
+  <text x="762" y="436" text-anchor="middle" font-size="17" font-weight="bold" fill="#c05a7a">RoPE / ALiBi / YaRN</text>
+
+  <!-- card 5: Ring Attention -->
+  <rect x="277" y="495" width="460" height="125" rx="14" fill="#ffffff" stroke="#3a8ea0" stroke-width="2.5"/>
+  <text x="507" y="535" text-anchor="middle" font-size="21" font-weight="bold" fill="#3a8ea0">🧩 Ring Attention / 分块并行</text>
+  <text x="507" y="572" text-anchor="middle" font-size="16" fill="#1c2b24">把长序列拆给多张 GPU 分工处理</text>
+  <text x="507" y="604" text-anchor="middle" font-size="17" font-weight="bold" fill="#3a8ea0">Gemini 1M+ tokens 靠这招</text>
+</svg>

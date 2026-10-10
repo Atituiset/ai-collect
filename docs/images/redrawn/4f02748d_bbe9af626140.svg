@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1013 594" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1013" height="594" fill="#faf9f6"/>
+
+  <text x="506" y="48" text-anchor="middle" font-size="27" font-weight="bold" fill="#1c2b24">Context 长度 vs 计算量（O(n²) 增长）</text>
+
+  <!-- axes -->
+  <line x1="150" y1="90" x2="150" y2="505" stroke="#1c2b24" stroke-width="2"/>
+  <line x1="150" y1="505" x2="980" y2="505" stroke="#1c2b24" stroke-width="2"/>
+  <text x="38" y="300" text-anchor="middle" font-size="18" fill="#1c2b24" transform="rotate(-90 38 300)">计算量（相对值）</text>
+  <text x="565" y="568" text-anchor="middle" font-size="19" fill="#1c2b24">Context 长度 (tokens)</text>
+
+  <!-- bars -->
+  <g>
+    <rect x="190" y="497" width="110" height="8" rx="4" fill="#a8d5c2"/>
+    <rect x="350" y="475" width="110" height="30" rx="4" fill="#7fc0a5"/>
+    <rect x="510" y="400" width="110" height="105" rx="4" fill="#55ab88"/>
+    <rect x="670" y="230" width="110" height="275" rx="4" fill="#2e7d5b"/>
+    <rect x="830" y="100" width="110" height="405" rx="4" fill="#1f5c42"/>
+  </g>
+
+  <!-- value labels -->
+  <g text-anchor="middle" font-weight="bold" fill="#1c2b24">
+    <text x="245" y="487" font-size="17">1×</text>
+    <text x="405" y="465" font-size="17">16×</text>
+    <text x="565" y="390" font-size="17">256×</text>
+    <text x="725" y="220" font-size="18">4,096×</text>
+    <text x="885" y="90" font-size="18">16,384×</text>
+  </g>
+
+  <!-- category labels -->
+  <g text-anchor="middle" font-size="18" fill="#1c2b24">
+    <text x="245" y="535">1K</text>
+    <text x="405" y="535">4K</text>
+    <text x="565" y="535">16K</text>
+    <text x="725" y="535">64K</text>
+    <text x="885" y="535">128K</text>
+  </g>
+</svg>

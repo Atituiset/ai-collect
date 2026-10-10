@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 461" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="1195" height="461" fill="#faf9f6"/>
+<rect x="6" y="12" width="54" height="437" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="23.0" y="230.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 23.0 230.5)">Verification &amp;</text>
+<text x="43.0" y="230.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 43.0 230.5)">Evaluation</text>
+<rect x="64" y="12" width="250" height="100" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="57.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Task and Benchmark</text>
+<text x="189.0" y="79.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Grounding</text>
+<line x1="314" y1="62.0" x2="336" y2="62.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="12" width="843" height="100" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="38" font-size="14" fill="#1c2b24">SWE-bench (Jimenez et al., 2024), Terminal-Bench (Merrill et al., 2026), WebArena (Zhou et al., 2024),</text>
+<text x="350" y="58" font-size="14" fill="#1c2b24">VisualWebArena (Koh et al., 2024), BrowserGym (Chezelles et al., 2024), WorkArena (Drouin et al., 2024), OSWorld</text>
+<text x="350" y="78" font-size="14" fill="#1c2b24">(Xie et al., 2024), AgentBench (Liu et al., 2023a), GAIA (Mialon et al., 2023), TheAgentCompany (Xu et al., 2024),</text>
+<text x="350" y="98" font-size="14" fill="#1c2b24">WorkArena++ (Boisvert et al., 2024)</text>
+<rect x="64" y="120" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="146.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Pre-Execution</text>
+<text x="189.0" y="168.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Readiness Validation</text>
+<line x1="314" y1="151.0" x2="336" y2="151.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="120" width="843" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="146" font-size="14" fill="#1c2b24">Repo2Run (Hu et al., 2025a), HAL (Kapoor et al., 2025), SWE-agent (Yang et al., 2024), SWE-ReX (SWE-agent</text>
+<text x="350" y="166" font-size="14" fill="#1c2b24">Team, 2024), OpenHands (Wang et al., 2025b), LLM-as-Judge Survey (Gu et al., 2024)</text>
+<rect x="64" y="190" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="216.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Controlled Execution</text>
+<text x="189.0" y="238.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Trace Capture</text>
+<line x1="314" y1="221.0" x2="336" y2="221.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="190" width="843" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="216" font-size="14" fill="#1c2b24">SWE-agent (Yang et al., 2024), OpenHands (Wang et al., 2025b), SWE-ReX (SWE-agent Team, 2024), HAL (Kapoor</text>
+<text x="350" y="236" font-size="14" fill="#1c2b24">et al., 2025), R2E-Gym (Jain et al., 2025), LangChain Deep-Agent Evaluation (LangChain, 2025b)</text>
+<rect x="64" y="260" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="295.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Multi-Level Judgement</text>
+<text x="189.0" y="317.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Failure Attribution</text>
+<line x1="314" y1="300.5" x2="336" y2="300.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="260" width="843" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="286" font-size="14" fill="#1c2b24">ReAct (Yao et al., 2023), G-Eval (Liu et al., 2023b), MT-Bench and Chatbot Arena (Zheng et al., 2023), LLM-as-Judge</text>
+<text x="350" y="306" font-size="14" fill="#1c2b24">Survey (Gu et al., 2024), SWE-bench (Jimenez et al., 2024), OSWorld (Xie et al., 2024), Terminal-Bench (Merrill et</text>
+<text x="350" y="326" font-size="14" fill="#1c2b24">al., 2026), HAL (Kapoor et al., 2025)</text>
+<rect x="64" y="349" width="250" height="100" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="394.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Continuous Regression</text>
+<text x="189.0" y="416.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Deployment Feedback</text>
+<line x1="314" y1="399.0" x2="336" y2="399.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="349" width="843" height="100" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="375" font-size="14" fill="#1c2b24">Anthropic Evals (Anthropic, 2026b), LangChain Deep-Agent Evaluation (LangChain, 2025b), promptfoo (promptfoo</text>
+<text x="350" y="395" font-size="14" fill="#1c2b24">contributors, 2026), DeepEval (Confident AI, 2026), RAGAS (Es et al., 2024), lm-evaluation-harness (Gao et al.,</text>
+<text x="350" y="415" font-size="14" fill="#1c2b24">2021), Reproducible LM Evaluation (Biderman et al., 2024), verifiers (Prime Intellect, 2026), R2E-Gym (Jain et al.,</text>
+<text x="350" y="435" font-size="14" fill="#1c2b24">2025), Meta-Harness (Lee et al., 2026)</text>
+</svg>

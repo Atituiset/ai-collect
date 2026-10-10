@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 810" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="810" fill="#faf9f6"/>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d5b"/>
+    </marker>
+  </defs>
+
+  <text x="540" y="45" fill="#1c2b24" font-size="38" font-weight="bold" text-anchor="middle">面试的本质：团队梯队建设图</text>
+  <text x="540" y="78" fill="#1c2b24" font-size="15" text-anchor="middle">— ●  企业不是在招最完美的人，而是在补某个位置、某类能力、某种权限  ● —</text>
+
+  <!-- ===== panel 1 ===== -->
+  <rect x="10" y="92" width="690" height="180" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="104" width="26" height="26" rx="5" fill="#2e7d5b"/>
+  <text x="35" y="123" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">1</text>
+  <text x="58" y="124" fill="#1c2b24" font-size="20" font-weight="bold">为什么会有面试？</text>
+  <g fill="#f2f7f4" stroke="#9fb3aa" stroke-width="1">
+    <rect x="30" y="142" width="180" height="72" rx="6"/>
+    <rect x="255" y="142" width="180" height="72" rx="6"/>
+    <rect x="480" y="142" width="200" height="72" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="12" text-anchor="middle">
+    <text x="120" y="166" font-size="14" font-weight="bold">👥 团队出现缺口</text>
+    <text x="120" y="188">业务增长 / 组织变化</text>
+    <text x="120" y="206">离职流失 / 战略调整</text>
+    <text x="345" y="166" font-size="14" font-weight="bold">🎯 某个位置缺人</text>
+    <text x="345" y="188">岗位空缺</text>
+    <text x="345" y="206">影响交付或目标达成</text>
+    <text x="580" y="162" font-size="14" font-weight="bold">🔧 需要补足</text>
+    <text x="580" y="182">能力 / 权限 / 风险承担</text>
+    <text x="580" y="200">补能力短板</text>
+    <text x="580" y="216">补权限空白 / 分担风险</text>
+  </g>
+  <g stroke="#2e7d5b" stroke-width="2" marker-end="url(#arr)">
+    <line x1="214" y1="178" x2="251" y2="178"/>
+    <line x1="439" y1="178" x2="476" y2="178"/>
+  </g>
+  <rect x="30" y="226" width="650" height="32" rx="6" fill="#ffffff" stroke="#9fb3aa" stroke-width="1" stroke-dasharray="5 3"/>
+  <text x="355" y="247" fill="#1c2b24" font-size="13.5" text-anchor="middle">💡 <tspan font-weight="bold">本质：面试是为了解决团队的结构性缺口，而不是为了评价一个人。</tspan></text>
+
+  <!-- ===== panel 3 (right top) ===== -->
+  <rect x="715" y="92" width="355" height="380" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="727" y="104" width="26" height="26" rx="5" fill="#b58900"/>
+  <text x="740" y="123" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">3</text>
+  <text x="763" y="124" fill="#b58900" font-size="20" font-weight="bold">企业真正关心什么？</text>
+  <g fill="#fdf6e3" stroke="#b58900" stroke-width="1">
+    <rect x="727" y="142" width="331" height="56" rx="6"/>
+    <rect x="727" y="206" width="331" height="56" rx="6"/>
+    <rect x="727" y="270" width="331" height="56" rx="6"/>
+    <rect x="727" y="334" width="331" height="56" rx="6"/>
+  </g>
+  <g fill="#1c2b24">
+    <text x="745" y="166" font-size="14" font-weight="bold" fill="#b58900">🪑 缺什么位置</text>
+    <text x="880" y="162" font-size="11">这个坑是哪一个岗位？</text>
+    <text x="880" y="180" font-size="11">在组织中承担什么角色？</text>
+    <text x="745" y="230" font-size="14" font-weight="bold" fill="#b58900">➕ 缺什么能力</text>
+    <text x="880" y="226" font-size="11">需要哪些关键能力？</text>
+    <text x="880" y="244" font-size="11">现有能力哪里不足？</text>
+    <text x="745" y="294" font-size="14" font-weight="bold" fill="#b58900">🔒 给多少权限</text>
+    <text x="880" y="290" font-size="11">需要什么级别的决策权？</text>
+    <text x="880" y="308" font-size="11">能调动哪些资源？</text>
+    <text x="745" y="358" font-size="14" font-weight="bold" fill="#b58900">⚠️ 承担什么风险</text>
+    <text x="880" y="354" font-size="11">可能面临哪些业务风险？</text>
+    <text x="880" y="372" font-size="11">结果不好时谁来兜底？</text>
+  </g>
+  <rect x="727" y="402" width="331" height="58" rx="6" fill="#fdf6e3" stroke="#b58900" stroke-width="1"/>
+  <text x="750" y="428" fill="#b58900" font-size="13" font-weight="bold">★ 所以，面试不是抽象评价一个人，</text>
+  <text x="770" y="450" fill="#b58900" font-size="13" font-weight="bold">而是判断你能否补这个坑。</text>
+
+  <!-- ===== panel 2 ===== -->
+  <rect x="10" y="288" width="690" height="192" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="300" width="26" height="26" rx="5" fill="#2e7d5b"/>
+  <text x="35" y="319" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">2</text>
+  <text x="58" y="320" fill="#1c2b24" font-size="20" font-weight="bold">团队三层梯队</text>
+
+  <ellipse cx="130" cy="356" rx="105" ry="24" fill="#f6f0fb" stroke="#7b5ea7" stroke-width="1.2"/>
+  <ellipse cx="130" cy="398" rx="92" ry="24" fill="#eef4fb" stroke="#4a6fa5" stroke-width="1.2"/>
+  <ellipse cx="130" cy="440" rx="80" ry="24" fill="#e9f4ee" stroke="#2e7d5b" stroke-width="1.2"/>
+  <g fill="#1c2b24" font-size="13" font-weight="bold" text-anchor="middle">
+    <text x="130" y="360">👑 第一梯队干部</text>
+    <text x="130" y="402">👥 第二梯队干部</text>
+    <text x="130" y="444">👥 第三梯队干活的人</text>
+  </g>
+  <g stroke="#2e7d5b" stroke-width="1.5" marker-end="url(#arr)" fill="none">
+    <line x1="238" y1="356" x2="272" y2="356"/>
+    <line x1="225" y1="398" x2="272" y2="398"/>
+    <line x1="213" y1="440" x2="272" y2="440"/>
+  </g>
+  <g fill="#f2f7f4" stroke="#9fb3aa" stroke-width="1">
+    <rect x="278" y="332" width="400" height="44" rx="6"/>
+    <rect x="278" y="380" width="400" height="44" rx="6"/>
+    <rect x="278" y="428" width="400" height="44" rx="6"/>
+  </g>
+  <g fill="#1c2b24" font-size="12" text-anchor="middle">
+    <text x="478" y="350" font-weight="bold">核心工作 / 高忠诚 / 高权限 / 很少外招</text>
+    <text x="478" y="368">定战略 / 拿结果 / 带组织 / 扛责任</text>
+    <text x="478" y="398" font-weight="bold">外招重点 / 能力输入 / 良性竞争 / 机制补位</text>
+    <text x="478" y="416">挑大梁 / 建机制 / 带团队 / 接班梯队</text>
+    <text x="478" y="446" font-weight="bold">一线交付 / 一个萝卜一个坑 / 专业达标 / 稳定执行</text>
+    <text x="478" y="464">做交付 / 重执行 / 保质量 / 持续改进</text>
+  </g>
+
+  <!-- ===== panel 4 ===== -->
+  <rect x="10" y="496" width="510" height="298" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="22" y="508" width="26" height="26" rx="5" fill="#2e7d5b"/>
+  <text x="35" y="527" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">4</text>
+  <text x="58" y="528" fill="#1c2b24" font-size="19" font-weight="bold">不同梯队的面试重点</text>
+  <text x="275" y="528" fill="#666666" font-size="12">不同层级，考察重点不同</text>
+
+  <g font-size="12" text-anchor="middle">
+    <rect x="22" y="544" width="486" height="34" fill="#e8e4dc"/>
+    <g fill="#1c2b24" font-weight="bold">
+      <text x="70" y="566">梯队层级</text>
+      <text x="168" y="566">👤 能力与素质</text>
+      <text x="266" y="566">📊 思维与价值观</text>
+      <text x="364" y="566">♟ 行为与经验</text>
+      <text x="462" y="566">🎓 结果与潜力</text>
+    </g>
+    <rect x="22" y="578" width="486" height="52" fill="#7b5ea7"/>
+    <rect x="22" y="630" width="486" height="52" fill="#4a6fa5"/>
+    <rect x="22" y="682" width="486" height="52" fill="#2e7d5b"/>
+    <g fill="#ffffff" font-weight="bold">
+      <text x="70" y="609">第一梯队</text>
+      <text x="70" y="661">第二梯队</text>
+      <text x="70" y="713">第三梯队</text>
+    </g>
+    <g fill="#1c2b24">
+      <rect x="118" y="578" width="98" height="52" fill="#f6f0fb"/>
+      <rect x="216" y="578" width="98" height="52" fill="#f6f0fb"/>
+      <rect x="314" y="578" width="98" height="52" fill="#f6f0fb"/>
+      <rect x="412" y="578" width="96" height="52" fill="#f6f0fb"/>
+      <rect x="118" y="630" width="98" height="52" fill="#eef4fb"/>
+      <rect x="216" y="630" width="98" height="52" fill="#eef4fb"/>
+      <rect x="314" y="630" width="98" height="52" fill="#eef4fb"/>
+      <rect x="412" y="630" width="96" height="52" fill="#eef4fb"/>
+      <rect x="118" y="682" width="98" height="52" fill="#e9f4ee"/>
+      <rect x="216" y="682" width="98" height="52" fill="#e9f4ee"/>
+      <rect x="314" y="682" width="98" height="52" fill="#e9f4ee"/>
+      <rect x="412" y="682" width="96" height="52" fill="#e9f4ee"/>
+      <text x="167" y="609">忠诚度</text><text x="265" y="609">信任</text><text x="363" y="609">资源观</text><text x="460" y="609">业务共识</text>
+      <text x="167" y="661">管理能力</text><text x="265" y="661">机制建设</text><text x="363" y="661">带队能力</text><text x="460" y="661">新能力输入</text>
+      <text x="167" y="713">专业能力</text><text x="265" y="713">执行力</text><text x="363" y="713">稳定性</text><text x="460" y="713">学习能力</text>
+    </g>
+  </g>
+  <rect x="22" y="746" width="486" height="34" rx="6" fill="#f2f7f4"/>
+  <text x="265" y="768" fill="#1c2b24" font-size="12.5" text-anchor="middle">📋 一句话：层级越高，看格局与责任；层级越低，看专业与执行。</text>
+
+  <!-- ===== panel 5 ===== -->
+  <rect x="535" y="496" width="535" height="298" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="547" y="508" width="26" height="26" rx="5" fill="#2e7d5b"/>
+  <text x="560" y="527" fill="#ffffff" font-size="16" font-weight="bold" text-anchor="middle">5</text>
+  <text x="583" y="528" fill="#1c2b24" font-size="19" font-weight="bold">候选人应该怎么回答？</text>
+  <text x="855" y="528" fill="#666666" font-size="12">（回答框架）</text>
+
+  <g fill="#f2f7f4" stroke="#2e7d5b" stroke-width="1">
+    <rect x="549" y="560" width="86" height="130" rx="8"/>
+    <rect x="651" y="560" width="86" height="130" rx="8"/>
+    <rect x="753" y="560" width="86" height="130" rx="8"/>
+    <rect x="855" y="560" width="86" height="130" rx="8"/>
+    <rect x="957" y="560" width="86" height="130" rx="8"/>
+  </g>
+  <g fill="#2e7d5b">
+    <circle cx="592" cy="552" r="12"/><circle cx="694" cy="552" r="12"/><circle cx="796" cy="552" r="12"/><circle cx="898" cy="552" r="12"/><circle cx="1000" cy="552" r="12"/>
+  </g>
+  <g fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">
+    <text x="592" y="557">1</text><text x="694" y="557">2</text><text x="796" y="557">3</text><text x="898" y="557">4</text><text x="1000" y="557">5</text>
+  </g>
+  <g fill="#1c2b24" font-size="11" text-anchor="middle">
+    <text x="592" y="600">🧍</text>
+    <text x="592" y="626" font-weight="bold">我是谁</text>
+    <text x="592" y="652">我的背景</text>
+    <text x="592" y="670">与核心标签</text>
+    <text x="694" y="600">🎯</text>
+    <text x="694" y="618" font-weight="bold">我解决过</text>
+    <text x="694" y="636" font-weight="bold">什么问题</text>
+    <text x="694" y="658">关键项目 / 场景</text>
+    <text x="694" y="676">问题与挑战</text>
+    <text x="796" y="600">🧩</text>
+    <text x="796" y="618" font-weight="bold">我能补</text>
+    <text x="796" y="636" font-weight="bold">什么坑</text>
+    <text x="796" y="658">匹配岗位缺口</text>
+    <text x="796" y="676">能力与价值</text>
+    <text x="898" y="600">🛡</text>
+    <text x="898" y="618" font-weight="bold">我能承担</text>
+    <text x="898" y="636" font-weight="bold">什么责任</text>
+    <text x="898" y="658">可承担的权限</text>
+    <text x="898" y="676">与目标结果</text>
+    <text x="1000" y="600">👍</text>
+    <text x="1000" y="626" font-weight="bold">为什么选我</text>
+    <text x="1000" y="652">差异化优势</text>
+    <text x="1000" y="670">与确定性</text>
+  </g>
+  <g stroke="#2e7d5b" stroke-width="2" marker-end="url(#arr)">
+    <line x1="637" y1="625" x2="647" y2="625"/>
+    <line x1="739" y1="625" x2="749" y2="625"/>
+    <line x1="841" y1="625" x2="851" y2="625"/>
+    <line x1="943" y1="625" x2="953" y2="625"/>
+  </g>
+
+  <rect x="549" y="712" width="509" height="56" rx="8" fill="#e9f4ee" stroke="#2e7d5b" stroke-width="1"/>
+  <text x="803" y="747" fill="#2e7d5b" font-size="18" font-weight="bold" text-anchor="middle">🏆 你的回答，必须证明：你正好能补这个坑</text>
+</svg>

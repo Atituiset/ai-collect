@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 519" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="519" fill="#faf9f6"/>
+  <defs>
+    <marker id="up" markerWidth="9" markerHeight="9" refX="4.5" refY="1" orient="auto">
+      <path d="M0,7 L4.5,0 L9,7 Z" fill="#2e7d5b"/>
+    </marker>
+  </defs>
+  <rect x="10" y="10" width="1060" height="499" rx="16" fill="none" stroke="#c9c4ba" stroke-width="1.4"/>
+
+  <!-- O band -->
+  <rect x="30" y="24" width="1020" height="92" rx="12" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.5"/>
+  <rect x="50" y="46" width="44" height="44" rx="10" fill="#2e7d5b"/>
+  <text x="72" y="77" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle">O</text>
+  <text x="110" y="76" font-size="18" font-weight="700" fill="#1c2b24">Observability &amp; Operations</text>
+  <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+    <rect x="470" y="40" width="135" height="60" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="537" y="76">Tracing</text>
+    <rect x="615" y="40" width="135" height="60" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="682" y="76">Cost and latency</text>
+    <rect x="760" y="40" width="135" height="60" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="827" y="70">Failure</text>
+    <text x="827" y="86">diagnosis</text>
+    <rect x="905" y="40" width="135" height="60" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="972" y="70">Reliability</text>
+    <text x="972" y="86">engineering</text>
+  </g>
+
+  <!-- up arrows O <- cards -->
+  <line x1="150" y1="130" x2="150" y2="120" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="405" y1="130" x2="405" y2="120" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="660" y1="130" x2="660" y2="120" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="915" y1="130" x2="915" y2="120" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+
+  <!-- middle cards E T C L -->
+  <g>
+    <rect x="30" y="132" width="240" height="204" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+    <rect x="44" y="146" width="38" height="38" rx="9" fill="#2e7d5b"/>
+    <text x="63" y="173" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">E</text>
+    <text x="92" y="158" font-size="15" font-weight="700" fill="#1c2b24">Execution</text>
+    <text x="92" y="176" font-size="15" font-weight="700" fill="#1c2b24">Environment</text>
+    <text x="92" y="194" font-size="15" font-weight="700" fill="#1c2b24">&amp; Sandbox</text>
+    <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+      <rect x="44" y="216" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="150" y="235">Sandboxed runtime</text>
+      <rect x="44" y="254" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="150" y="273">Resource boundary</text>
+      <rect x="44" y="292" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="150" y="311">Execution substrate</text>
+    </g>
+  </g>
+  <g>
+    <rect x="285" y="132" width="240" height="204" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+    <rect x="299" y="146" width="38" height="38" rx="9" fill="#2e7d5b"/>
+    <text x="318" y="173" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">T</text>
+    <text x="347" y="165" font-size="15" font-weight="700" fill="#1c2b24">Tool Interface</text>
+    <text x="347" y="183" font-size="15" font-weight="700" fill="#1c2b24">&amp; Protocol</text>
+    <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+      <rect x="299" y="216" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="405" y="235">Tool schema</text>
+      <rect x="299" y="254" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="405" y="273">Protocol layer</text>
+      <rect x="299" y="292" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="405" y="311">Tool routing</text>
+    </g>
+  </g>
+  <g>
+    <rect x="540" y="132" width="240" height="204" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+    <rect x="554" y="146" width="38" height="38" rx="9" fill="#2e7d5b"/>
+    <text x="573" y="173" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">C</text>
+    <text x="602" y="158" font-size="15" font-weight="700" fill="#1c2b24">Context</text>
+    <text x="602" y="176" font-size="15" font-weight="700" fill="#1c2b24">&amp; Memory</text>
+    <text x="602" y="194" font-size="15" font-weight="700" fill="#1c2b24">Management</text>
+    <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+      <rect x="554" y="216" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="660" y="235">Active context</text>
+      <rect x="554" y="254" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="660" y="273">Session state</text>
+      <rect x="554" y="292" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="660" y="311">Long-term memory</text>
+    </g>
+  </g>
+  <g>
+    <rect x="795" y="132" width="240" height="204" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+    <rect x="809" y="146" width="38" height="38" rx="9" fill="#2e7d5b"/>
+    <text x="828" y="173" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">L</text>
+    <text x="857" y="165" font-size="15" font-weight="700" fill="#1c2b24">Lifecycle</text>
+    <text x="857" y="183" font-size="15" font-weight="700" fill="#1c2b24">&amp; Orchestration</text>
+    <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+      <rect x="809" y="216" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="915" y="235">Single-agent loop</text>
+      <rect x="809" y="254" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="915" y="273">Multi-agent coord.</text>
+      <rect x="809" y="292" width="212" height="30" rx="7" fill="#faf9f6" stroke="#2e7d5b" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="915" y="311">Task pipeline</text>
+    </g>
+  </g>
+
+  <!-- up arrows cards <- V -->
+  <line x1="150" y1="350" x2="150" y2="340" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="405" y1="350" x2="405" y2="340" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="660" y1="350" x2="660" y2="340" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="915" y1="350" x2="915" y2="340" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+
+  <!-- V band -->
+  <rect x="30" y="352" width="1020" height="88" rx="12" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.5"/>
+  <rect x="50" y="374" width="44" height="44" rx="10" fill="#2e7d5b"/>
+  <text x="72" y="405" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle">V</text>
+  <text x="110" y="402" font-size="18" font-weight="700" fill="#1c2b24">Verification &amp; Evaluation</text>
+  <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+    <rect x="380" y="368" width="126" height="56" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="443" y="390">Benchmark</text>
+    <text x="443" y="406">grounding</text>
+    <rect x="516" y="368" width="126" height="56" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="579" y="390">Readiness</text>
+    <text x="579" y="406">evaluation</text>
+    <rect x="652" y="368" width="126" height="56" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="715" y="390">Trace</text>
+    <text x="715" y="406">capture</text>
+    <rect x="788" y="368" width="126" height="56" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="851" y="390">Judgement</text>
+    <text x="851" y="406">&amp; attribution</text>
+    <rect x="924" y="368" width="126" height="56" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="987" y="390">Regression</text>
+    <text x="987" y="406">feedback</text>
+  </g>
+
+  <!-- up arrows V <- G -->
+  <line x1="280" y1="450" x2="280" y2="444" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="540" y1="450" x2="540" y2="444" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+  <line x1="800" y1="450" x2="800" y2="444" stroke="#2e7d5b" stroke-width="1.8" marker-end="url(#up)"/>
+
+  <!-- G band -->
+  <rect x="30" y="452" width="1020" height="56" rx="12" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.5"/>
+  <rect x="50" y="463" width="34" height="34" rx="9" fill="#2e7d5b"/>
+  <text x="67" y="487" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">G</text>
+  <text x="100" y="486" font-size="17" font-weight="700" fill="#1c2b24">Governance &amp; Security</text>
+  <g font-size="12.5" fill="#1c2b24" text-anchor="middle">
+    <rect x="470" y="462" width="135" height="36" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="537" y="485">Permission control</text>
+    <rect x="615" y="462" width="135" height="36" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="682" y="485">Policy enforcement</text>
+    <rect x="760" y="462" width="135" height="36" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="827" y="485">Audit trail</text>
+    <rect x="905" y="462" width="135" height="36" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.1" stroke-dasharray="5 4"/>
+    <text x="972" y="485">Security guardrails</text>
+  </g>
+</svg>

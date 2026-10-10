@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1103 531" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+<rect width="1103" height="531" fill="#faf9f6"/>
+<rect x="6" y="12" width="54" height="507" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="23.0" y="265.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 23.0 265.5)">Governance &amp;</text>
+<text x="43.0" y="265.5" font-size="15" font-weight="700" fill="#1c2b24" text-anchor="middle" transform="rotate(-90 43.0 265.5)">Security</text>
+<rect x="64" y="12" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="47.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Permission Models</text>
+<text x="189.0" y="69.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">and Identity Management</text>
+<line x1="314" y1="52.5" x2="336" y2="52.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="12" width="751" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="38" font-size="14" fill="#1c2b24">Progent (Shi et al., 2025a), Contextual Agent Security (Tsai &amp; Bagdasarian, 2025), Authenticated</text>
+<text x="350" y="58" font-size="14" fill="#1c2b24">Delegation (South et al., 2025), SAGA (Syros et al., 2025), IsolateGPT (Wu et al., 2025), Permission</text>
+<text x="350" y="78" font-size="14" fill="#1c2b24">Manifests (Marro et al., 2025)</text>
+<rect x="64" y="101" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="147.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Lifecycle Hooks</text>
+<line x1="314" y1="141.5" x2="336" y2="141.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="101" width="751" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="127" font-size="14" fill="#1c2b24">PromptShield (Jacob et al., 2024), DataSentinel (Liu et al., 2025), ShieldAgent (Chen et al., 2025b),</text>
+<text x="350" y="147" font-size="14" fill="#1c2b24">ControlValve (Jia et al., 2025), CaMeL (Debenedetti et al., 2025), AgentSpec (Wang et al., 2026),</text>
+<text x="350" y="167" font-size="14" fill="#1c2b24">AgentDoG (Liu et al., 2026a)</text>
+<rect x="64" y="190" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="225.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Component</text>
+<text x="189.0" y="247.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Hardening</text>
+<line x1="314" y1="230.5" x2="336" y2="230.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="190" width="751" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="216" font-size="14" fill="#1c2b24">Instruction Hierarchy (Wallace et al., 2024), SecAlign (Chen et al., 2025a), Llama Guard (Inan et al.,</text>
+<text x="350" y="236" font-size="14" fill="#1c2b24">2023), MCP Safety Audit (Radosevich &amp; Halloran, 2025), Jumping the Line (Trail of Bits, 2025), ETDI</text>
+<text x="350" y="256" font-size="14" fill="#1c2b24">(Bhatt et al., 2025), SAFEFLOW (Li et al., 2025)</text>
+<rect x="64" y="279" width="250" height="62" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="305.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Declarative</text>
+<text x="189.0" y="327.0" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Constitutions</text>
+<line x1="314" y1="310.0" x2="336" y2="310.0" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="279" width="751" height="62" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="305" font-size="14" fill="#1c2b24">Claude&#x27;s Constitution (Anthropic, 2026a), AutoHarness (AIMing Lab, 2026), Progent Policies (Shi et al.,</text>
+<text x="350" y="325" font-size="14" fill="#1c2b24">2025a), Formal-LLM (Li et al., 2024), VeriSafeAgent (Lee et al., 2025), AgentSpec (Wang et al., 2026)</text>
+<rect x="64" y="349" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="384.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Audit</text>
+<text x="189.0" y="406.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Infrastructure</text>
+<line x1="314" y1="389.5" x2="336" y2="389.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="349" width="751" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="375" font-size="14" fill="#1c2b24">AutoHarness (AIMing Lab, 2026), SAGA (Syros et al., 2025), AgentMonitor (Naihin et al., 2023),</text>
+<text x="350" y="395" font-size="14" fill="#1c2b24">AgentAuditor (Luo et al., 2025), SentinelAgent (He et al., 2025), OWASP LLM Top 10 (OWASP</text>
+<text x="350" y="415" font-size="14" fill="#1c2b24">Foundation, 2025), Agentic Governance Practices (Shavit et al., 2023)</text>
+<rect x="64" y="438" width="250" height="81" rx="10" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="1.4"/>
+<text x="189.0" y="473.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Agent Security</text>
+<text x="189.0" y="495.5" font-size="16" font-weight="700" fill="#1c2b24" text-anchor="middle">Landscape</text>
+<line x1="314" y1="478.5" x2="336" y2="478.5" stroke="#2e7d5b" stroke-width="1.6"/>
+<rect x="336" y="438" width="751" height="81" rx="8" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.2"/>
+<text x="350" y="464" font-size="14" fill="#1c2b24">Attack and Defense Landscape (Kim et al., 2026), Clawed and Dangerous (Sleim et al., 2026),</text>
+<text x="350" y="484" font-size="14" fill="#1c2b24">AgentDojo (Debenedetti et al., 2024), Jailbreaking LLMs (Andriuschenko et al., 2024), Adaptive</text>
+<text x="350" y="504" font-size="14" fill="#1c2b24">Attacks (Nasr et al., 2025), Slopsquatting (Spracklen et al., 2025)</text>
+</svg>

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 550" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1080" height="550" fill="#faf9f6"/>
+  <defs>
+    <marker id="arr12" markerWidth="11" markerHeight="11" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#2e7d5b"/>
+    </marker>
+  </defs>
+
+  <!-- cycle arrows -->
+  <path d="M695 70 C 790 70 830 100 872 158" fill="none" stroke="#2e7d5b" stroke-width="3.5" marker-end="url(#arr12)"/>
+  <path d="M890 280 C 905 330 905 355 888 392" fill="none" stroke="#2e7d5b" stroke-width="3.5" marker-end="url(#arr12)"/>
+  <path d="M595 460 C 560 465 525 465 490 460" fill="none" stroke="#2e7d5b" stroke-width="3.5" marker-end="url(#arr12)"/>
+  <path d="M192 392 C 175 355 175 330 190 282" fill="none" stroke="#2e7d5b" stroke-width="3.5" marker-end="url(#arr12)"/>
+  <path d="M208 158 C 250 100 290 70 383 70" fill="none" stroke="#2e7d5b" stroke-width="3.5" marker-end="url(#arr12)"/>
+
+  <!-- center -->
+  <ellipse cx="540" cy="278" rx="132" ry="76" fill="#e9f2ec" stroke="#2e7d5b" stroke-width="2"/>
+  <text x="540" y="262" font-size="21" font-weight="700" fill="#1c2b24" text-anchor="middle">Validation &amp;</text>
+  <text x="540" y="288" font-size="21" font-weight="700" fill="#1c2b24" text-anchor="middle">Evaluation</text>
+  <text x="540" y="312" font-size="13" fill="#55605a" text-anchor="middle">Task-to-Feedback Lifecycle</text>
+
+  <!-- Stage 1 -->
+  <rect x="390" y="16" width="300" height="108" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.3"/>
+  <circle cx="420" cy="44" r="15" fill="#2e7d5b"/>
+  <text x="420" y="50" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+  <text x="446" y="40" font-size="11.5" font-weight="700" fill="#55605a">Stage 1</text>
+  <text x="446" y="58" font-size="14.5" font-weight="700" fill="#1c2b24">Task and Benchmarking</text>
+  <text x="446" y="76" font-size="14.5" font-weight="700" fill="#1c2b24">Grounding</text>
+  <line x1="410" y1="88" x2="670" y2="88" stroke="#c9c4ba" stroke-width="1"/>
+  <text x="540" y="108" font-size="13" fill="#55605a" text-anchor="middle">What is evaluated?</text>
+
+  <!-- Stage 2 -->
+  <rect x="730" y="160" width="300" height="108" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.3"/>
+  <circle cx="760" cy="188" r="15" fill="#2e7d5b"/>
+  <text x="760" y="194" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="786" y="184" font-size="11.5" font-weight="700" fill="#55605a">Stage 2</text>
+  <text x="786" y="202" font-size="14.5" font-weight="700" fill="#1c2b24">Pre-execution</text>
+  <text x="786" y="220" font-size="14.5" font-weight="700" fill="#1c2b24">Readiness Validation</text>
+  <line x1="750" y1="232" x2="1010" y2="232" stroke="#c9c4ba" stroke-width="1"/>
+  <text x="880" y="252" font-size="13" fill="#55605a" text-anchor="middle">Is the setup ready?</text>
+
+  <!-- Stage 3 -->
+  <rect x="600" y="404" width="300" height="108" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.3"/>
+  <circle cx="630" cy="432" r="15" fill="#2e7d5b"/>
+  <text x="630" y="438" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+  <text x="656" y="428" font-size="11.5" font-weight="700" fill="#55605a">Stage 3</text>
+  <text x="656" y="446" font-size="14.5" font-weight="700" fill="#1c2b24">Controlled Execution</text>
+  <text x="656" y="464" font-size="14.5" font-weight="700" fill="#1c2b24">and Trace Capture</text>
+  <line x1="620" y1="476" x2="880" y2="476" stroke="#c9c4ba" stroke-width="1"/>
+  <text x="750" y="496" font-size="13" fill="#55605a" text-anchor="middle">What happened?</text>
+
+  <!-- Stage 4 -->
+  <rect x="180" y="404" width="300" height="108" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.3"/>
+  <circle cx="210" cy="432" r="15" fill="#2e7d5b"/>
+  <text x="210" y="438" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+  <text x="236" y="428" font-size="11.5" font-weight="700" fill="#55605a">Stage 4</text>
+  <text x="236" y="446" font-size="14.5" font-weight="700" fill="#1c2b24">Multi-level Judgement</text>
+  <text x="236" y="464" font-size="14.5" font-weight="700" fill="#1c2b24">and Failure Attribution</text>
+  <line x1="200" y1="476" x2="460" y2="476" stroke="#c9c4ba" stroke-width="1"/>
+  <text x="330" y="496" font-size="13" fill="#55605a" text-anchor="middle">Why did it succeed or fail?</text>
+
+  <!-- Stage 5 -->
+  <rect x="50" y="160" width="300" height="108" rx="12" fill="#ffffff" stroke="#c9c4ba" stroke-width="1.3"/>
+  <circle cx="80" cy="188" r="15" fill="#2e7d5b"/>
+  <text x="80" y="194" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+  <text x="106" y="184" font-size="11.5" font-weight="700" fill="#55605a">Stage 5</text>
+  <text x="106" y="202" font-size="14.5" font-weight="700" fill="#1c2b24">Continuous Regression</text>
+  <text x="106" y="220" font-size="14.5" font-weight="700" fill="#1c2b24">and Deployment Feedback</text>
+  <line x1="70" y1="232" x2="330" y2="232" stroke="#c9c4ba" stroke-width="1"/>
+  <text x="200" y="252" font-size="13" fill="#55605a" text-anchor="middle">How does it improve?</text>
+</svg>

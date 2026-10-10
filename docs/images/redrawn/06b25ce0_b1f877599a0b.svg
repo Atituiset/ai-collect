@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 537" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c2b24"/>
+    </marker>
+  </defs>
+  <rect width="1080" height="537" fill="#faf9f6"/>
+
+  <!-- ===== left: X and W^Q W^K W^V ===== -->
+  <text x="110" y="205" text-anchor="middle" font-size="24" font-weight="bold" font-style="italic" fill="#4a7c3a">X</text>
+  <g fill="#b7d99a" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="70" y="220" width="80" height="100"/>
+    <path d="M70,245 H150 M70,270 H150 M70,295 H150 M90,220 V320 M110,220 V320 M130,220 V320" fill="none"/>
+  </g>
+  <text x="45" y="240" font-size="18" font-weight="bold" font-style="italic" fill="#4a7c3a">x<tspan dy="4" font-size="13">1</tspan></text>
+  <text x="45" y="265" font-size="18" font-weight="bold" font-style="italic" fill="#4a7c3a">x<tspan dy="4" font-size="13">2</tspan></text>
+  <text x="45" y="290" font-size="18" font-weight="bold" font-style="italic" fill="#4a7c3a">x<tspan dy="4" font-size="13">3</tspan></text>
+  <text x="45" y="315" font-size="18" font-weight="bold" font-style="italic" fill="#4a7c3a">x<tspan dy="4" font-size="13">4</tspan></text>
+
+  <!-- dashed multiply arrows -->
+  <line x1="152" y1="240" x2="262" y2="120" stroke="#1c2b24" stroke-width="1.6" stroke-dasharray="6,5"/>
+  <text x="195" y="175" font-size="18" fill="#1c2b24">×</text>
+  <line x1="152" y1="270" x2="262" y2="272" stroke="#1c2b24" stroke-width="1.6" stroke-dasharray="6,5"/>
+  <text x="205" y="262" font-size="18" fill="#1c2b24">×</text>
+  <line x1="152" y1="300" x2="262" y2="420" stroke="#1c2b24" stroke-width="1.6" stroke-dasharray="6,5"/>
+  <text x="195" y="375" font-size="18" fill="#1c2b24">×</text>
+
+  <!-- W^Q -->
+  <text x="262" y="58" font-size="24" font-weight="bold" font-style="italic" fill="#6a5ea8">W<tspan dy="-8" font-size="16">Q</tspan></text>
+  <g fill="#c9c3e0" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="270" y="75" width="75" height="85"/>
+    <path d="M270,96 H345 M270,117 H345 M270,138 H345 M289,75 V160 M308,75 V160 M327,75 V160" fill="none"/>
+  </g>
+  <text x="388" y="62" font-size="22" font-weight="bold" font-style="italic"><tspan fill="#6a5ea8">Q</tspan><tspan fill="#1c2b24"> = </tspan><tspan fill="#4a7c3a">X</tspan><tspan fill="#6a5ea8">W</tspan><tspan dy="-8" font-size="14" fill="#6a5ea8">Q</tspan></text>
+  <text x="360" y="125" font-size="22" fill="#1c2b24">=</text>
+  <g fill="#c9c3e0" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="385" y="75" width="80" height="85"/>
+    <path d="M385,96 H465 M385,117 H465 M385,138 H465 M405,75 V160 M425,75 V160 M445,75 V160" fill="none"/>
+  </g>
+
+  <!-- W^K -->
+  <text x="262" y="213" font-size="24" font-weight="bold" font-style="italic" fill="#c07a1e">W<tspan dy="-8" font-size="16">K</tspan></text>
+  <g fill="#f2d3a7" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="270" y="230" width="75" height="85"/>
+    <path d="M270,251 H345 M270,272 H345 M270,293 H345 M289,230 V315 M308,230 V315 M327,230 V315" fill="none"/>
+  </g>
+  <text x="388" y="217" font-size="22" font-weight="bold" font-style="italic"><tspan fill="#c07a1e">K</tspan><tspan fill="#1c2b24"> = </tspan><tspan fill="#4a7c3a">X</tspan><tspan fill="#c07a1e">W</tspan><tspan dy="-8" font-size="14" fill="#c07a1e">K</tspan></text>
+  <text x="360" y="280" font-size="22" fill="#1c2b24">=</text>
+  <g fill="#f2d3a7" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="385" y="230" width="80" height="85"/>
+    <path d="M385,251 H465 M385,272 H465 M385,293 H465 M405,230 V315 M425,230 V315 M445,230 V315" fill="none"/>
+  </g>
+
+  <!-- W^V -->
+  <text x="262" y="368" font-size="24" font-weight="bold" font-style="italic" fill="#3a6ea8">W<tspan dy="-8" font-size="16">V</tspan></text>
+  <g fill="#a9cbe8" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="270" y="385" width="75" height="85"/>
+    <path d="M270,406 H345 M270,427 H345 M270,448 H345 M289,385 V470 M308,385 V470 M327,385 V470" fill="none"/>
+  </g>
+  <text x="388" y="372" font-size="22" font-weight="bold" font-style="italic"><tspan fill="#3a6ea8">V</tspan><tspan fill="#1c2b24"> = </tspan><tspan fill="#4a7c3a">X</tspan><tspan fill="#3a6ea8">W</tspan><tspan dy="-8" font-size="14" fill="#3a6ea8">V</tspan></text>
+  <text x="360" y="435" font-size="22" fill="#1c2b24">=</text>
+  <g fill="#a9cbe8" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="385" y="385" width="80" height="85"/>
+    <path d="M385,406 H465 M385,427 H465 M385,448 H465 M405,385 V470 M425,385 V470 M445,385 V470" fill="none"/>
+  </g>
+
+  <text x="268" y="505" font-size="20" font-weight="bold"><tspan fill="#1c2b24">Compute the </tspan><tspan fill="#6a5ea8">Q</tspan><tspan fill="#1c2b24">, </tspan><tspan fill="#c07a1e">K</tspan><tspan fill="#1c2b24"> and </tspan><tspan fill="#3a6ea8">V</tspan><tspan fill="#1c2b24"> Matrices</tspan></text>
+
+  <!-- divider + big yellow arrow -->
+  <line x1="540" y1="20" x2="540" y2="517" stroke="#1c2b24" stroke-width="2" stroke-dasharray="10,8"/>
+  <polygon points="500,95 552,95 552,72 610,120 552,168 552,145 500,145" fill="#f5c142" stroke="#1c2b24" stroke-width="1.5"/>
+
+  <!-- ===== right top: Q x K^T / sqrt(d_k) = S ===== -->
+  <text x="687" y="38" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#6a5ea8">Q</text>
+  <g fill="#c9c3e0" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="655" y="48" width="65" height="70"/>
+    <path d="M655,65 H720 M655,83 H720 M655,100 H720 M671,48 V118 M687,48 V118 M703,48 V118" fill="none"/>
+  </g>
+  <text x="745" y="90" font-size="20" fill="#1c2b24">×</text>
+  <text x="812" y="32" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#c07a1e">K<tspan dy="-8" font-size="15">T</tspan></text>
+  <g fill="#f2d3a7" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="775" y="48" width="70" height="70"/>
+    <path d="M775,65 H845 M775,83 H845 M775,100 H845 M792,48 V118 M810,48 V118 M828,48 V118" fill="none"/>
+  </g>
+  <line x1="640" y1="140" x2="862" y2="140" stroke="#1c2b24" stroke-width="2"/>
+  <text x="750" y="172" text-anchor="middle" font-size="24" font-weight="bold" font-style="italic" fill="#1c2b24">√<tspan text-decoration="overline">d</tspan><tspan dy="5" font-size="15">k</tspan></text>
+  <text x="882" y="90" font-size="22" fill="#1c2b24">=</text>
+  <text x="945" y="32" text-anchor="middle" font-size="22" font-weight="bold" font-style="italic" fill="#b3402e">S</text>
+  <g fill="#d95f4b" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="905" y="42" width="80" height="98"/>
+    <path d="M905,66 H985 M905,91 H985 M905,115 H985 M925,42 V140 M945,42 V140 M965,42 V140" fill="none"/>
+  </g>
+  <text x="945" y="168" text-anchor="middle" font-size="18" fill="#1c2b24">Scaled Scores</text>
+
+  <!-- ===== right middle: Softmax(S) = P ===== -->
+  <text x="652" y="275" text-anchor="middle" font-size="26" font-weight="bold" font-style="italic" fill="#1c2b24">Softmax</text>
+  <text x="735" y="285" font-size="52" fill="#1c2b24">(</text>
+  <g fill="#d95f4b" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="760" y="225" width="80" height="85"/>
+    <path d="M760,246 H840 M760,267 H840 M760,288 H840 M780,225 V310 M800,225 V310 M820,225 V310" fill="none"/>
+  </g>
+  <text x="773" y="212" text-anchor="middle" font-size="20" font-weight="bold" font-style="italic" fill="#b3402e">S</text>
+  <text x="848" y="285" font-size="52" fill="#1c2b24">)</text>
+  <text x="878" y="275" font-size="22" fill="#1c2b24">=</text>
+  <text x="947" y="212" text-anchor="middle" font-size="20" font-weight="bold" font-style="italic" fill="#3a8a8a">P</text>
+  <g fill="#cfe8ec" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="907" y="225" width="80" height="85"/>
+    <path d="M907,246 H987 M907,267 H987 M907,288 H987 M927,225 V310 M947,225 V310 M967,225 V310" fill="none"/>
+  </g>
+  <text x="947" y="338" text-anchor="middle" font-size="18" fill="#1c2b24">Attention Weights</text>
+
+  <!-- ===== right bottom: P x V = Z ===== -->
+  <text x="692" y="378" text-anchor="middle" font-size="20" font-weight="bold" font-style="italic" fill="#3a8a8a">P</text>
+  <g fill="#cfe8ec" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="655" y="390" width="75" height="85"/>
+    <path d="M655,411 H730 M655,432 H730 M655,453 H730 M674,390 V475 M693,390 V475 M711,390 V475" fill="none"/>
+  </g>
+  <text x="753" y="440" font-size="20" fill="#1c2b24">×</text>
+  <text x="817" y="378" text-anchor="middle" font-size="20" font-weight="bold" font-style="italic" fill="#3a6ea8">V</text>
+  <g fill="#a9cbe8" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="775" y="390" width="80" height="85"/>
+    <path d="M775,411 H855 M775,432 H855 M775,453 H855 M795,390 V475 M815,390 V475 M835,390 V475" fill="none"/>
+  </g>
+  <text x="878" y="440" font-size="22" fill="#1c2b24">=</text>
+  <text x="937" y="378" text-anchor="middle" font-size="20" font-weight="bold" font-style="italic" fill="#c0877a">Z</text>
+  <g fill="#f2d7d0" stroke="#1c2b24" stroke-width="1.2">
+    <rect x="905" y="390" width="65" height="85"/>
+    <path d="M905,411 H970 M905,432 H970 M905,453 H970 M921,390 V475 M937,390 V475 M954,390 V475" fill="none"/>
+  </g>
+  <text x="988" y="408" font-size="17" font-weight="bold" font-style="italic" fill="#c0877a">z<tspan dy="4" font-size="12">1</tspan></text>
+  <text x="988" y="429" font-size="17" font-weight="bold" font-style="italic" fill="#c0877a">z<tspan dy="4" font-size="12">2</tspan></text>
+  <text x="988" y="450" font-size="17" font-weight="bold" font-style="italic" fill="#c0877a">z<tspan dy="4" font-size="12">3</tspan></text>
+  <text x="988" y="471" font-size="17" font-weight="bold" font-style="italic" fill="#c0877a">z<tspan dy="4" font-size="12">4</tspan></text>
+</svg>

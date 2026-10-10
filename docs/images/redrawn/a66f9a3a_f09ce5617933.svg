@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1055 1491" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">
+  <rect width="1055" height="1491" fill="#faf9f6"/>
+
+  <text x="527" y="68" fill="#1c2b24" font-size="44" font-weight="bold" text-anchor="middle">简历案例对比：哪些信息更有价值？</text>
+  <text x="527" y="118" fill="#1c2b24" font-size="22" text-anchor="middle">从普通表达，到高价值表达｜看清每个模块的优化点</text>
+  <text x="527" y="160" fill="#2e7d5b" font-size="16" text-anchor="middle">ⓘ 注意：优化不是造假，而是围绕目标岗位突出更有价值的信息。</text>
+
+  <!-- ===== case panels ===== -->
+  <rect x="25" y="190" width="430" height="600" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <rect x="45" y="210" width="390" height="44" rx="6" fill="#e8e4dc"/>
+  <text x="240" y="239" fill="#1c2b24" font-size="20" font-weight="bold" text-anchor="middle">案例A｜普通型简历</text>
+
+  <rect x="600" y="190" width="430" height="600" rx="10" fill="#ffffff" stroke="#2e7d5b" stroke-width="2"/>
+  <rect x="620" y="210" width="390" height="44" rx="6" fill="#2e7d5b"/>
+  <text x="815" y="239" fill="#ffffff" font-size="20" font-weight="bold" text-anchor="middle">案例B｜高势能简历 ♛</text>
+
+  <!-- panel A rows -->
+  <g fill="#1c2b24" font-size="15">
+    <text x="55" y="300">● <tspan font-weight="bold">姓名：</tspan>随意</text>
+    <line x1="45" y1="320" x2="435" y2="320" stroke="#ddd" stroke-width="1"/>
+    <text x="55" y="355">◎ <tspan font-weight="bold">定位：</tspan>新媒体领域从业者</text>
+    <line x1="45" y1="375" x2="435" y2="375" stroke="#ddd" stroke-width="1"/>
+    <text x="55" y="412">★ <tspan font-weight="bold">专业技能 / 特长：</tspan></text>
+    <text x="70" y="442">· 新媒体领域从业者, 全网粉丝20W</text>
+    <text x="70" y="470">· 某平台热门课程讲师</text>
+    <line x1="45" y1="490" x2="435" y2="490" stroke="#ddd" stroke-width="1"/>
+    <text x="55" y="527">🎓 <tspan font-weight="bold">教育信息：</tspan>北京师范大学本科</text>
+    <line x1="45" y1="547" x2="435" y2="547" stroke="#ddd" stroke-width="1"/>
+    <text x="55" y="584">🏢 <tspan font-weight="bold">公司信息：</tspan>某知名互联网公司2年新媒体</text>
+    <text x="70" y="612">运营经历，主要负责内容策划与推广</text>
+    <line x1="45" y1="632" x2="435" y2="632" stroke="#ddd" stroke-width="1"/>
+    <text x="55" y="669">📁 <tspan font-weight="bold">项目信息：</tspan></text>
+    <text x="70" y="699">· 主导短视频账号从0到20W粉丝的增长</text>
+    <text x="70" y="727">· 参与直播项目的策划与执行，提高订单</text>
+    <text x="82" y="755">转化率，具体数据xxx</text>
+  </g>
+
+  <!-- panel B rows -->
+  <g fill="#1c2b24" font-size="15">
+    <text x="630" y="300">● <tspan font-weight="bold">姓名：</tspan>随意</text>
+    <line x1="620" y1="320" x2="1010" y2="320" stroke="#ddd" stroke-width="1"/>
+    <text x="630" y="355">◎ <tspan font-weight="bold">定位：</tspan><tspan fill="#2e7d5b" font-weight="bold">AI领域专家</tspan></text>
+    <line x1="620" y1="375" x2="1010" y2="375" stroke="#ddd" stroke-width="1"/>
+    <text x="630" y="412">★ <tspan font-weight="bold">专业技能 / 特长：</tspan></text>
+    <text x="645" y="442">· <tspan fill="#2e7d5b" font-weight="bold">AI领域专家</tspan>, 全网粉丝<tspan fill="#2e7d5b" font-weight="bold">50W</tspan></text>
+    <text x="645" y="470">· <tspan fill="#2e7d5b" font-weight="bold">《XXX》书籍作者</tspan></text>
+    <line x1="620" y1="490" x2="1010" y2="490" stroke="#ddd" stroke-width="1"/>
+    <text x="630" y="527">🎓 <tspan font-weight="bold">教育信息：</tspan><tspan fill="#2e7d5b" font-weight="bold">清华大学本硕连读</tspan></text>
+    <line x1="620" y1="547" x2="1010" y2="547" stroke="#ddd" stroke-width="1"/>
+    <text x="630" y="584">🏢 <tspan font-weight="bold">公司信息：</tspan><tspan fill="#2e7d5b" font-weight="bold">OpenAI 3年工作经历</tspan>，</text>
+    <text x="645" y="612">负责代码开发</text>
+    <line x1="620" y1="632" x2="1010" y2="632" stroke="#ddd" stroke-width="1"/>
+    <text x="630" y="669">📁 <tspan font-weight="bold">项目信息：</tspan></text>
+    <text x="645" y="699">· <tspan fill="#2e7d5b" font-weight="bold">ChatGPT模型调优</tspan></text>
+  </g>
+
+  <!-- middle arrows -->
+  <text x="527" y="320" fill="#2e7d5b" font-size="20" font-weight="bold" text-anchor="middle">信息价值</text>
+  <text x="527" y="348" fill="#2e7d5b" font-size="20" font-weight="bold" text-anchor="middle">提升</text>
+  <text x="527" y="400" fill="#2e7d5b" font-size="30" text-anchor="middle">➤➤</text>
+  <rect x="465" y="445" width="125" height="40" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.2"/>
+  <text x="527" y="471" fill="#1c2b24" font-size="15" text-anchor="middle">🏷 标签更清晰</text>
+  <rect x="465" y="525" width="125" height="40" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.2"/>
+  <text x="527" y="551" fill="#1c2b24" font-size="15" text-anchor="middle">🛡 背书更强</text>
+  <rect x="465" y="605" width="125" height="40" rx="8" fill="#ffffff" stroke="#2e7d5b" stroke-width="1.2"/>
+  <text x="527" y="631" fill="#1c2b24" font-size="15" text-anchor="middle">💎 项目更稀缺</text>
+
+  <!-- ===== optimization cards ===== -->
+  <text x="527" y="855" fill="#1c2b24" font-size="34" font-weight="bold" text-anchor="middle">每个部分的优化点在哪？</text>
+
+  <g font-size="13" fill="#1c2b24">
+    <!-- card 1 -->
+    <rect x="15" y="885" width="195" height="330" rx="8" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="30" y="955" width="165" height="34" rx="6" fill="#2e7d5b"/>
+    <text x="112" y="978" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">1. 定位 / 抬头</text>
+    <text x="30" y="1015">从泛化的职业描述，变成</text>
+    <text x="30" y="1037">明确的个人标签。</text>
+    <text x="30" y="1075">让 HR 一眼知道你是谁，</text>
+    <text x="30" y="1097">适合什么岗位。</text>
+    <text x="30" y="1155" font-weight="bold">优化方向：岗位相关 +</text>
+    <text x="30" y="1177" font-weight="bold">身份标签化。</text>
+    <!-- card 2 -->
+    <rect x="220" y="885" width="195" height="330" rx="8" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="235" y="955" width="165" height="34" rx="6" fill="#2e7d5b"/>
+    <text x="317" y="978" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">2. 专业技能 / 特长</text>
+    <text x="235" y="1015">不是堆词，而是突出最能</text>
+    <text x="235" y="1037">建立信任的卖点。</text>
+    <text x="235" y="1075">粉丝量、讲师经历、作者</text>
+    <text x="235" y="1097">身份，都属于可感知的</text>
+    <text x="235" y="1119">影响力。</text>
+    <text x="235" y="1155" font-weight="bold">优化方向：量化成果 +</text>
+    <text x="235" y="1177" font-weight="bold">稀缺身份。</text>
+    <!-- card 3 -->
+    <rect x="425" y="885" width="195" height="330" rx="8" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="440" y="955" width="165" height="34" rx="6" fill="#2e7d5b"/>
+    <text x="522" y="978" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">3. 教育信息</text>
+    <text x="440" y="1015">教育背景属于高信任信息。</text>
+    <text x="440" y="1075">名校、学历层级，会直接</text>
+    <text x="440" y="1097">影响第一印象。</text>
+    <text x="440" y="1155" font-weight="bold">优化方向：如实呈现，</text>
+    <text x="440" y="1177" font-weight="bold">优先展示强背书。</text>
+    <!-- card 4 -->
+    <rect x="630" y="885" width="195" height="330" rx="8" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="645" y="955" width="165" height="34" rx="6" fill="#2e7d5b"/>
+    <text x="727" y="978" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">4. 公司信息</text>
+    <text x="645" y="1015">公司品牌会放大候选人的</text>
+    <text x="645" y="1037">可信度。</text>
+    <text x="645" y="1075">越知名、越相关，越容易</text>
+    <text x="645" y="1097">降低筛选成本。</text>
+    <text x="645" y="1155" font-weight="bold">优化方向：公司知名度 +</text>
+    <text x="645" y="1177" font-weight="bold">岗位相关性。</text>
+    <!-- card 5 -->
+    <rect x="835" y="885" width="195" height="330" rx="8" fill="#ffffff" stroke="#9fb3aa" stroke-width="1"/>
+    <rect x="850" y="955" width="165" height="34" rx="6" fill="#2e7d5b"/>
+    <text x="932" y="978" fill="#ffffff" font-size="15" font-weight="bold" text-anchor="middle">5. 项目信息</text>
+    <text x="850" y="1015">项目是面试深挖的核心。</text>
+    <text x="850" y="1075">与其写很多，不如写最能</text>
+    <text x="850" y="1097">代表能力上限的项目。</text>
+    <text x="850" y="1155" font-weight="bold">优化方向：突出稀缺项目</text>
+    <text x="850" y="1177" font-weight="bold">+ 结果导向。</text>
+  </g>
+  <g fill="#2e7d5b" font-size="30" text-anchor="middle">
+    <text x="112" y="940">👤</text>
+    <text x="317" y="940">⭐</text>
+    <text x="522" y="940">🎓</text>
+    <text x="727" y="940">🏢</text>
+    <text x="932" y="940">📁</text>
+  </g>
+
+  <!-- ===== bottom summary ===== -->
+  <rect x="15" y="1245" width="1025" height="215" rx="10" fill="#ffffff" stroke="#1c2b24" stroke-width="1.2"/>
+  <text x="120" y="1330" fill="#2e7d5b" font-size="26" font-weight="bold" text-anchor="middle">这张图想</text>
+  <text x="120" y="1365" fill="#2e7d5b" font-size="26" font-weight="bold" text-anchor="middle">说明什么？</text>
+  <text x="120" y="1300" fill="#2e7d5b" font-size="44" text-anchor="middle">🎯</text>
+  <g fill="#1c2b24" font-size="17">
+    <text x="300" y="1300">●  好简历不是字多，而是高价值信息密度更高。</text>
+    <text x="300" y="1340">●  企业会优先看：标签是否清晰、背书是否够强、项目是否有代表性。</text>
+    <text x="300" y="1380">●  同样是一页简历，信息的“势能”差异会非常大。</text>
+    <text x="300" y="1420">●  核心原则：目标清晰、简洁表达、优势优先、引导面试。</text>
+  </g>
+</svg>
