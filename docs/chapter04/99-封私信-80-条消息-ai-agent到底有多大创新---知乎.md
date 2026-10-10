@@ -88,6 +88,5 @@ AK 的答案很犀利：目前的 Agent 只是一个记忆力超群但缺乏常�
 
 做梦当大侠
 
-​ 关注
 
 [谢邀 @托狸](https://www.zhihu.com/people/f45702fcf8b7d19ce0bf2be2a8f4ac94)

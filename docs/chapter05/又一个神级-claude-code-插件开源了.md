@@ -80,8 +80,4 @@ EverOS 把 AI 长期记忆这事，从提示词技巧推进成了一个可运行
 
 有动手能力的开发者，还可以对它们进行改动，变成自己的东西。
 
-也可以顺手 Star 关注一下，留意 EverOS 仓库后续更多的落地案例开源。
-
 GitHub 项目地址：https://github.com/EverMind-AI/EverOS
-
-今天的分享到此结束，感谢大家抽空阅读，我们下期再见，Respect！

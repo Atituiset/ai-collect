@@ -1,9 +1,5 @@
 # 终于把 Transformer 算法搞懂了！！
 
-大家好，我是小寒
-
-今天给大家分享一个超强的算法模型，Transformer
-
 Transformer 是由 Google 在 2017 年的论文《Attention Is All You Need》中提出的一种深度学习架构，它彻底改变了自然语言处理（NLP）领域，并成为当前大语言模型（如 GPT、Claude、Gemini）的的底层架构。
 
 与之前的 RNN 和 LSTM 不同，Transformer 摒弃了递归结构，完全基于自注意力机制（Self-Attention）来捕捉序列中的全局依赖关系，使得模型能够并行处理序列数据，并捕捉长距离的依赖关系。

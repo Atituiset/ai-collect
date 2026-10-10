@@ -1,7 +1,5 @@
 # Transformer 推理全流程简单拆解
 
-> 字数 6984，阅读大约需 35 分钟
-
 2017 年，Google 的八位研究员发表了一篇论文，标题只有六个词：*Attention Is All You Need*。这篇论文提出了 Transformer 架构，完全抛弃了此前自然语言处理领域主流的循环神经网络（RNN）和卷积神经网络（CNN），仅靠注意力机制就实现了当时最优秀的翻译效果。
 
 此后，Transformer 的影响远超翻译本身。GPT 系列、BERT、LLaMA、Gemini——几乎所有现代大语言模型都建立在 Transformer 之上。可以说，理解 Transformer，就是理解今天 AI 的底层逻辑。

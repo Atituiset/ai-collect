@@ -145,12 +145,4 @@ KV Cache 在实践中能显著提升推理速度。代价是 GPU 显存占用增
 
 **参考资料：**
 
-Avi Chawla：KV Caching in LLMs, Explained Visually. 
-
-**朋友们都在看**
-
-[Harness Engineering 被讲烂之后，Agent…](https://mp.weixin.qq.com/s?__biz=Mzk0MjI4Nzc3Mw==&mid=2247489111&idx=1&sn=8b7a9755e0b0333eba862ae4adb261ef&scene=21#wechat_redirect)
-
-[我用 PAI/Codex 理解 Harness Engineering…](https://mp.weixin.qq.com/s?__biz=Mzk0MjI4Nzc3Mw==&mid=2247489111&idx=2&sn=c765bda2e245a8278de600e6b3d52e42&scene=21#wechat_redirect)
-
-[Gemini Flash 3.5 来了…](https://mp.weixin.qq.com/s?__biz=Mzk0MjI4Nzc3Mw==&mid=2247489061&idx=1&sn=e309e433713bb2a93cd0fa4e233546c0&scene=21#wechat_redirect)
+Avi Chawla：KV Caching in LLMs, Explained Visually.

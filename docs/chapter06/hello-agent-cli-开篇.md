@@ -2,8 +2,6 @@
 
 前段时间 Claude Code 泄露，大家都在讨论这个项目，我也很好奇这个项目是怎么实现的，于是就想做个系列教程，来记录自己实现 Agent CLI 工具的过程。
 
-喜欢的话， 可以关注一下这个合集[hello Agent CLI](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzIzODYyNzM0OA==&action=getalbum&album_id=4476490779292860419#wechat_redirect)， 我会持续更新这个系列教程。
-
 首先介绍一下这个教程的定位：
 
 这个教程会基于 Claude Code 的源码，从零开始实现一个 Agent CLI 工具，并对比 Claude Code 的实现方式，帮助你理解 Agent CLI 工具的实现原理。
